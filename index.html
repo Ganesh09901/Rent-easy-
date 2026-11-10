@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rent Easy - Owner Dashboard</title>
+    <style>
+        /* --- GLOBAL STYLES --- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            margin: 0; padding: 0; box-sizing: border-box;
+        }
+        .hidden { display: none !important; }
+        
+        /* --- AUTHENTICATION CARDS --- */
+        #authContainer { display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .card {
+            background: white; padding: 30px; border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1); width: 350px;
+        }
+        h2 { text-align: center; color: #2c3e50; margin-bottom: 25px; }
+        input {
+            width: 100%; padding: 12px; margin: 8px 0 16px 0;
+            border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 14px;
+        }
+        input:focus { outline: none; border-color: #3b82f6; }
+        button {
+            width: 100%; padding: 12px; background-color: #3b82f6; color: white;
+            border: none; border-radius: 6px; cursor: pointer; font-size: 16px;
+            font-weight: bold; transition: background 0.3s ease;
+        }
+        button:hover { background-color: #2563eb; }
+        button:disabled { background-color: #94a3b8; cursor: not-allowed; }
+        .switch-link { background: none; color: #3b82f6; text-decoration: underline; padding: 0; margin-top: 15px; }
+        .forgot-link { font-size: 12px; text-align: right; display: block; cursor: pointer; color: #64748b; margin-top: -10px; margin-bottom: 20px; text-decoration: underline; }
+
+        /* --- DASHBOARD STYLES --- */
+        #dashboardContainer { padding: 20px; max-width: 800px; margin: auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .header h3 { margin: 0; color: #2c3e50; }
+        .logout-btn { width: auto; padding: 8px 15px; background-color: #ef4444; font-size: 14px; }
+        
+        /* FLOATING ACTION BUTTON (+) */
+        .fab {
+            position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px;
+            background-color: #3b82f6; color: white; border-radius: 50%; font-size: 32px;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); cursor: pointer;
+            z-index: 100; transition: transform 0.2s;
+        }
+        .fab:hover { transform: scale(1.1); background-color: #2563eb; }
+
+        /* --- MODAL / OVERLAY --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center;
+            z-index: 1000; overflow-y: auto; padding: 20px; box-sizing: border-box;
+        }
+        .modal-content {
+            background: white; padding: 25px; border-radius: 12px;
+            width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; position: relative;
+        }
+        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 28px; cursor: pointer; color: #64748b; }
+        
+        /* Custom Alert Popup Styling */
+        #customAlertContent { text-align: center; max-width: 320px; }
+        .alert-icon { font-size: 50px; margin-bottom: 10px; }
+        
+        /* --- DYNAMIC ROOM BOXES --- */
+        .room-box { background: #f8fafc; border: 1px solid #cbd5e1; padding: 15px; margin-bottom: 15px; border-radius: 8px; }
+        .room-box h4 { margin-top: 0; color: #3b82f6; margin-bottom: 10px; }
+        .input-group { display: flex; gap: 10px; }
+        .input-group input { margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+    <!-- ================= CUSTOM ALERT POPUP ================= -->
+    <div id="customAlert" class="modal-overlay hidden" style="z-index: 9999;">
+        <div class="modal-content" id="customAlertContent">
+            <div id="alertIcon" class="alert-icon">✅</div>
+            <h3 id="alertTitle" style="margin-top:0;">Success</h3>
+            <p id="alertMessage" style="color: #64748b; font-size: 14px;"></p>
+            <button id="closeAlertBtn" style="margin-top: 15px;">OK</button>
+        </div>
+    </div>
+
+    <!-- ================= AUTHENTICATION CONTAINER ================= -->
+    <div id="authContainer">
+        <div class="card">
+            <h2>Rent Easy</h2>
+            
+            <!-- Login Form -->
+            <div id="loginForm">
+                <input type="email" id="loginEmail" placeholder="Email ID" required>
+                <input type="password" id="loginPassword" placeholder="Password" required>
+                <span class="forgot-link" id="openForgotModal">Forgot Password?</span>
+                <button id="loginBtn">Login</button>
+                <button class="switch-link" id="showRegisterBtn">Don't have an account? Register</button>
+            </div>
+
+            <!-- Registration Form -->
+            <div id="registerForm" class="hidden">
+                <input type="text" id="regName" placeholder="Owner Name" required>
+                <input type="tel" id="regMobile" placeholder="Mobile Number" required>
+                <input type="email" id="regEmail" placeholder="Email ID" required>
+                <input type="password" id="regPassword" placeholder="Password (min 6 chars)" required>
+                <button id="registerBtn">Register</button>
+                <button class="switch-link" id="showLoginBtn">Already have an account? Login</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgotModal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 320px;">
+            <span class="close-btn" id="closeForgotModal">&times;</span>
+            <h3 style="margin-top:0;">Reset Password</h3>
+            <p style="font-size: 13px; color: #64748b;">Enter your Email ID to receive a reset link.</p>
+            <input type="email" id="resetEmail" placeholder="Enter Email ID" required>
+            <button id="sendResetBtn">Send Email</button>
+        </div>
+    </div>
+
+    <!-- ================= DASHBOARD CONTAINER ================= -->
+    <div id="dashboardContainer" class="hidden">
+        <div class="header">
+            <h3>Welcome to Rent Easy Dashboard</h3>
+            <button class="logout-btn" id="logoutBtn">Logout</button>
+        </div>
+        
+        <div class="house-list" id="houseList" style="margin-top:20px;">
+            <h4 style="color:#64748b;">Your houses and rooms will appear here.</h4>
+            <p>Click the '+' button below to add a new House and Rooms.</p>
+        </div>
+
+        <!-- Floating Action Button -->
+        <div class="fab" id="openAddHouseModal" title="Add New House">+</div>
+    </div>
+
+    <!-- ================= ADD HOUSE & ROOMS OVERLAY ================= -->
+    <div id="addHouseModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <span class="close-btn" id="closeAddHouseModal">&times;</span>
+            <h3 style="margin-top:0;">Add New Property</h3>
+            
+            <label><b>House/Building Name</b></label>
+            <input type="text" id="houseName" placeholder="e.g. Royal Heights" required>
+            
+            <label><b>Address</b></label>
+            <input type="text" id="houseAddress" placeholder="Full Address" required>
+            
+            <label><b>How many rooms are in this house?</b></label>
+            <input type="number" id="roomCount" placeholder="e.g. 4" min="1" required>
+            
+            <div id="dynamicRoomsContainer"></div>
+            
+            <button id="savePropertyBtn" style="margin-top: 15px;">Save House & Rooms</button>
+        </div>
+    </div>
+
+    <!-- ================= FIREBASE & JAVASCRIPT ================= -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Your Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBkvhFwXcd-UOatoJDXqmXO7m7W85Ir1FI",
+            authDomain: "rent-easy-web.firebaseapp.com",
+            projectId: "rent-easy-web",
+            storageBucket: "rent-easy-web.firebasestorage.app",
+            messagingSenderId: "441449420109",
+            appId: "1:441449420109:web:81c8c5293c0e7fe8795304"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // UI Elements
+        const authContainer = document.getElementById('authContainer');
+        const dashboardContainer = document.getElementById('dashboardContainer');
+        
+        // --- CUSTOM ALERT FUNCTION ---
+        let alertCallback = null;
+        function showCustomAlert(type, title, message, callback = null) {
+            const alertBox = document.getElementById('customAlert');
+            const icon = document.getElementById('alertIcon');
+            const titleEl = document.getElementById('alertTitle');
+            const messageEl = document.getElementById('alertMessage');
+            
+            if(type === 'success') {
+                icon.innerHTML = '✅';
+                titleEl.style.color = '#10b981'; // Green
+            } else if (type === 'error') {
+                icon.innerHTML = '❌';
+                titleEl.style.color = '#ef4444'; // Red
+            } else {
+                icon.innerHTML = '⚠️';
+                titleEl.style.color = '#f59e0b'; // Yellow
+            }
+
+            titleEl.innerText = title;
+            messageEl.innerText = message;
+            alertCallback = callback;
+            
+            alertBox.classList.remove('hidden');
+        }
+
+        document.getElementById('closeAlertBtn').addEventListener('click', () => {
+            document.getElementById('customAlert').classList.add('hidden');
+            if(alertCallback) alertCallback(); // Execute next step if any (like redirect to dashboard)
+        });
+
+
+        // Form Toggles
+        document.getElementById('showRegisterBtn').addEventListener('click', () => {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.remove('hidden');
+        });
+        document.getElementById('showLoginBtn').addEventListener('click', () => {
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
+        });
+
+        document.getElementById('openForgotModal').addEventListener('click', () => document.getElementById('forgotModal').classList.remove('hidden'));
+        document.getElementById('closeForgotModal').addEventListener('click', () => document.getElementById('forgotModal').classList.add('hidden'));
+
+        // --- AUTH STATE TRACKER (Auto Login/Dashboard Switch) ---
+        let currentUserId = null;
+        onAuthStateChanged(auth, (user) => {
+            // Hum directly dashboard switch nahi karenge agar custom alert khula hai
+            // taaki user pehle Success message padh sake.
+            if (user) {
+                currentUserId = user.uid;
+                // Agar user directly refresh karke aata hai to seedha dashboard khol do
+                if(document.getElementById('customAlert').classList.contains('hidden')) {
+                    authContainer.classList.add('hidden');
+                    dashboardContainer.classList.remove('hidden');
+                }
+            } else {
+                currentUserId = null;
+                authContainer.classList.remove('hidden');
+                dashboardContainer.classList.add('hidden');
+            }
+        });
+
+        // --- REGISTRATION ---
+        document.getElementById('registerBtn').addEventListener('click', async () => {
+            const name = document.getElementById('regName').value;
+            const mobile = document.getElementById('regMobile').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+
+            if (!name || !mobile || !email || !password) {
+                return showCustomAlert('error', 'Missing Fields', 'Please fill all details correctly.');
+            }
+            if (password.length < 6) {
+                return showCustomAlert('error', 'Weak Password', 'Password must be at least 6 characters.');
+            }
+
+            const btn = document.getElementById('registerBtn');
+            btn.innerText = "Registering..."; btn.disabled = true;
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                await setDoc(doc(db, "users", userCredential.user.uid), {
+                    ownerName: name, mobileNumber: mobile, emailId: email, role: "Owner"
+                });
+                
+                // Clear fields
+                document.getElementById('regName').value = ""; document.getElementById('regMobile').value = "";
+                document.getElementById('regEmail').value = ""; document.getElementById('regPassword').value = "";
+                
+                // Show Success Notification & Auto Login smoothly
+                showCustomAlert('success', 'Registration Successful!', 'Your account is created. We are logging you in...', () => {
+                    authContainer.classList.add('hidden');
+                    dashboardContainer.classList.remove('hidden');
+                });
+            } catch (error) { 
+                showCustomAlert('error', 'Registration Failed', error.message);
+            } finally {
+                btn.innerText = "Register"; btn.disabled = false;
+            }
+        });
+
+        // --- LOGIN ---
+        document.getElementById('loginBtn').addEventListener('click', async () => {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                return showCustomAlert('warning', 'Missing Fields', 'Please enter both Email ID and Password.');
+            }
+
+            const btn = document.getElementById('loginBtn');
+            btn.innerText = "Logging in..."; btn.disabled = true;
+
+            try { 
+                await signInWithEmailAndPassword(auth, email, password);
+                // Success: onAuthStateChanged will handle the view change automatically
+            } catch (error) { 
+                // Displaying clear Invalid Credentials message
+                if(error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+                    showCustomAlert('error', 'Invalid Login', 'Incorrect Email ID or Password. Please try again.');
+                } else {
+                    showCustomAlert('error', 'Login Failed', error.message);
+                }
+            } finally {
+                btn.innerText = "Login"; btn.disabled = false;
+            }
+        });
+
+        // --- LOGOUT ---
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await signOut(auth);
+            // Logout ke baad Login fields clear kar do
+            document.getElementById('loginEmail').value = "";
+            document.getElementById('loginPassword').value = "";
+            showCustomAlert('success', 'Logged Out', 'You have been successfully logged out.');
+        });
+
+        // --- FORGOT PASSWORD ---
+        document.getElementById('sendResetBtn').addEventListener('click', async () => {
+            const email = document.getElementById('resetEmail').value;
+            if (!email) return showCustomAlert('warning', 'Email Required', 'Enter your email ID first.');
+            
+            try {
+                await sendPasswordResetEmail(auth, email);
+                document.getElementById('forgotModal').classList.add('hidden');
+                showCustomAlert('success', 'Email Sent', 'Reset password link has been sent to your email.');
+                document.getElementById('resetEmail').value = "";
+            } catch (error) { 
+                showCustomAlert('error', 'Error', error.message); 
+            }
+        });
+
+        // ================= PROPERTY LOGIC =================
+        const addHouseModal = document.getElementById('addHouseModal');
+        
+        document.getElementById('openAddHouseModal').addEventListener('click', () => addHouseModal.classList.remove('hidden'));
+        document.getElementById('closeAddHouseModal').addEventListener('click', () => {
+            addHouseModal.classList.add('hidden');
+            document.getElementById('dynamicRoomsContainer').innerHTML = ''; 
+            document.getElementById('roomCount').value = '';
+        });
+
+        // Dynamic Room Form Generator
+        document.getElementById('roomCount').addEventListener('input', (e) => {
+            const count = parseInt(e.target.value) || 0;
+            const container = document.getElementById('dynamicRoomsContainer');
+            container.innerHTML = ''; 
+
+            for (let i = 1; i <= count; i++) {
+                container.innerHTML += `
+                    <div class="room-box">
+                        <h4>Room ${i} Details</h4>
+                        <input type="text" id="roomNo_${i}" placeholder="Room No/Name (e.g. 101)" required>
+                        <div class="input-group">
+                            <input type="number" id="rent_${i}" placeholder="Rent Amt (e.g. 5000)" required>
+                            <input type="number" id="water_${i}" placeholder="Water Bill (Fixed)" required>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="light_${i}" placeholder="Light Bill (Current)">
+                            <input type="number" id="penalty_${i}" placeholder="Penalty (if any)">
+                        </div>
+                    </div>
+                `;
+            }
+        });
+
+            
+            // Save House & Rooms Data
+        document.getElementById('savePropertyBtn').addEventListener('click', async () => {
+            const houseName = document.getElementById('houseName').value;
+            const houseAddress = document.getElementById('houseAddress').value;
+            const roomCount = parseInt(document.getElementById('roomCount').value) || 0;
+
+            if(!houseName || !houseAddress || roomCount < 1) {
+                return showCustomAlert('warning', 'Incomplete Data', 'Please enter house details and at least 1 room.');
+            }
+
+            const btn = document.getElementById('savePropertyBtn');
+            btn.innerText = "Saving Data..."; btn.disabled = true;
+
+            try {
+                const houseRef = await addDoc(collection(db, "houses"), {
+                    ownerId: currentUserId,
+                    houseName: houseName,
+                    address: houseAddress,
+                    totalRooms: roomCount,
+                    createdAt: new Date()
+                });
+
+                for (let i = 1; i <= roomCount; i++) {
+                    const roomNo = document.getElementById(`roomNo_${i}`).value;
+                    const rentAmt = document.getElementById(`rent_${i}`).value;
+                    const waterBill = document.getElementById(`water_${i}`).value;
+                    const lightBill = document.getElementById(`light_${i}`).value || 0;
+                    const penalty = document.getElementById(`penalty_${i}`).value || 0;
+
+                    if(roomNo && rentAmt && waterBill) {
+                        await addDoc(collection(db, "houses", houseRef.id, "rooms"), {
+                            roomNumber: roomNo,
+                            rentAmount: Number(rentAmt),
+                            waterBillFixed: Number(waterBill),
+                            lightBillCurrent: Number(lightBill),
+                            penalty: Number(penalty),
+                            createdAt: new Date()
+                        });
+                    }
+                }
+
+                addHouseModal.classList.add('hidden');
+                document.getElementById('houseName').value = '';
+                document.getElementById('houseAddress').value = '';
+                document.getElementById('roomCount').value = '';
+                document.getElementById('dynamicRoomsContainer').innerHTML = '';
+                
+                showCustomAlert('success', 'Property Saved!', 'Your House and Room details have been added successfully.');
+
+            } catch (error) {
+                showCustomAlert('error', 'Save Failed', error.message);
+            } finally {
+                btn.innerText = "Save House & Rooms"; btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
