@@ -205,16 +205,14 @@
         </div>
     </div>
 
-    <!-- ================= TRANSACTION DETAILS MODAL (NEW) ================= -->
+    <!-- TRANSACTION DETAILS MODAL -->
     <div id="transactionDetailsModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[70]">
         <div class="bg-white rounded-xl p-5 w-full max-w-sm modal-content shadow-2xl border-t-4 border-blue-500">
             <div class="flex justify-between items-center mb-4 border-b pb-3">
                 <h3 class="font-bold text-gray-800 text-lg">Transaction Details</h3>
                 <button onclick="document.getElementById('transactionDetailsModal').classList.add('hidden')"><i class="fas fa-times text-xl text-gray-500 hover:text-red-500"></i></button>
             </div>
-            <div class="space-y-3" id="tdBody">
-                <!-- Javascript will inject transaction info here -->
-            </div>
+            <div class="space-y-3" id="tdBody"></div>
         </div>
     </div>
 
@@ -272,14 +270,13 @@
             if(t==='History') window.loadHistoryData();
         };
 
-        // CLOSE ALL MODALS FUNCTION (Triggers background cleanup)
         window.closeAllModals = () => {
             ['addHouseModal', 'vacantExplorerModal', 'houseDetailsModal', 'roomManagerModal', 'transactionDetailsModal'].forEach(m => {
                 document.getElementById(m).classList.add('hidden');
             });
         };
 
-        // AUTH
+        // AUTH LOGIC
         document.getElementById('showRegisterBtn').onclick = () => { document.getElementById('loginForm').classList.add('hidden'); document.getElementById('registerForm').classList.remove('hidden'); };
         document.getElementById('showLoginBtn').onclick = () => { document.getElementById('registerForm').classList.add('hidden'); document.getElementById('loginForm').classList.remove('hidden'); };
 
@@ -304,7 +301,6 @@
         };
         document.getElementById('logoutBtn').onclick = () => signOut(auth);
         
-        // PROFILE
         async function loadProfileData() {
             const dSnap = await getDoc(doc(db, "users", currentUserId));
             if (dSnap.exists()) {
@@ -315,12 +311,7 @@
             }
         }
         
-        document.getElementById('saveProfileBtn').onclick = async () => {
-            await updateDoc(doc(db, "users", currentUserId), { upiId: document.getElementById('upiIdInput').value, bankAcc: document.getElementById('bankAccInput').value, ifsc: document.getElementById('ifscInput').value }); 
-            showAlert('success', 'Updated Successfully', 'Profile payment details saved in real-time.'); 
-        };
-
-        // ADD PROPERTY
+        // ADD PROPERTY LOGIC
         document.getElementById('openAddHouseModal').onclick = () => document.getElementById('addHouseModal').classList.remove('hidden');
         document.getElementById('closeAddHouseModal').onclick = () => document.getElementById('addHouseModal').classList.add('hidden');
         document.getElementById('roomCount').oninput = (e) => {
@@ -524,12 +515,12 @@
         };
         document.getElementById('closeRoomManagerModal').onclick = () => document.getElementById('roomManagerModal').classList.add('hidden');
 
-        // LOG TRANSACTION LOGIC (WITH HOUSE NAME)
+        // LOG TRANSACTION LOGIC
         async function logTransaction(houseName, rName, tName, amt, mode, type) {
             if(amt > 0) {
                 await addDoc(collection(db, "transactions"), { 
                     ownerId: currentUserId, 
-                    houseName: houseName,
+                    houseName: houseName || "N/A",
                     roomName: rName, 
                     tenantName: tName, 
                     amount: amt, 
@@ -541,7 +532,6 @@
         }
 
         // ================= BACKGROUND UPDATE LOGIC =================
-
         window.assignTenant = async (rNo) => {
             const name = document.getElementById('tName').value, mob = document.getElementById('tMob').value;
             const dep = Number(document.getElementById('tDep').value)||0, depMode = document.getElementById('tDepMode').value;
@@ -609,12 +599,13 @@
             await loadDashboardData(); showAlert('success', 'Updated Successfully', 'Room details saved in real-time.');
         };
 
-        // ================= TRANSACTION HISTORY (SMART RENDER & POPUP) =================
+        // ================= TRANSACTION HISTORY (FIXED) =================
         window.loadHistoryData = async () => {
             try {
                 const hList = document.getElementById('historyList'); 
                 hList.innerHTML = `<div class="text-center text-gray-500 mt-10"><i class="fas fa-spinner fa-spin text-3xl mb-2"></i><p>Loading...</p></div>`;
                 
+                // Fetch without order to avoid Firebase Index blocking issue
                 const q = query(collection(db, "transactions"), where("ownerId", "==", currentUserId));
                 const snaps = await getDocs(q);
                 
@@ -631,21 +622,29 @@
                 
                 hList.innerHTML = '';
                 transactions.forEach(t => {
-                    const dObj = new Date(t.date); 
+                    // Safe string handling
+                    const safeRoom = t.roomName ? String(t.roomName).replace('Room ','') : 'N/A';
+                    const safeTenant = t.tenantName || 'Unknown';
+                    const safeType = t.type || 'Transaction';
+                    const safeMode = t.mode || 'N/A';
+                    const safeHouse = t.houseName || '-';
+
+                    const dObj = new Date(t.date || 0); 
                     const dateStr = dObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
                     const timeStr = dObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                     
-                    let c = (t.type && t.type.includes("Refund")) ? "text-red-600" : "text-green-600";
-                    const encData = encodeURIComponent(JSON.stringify({...t, dateStr, timeStr}));
+                    let c = (safeType.includes("Refund")) ? "text-red-600" : "text-green-600";
+                    
+                    const encData = encodeURIComponent(JSON.stringify({...t, roomName: safeRoom, tenantName: safeTenant, houseName: safeHouse, type: safeType, mode: safeMode, dateStr, timeStr}));
 
                     hList.innerHTML += `
                     <div class="bg-white p-4 rounded-lg shadow-sm border mb-3 flex justify-between items-center hover:shadow-md transition cursor-pointer" onclick="openTransactionDetails('${encData}')">
                         <div>
-                            <p class="font-bold text-gray-800">Room ${t.roomName.replace('Room ','')}</p>
-                            <p class="text-xs text-gray-500 mt-1"><i class="far fa-calendar-alt"></i> ${dateStr} • ${timeStr}</p>
+                            <p class="font-bold text-gray-800">Room ${safeRoom}</p>
+                            <p class="text-xs text-gray-500 mt-1"><i class="far fa-calendar-alt"></i> ${dateStr}</p>
                         </div>
                         <div class="text-right flex flex-col items-end">
-                            <p class="font-bold text-lg ${c}">₹${t.amount}</p>
+                            <p class="font-bold text-lg ${c}">₹${t.amount || 0}</p>
                             <div class="flex items-center mt-1 text-blue-500 text-[11px] font-bold">
                                 View Details <i class="fas fa-chevron-right ml-1"></i>
                             </div>
@@ -653,7 +652,8 @@
                     </div>`;
                 });
             } catch(error) {
-                document.getElementById('historyList').innerHTML = `<div class="text-center text-red-500 mt-10"><p>Error loading history.</p></div>`;
+                console.error(error);
+                document.getElementById('historyList').innerHTML = `<div class="text-center text-red-500 mt-10"><p>Error: ${error.message}</p></div>`;
             }
         };
 
@@ -666,7 +666,7 @@
                 <div class="text-center mb-5 mt-2">
                     <p class="text-xs text-gray-400 uppercase tracking-widest font-bold mb-1">Amount ${t.type && t.type.includes("Refund") ? "Refunded" : "Received"}</p>
                     <p class="text-4xl font-black ${c}">₹${t.amount}</p>
-                    <p class="text-xs text-gray-500 mt-2 font-semibold bg-gray-100 inline-block px-3 py-1 rounded-full">${t.type || 'Transaction'}</p>
+                    <p class="text-xs text-gray-500 mt-2 font-semibold bg-gray-100 inline-block px-3 py-1 rounded-full">${t.type}</p>
                 </div>
                 <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-3 text-sm">
                     <div class="flex justify-between items-center border-b border-gray-200 pb-2">
@@ -679,7 +679,7 @@
                     </div>
                     <div class="flex justify-between items-center">
                         <span class="text-gray-500 font-medium">House</span>
-                        <span class="font-bold text-gray-800">${t.houseName || '-'}</span>
+                        <span class="font-bold text-gray-800">${t.houseName}</span>
                     </div>
                     <div class="flex justify-between items-center">
                         <span class="text-gray-500 font-medium">Room Number</span>
@@ -687,11 +687,11 @@
                     </div>
                     <div class="flex justify-between items-center">
                         <span class="text-gray-500 font-medium">Tenant</span>
-                        <span class="font-bold text-gray-800">${t.tenantName || '-'}</span>
+                        <span class="font-bold text-gray-800">${t.tenantName}</span>
                     </div>
                     <div class="flex justify-between items-center pt-2 border-t border-gray-200">
                         <span class="text-gray-500 font-medium">Payment Mode</span>
-                        <span class="font-bold text-gray-800 uppercase bg-white border border-gray-300 px-2 py-1 rounded text-[11px] shadow-sm">${t.mode || 'N/A'}</span>
+                        <span class="font-bold text-gray-800 uppercase bg-white border border-gray-300 px-2 py-1 rounded text-[11px] shadow-sm">${t.mode}</span>
                     </div>
                 </div>
             `;
