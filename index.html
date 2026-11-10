@@ -19,9 +19,9 @@
 </head>
 <body class="text-gray-800">
 
-    <!-- ================= CUSTOM ALERT ================= -->
+    <!-- ================= CUSTOM ALERT POPUP ================= -->
     <div id="customAlert" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4" style="z-index: 9999;">
-        <div class="bg-white rounded-xl p-6 w-full max-w-sm text-center shadow-2xl">
+        <div class="bg-white rounded-xl p-6 w-full max-w-sm text-center shadow-2xl transform transition-all scale-100">
             <div id="alertIcon" class="text-5xl mb-3">✅</div>
             <h3 id="alertTitle" class="text-xl font-bold mb-2">Success</h3>
             <p id="alertMessage" class="text-gray-500 text-sm mb-5"></p>
@@ -35,19 +35,19 @@
             <h2 class="text-3xl font-extrabold text-center text-blue-600 mb-6"><i class="fas fa-building mr-2"></i>Rent Easy</h2>
             
             <div id="loginForm">
-                <input type="email" id="loginEmail" placeholder="Email ID" class="w-full border border-gray-300 p-3 rounded-lg mb-4" required>
-                <input type="password" id="loginPassword" placeholder="Password" class="w-full border border-gray-300 p-3 rounded-lg mb-4" required>
-                <button id="loginBtn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg">Login</button>
-                <p class="text-center text-sm text-gray-500 mt-4 cursor-pointer hover:text-blue-600" id="showRegisterBtn">Don't have an account? Register</p>
+                <input type="email" id="loginEmail" placeholder="Email ID" class="w-full border border-gray-300 p-3 rounded-lg mb-4 outline-none focus:ring-2 focus:ring-blue-500" required>
+                <input type="password" id="loginPassword" placeholder="Password" class="w-full border border-gray-300 p-3 rounded-lg mb-4 outline-none focus:ring-2 focus:ring-blue-500" required>
+                <button id="loginBtn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition">Login</button>
+                <p class="text-center text-sm text-gray-500 mt-4 cursor-pointer hover:text-blue-600 font-semibold" id="showRegisterBtn">Don't have an account? Register</p>
             </div>
 
             <div id="registerForm" class="hidden">
-                <input type="text" id="regName" placeholder="Full Name" class="w-full border border-gray-300 p-3 rounded-lg mb-3" required>
-                <input type="tel" id="regMobile" placeholder="Mobile Number" class="w-full border border-gray-300 p-3 rounded-lg mb-3" required>
-                <input type="email" id="regEmail" placeholder="Email ID" class="w-full border border-gray-300 p-3 rounded-lg mb-3" required>
-                <input type="password" id="regPassword" placeholder="Password" class="w-full border border-gray-300 p-3 rounded-lg mb-4" required>
-                <button id="registerBtn" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg">Create Account</button>
-                <p class="text-center text-sm text-gray-500 mt-4 cursor-pointer hover:text-blue-600" id="showLoginBtn">Already have an account? Login</p>
+                <input type="text" id="regName" placeholder="Full Name" class="w-full border border-gray-300 p-3 rounded-lg mb-3 outline-none focus:ring-2 focus:ring-blue-500" required>
+                <input type="tel" id="regMobile" placeholder="Mobile Number" class="w-full border border-gray-300 p-3 rounded-lg mb-3 outline-none focus:ring-2 focus:ring-blue-500" required>
+                <input type="email" id="regEmail" placeholder="Email ID" class="w-full border border-gray-300 p-3 rounded-lg mb-3 outline-none focus:ring-2 focus:ring-blue-500" required>
+                <input type="password" id="regPassword" placeholder="Password" class="w-full border border-gray-300 p-3 rounded-lg mb-4 outline-none focus:ring-2 focus:ring-blue-500" required>
+                <button id="registerBtn" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 transition">Create Account</button>
+                <p class="text-center text-sm text-gray-500 mt-4 cursor-pointer hover:text-blue-600 font-semibold" id="showLoginBtn">Already have an account? Login</p>
             </div>
         </div>
     </div>
@@ -56,7 +56,7 @@
     <div id="appContainer" class="hidden min-h-screen">
         <header class="bg-blue-600 text-white p-4 sticky top-0 z-40 shadow-md flex justify-between items-center">
             <h1 class="text-xl font-bold"><i class="fas fa-building mr-2"></i> Rent Easy</h1>
-            <button id="logoutBtn" class="bg-red-500 px-3 py-1 rounded text-sm font-bold shadow"><i class="fas fa-sign-out-alt"></i></button>
+            <button id="logoutBtn" class="bg-red-500 px-3 py-1 rounded text-sm font-bold shadow hover:bg-red-600"><i class="fas fa-sign-out-alt"></i></button>
         </header>
 
         <main class="p-4 tab-content max-w-3xl mx-auto">
@@ -65,14 +65,14 @@
             <div id="tabAnalytics">
                 <h2 class="text-2xl font-bold text-gray-800 mb-4">Dashboard Overview</h2>
                 
-                <!-- NEW: Available Rooms Section (Khali Rooms) -->
-                <div class="mb-6 bg-white p-4 rounded-xl shadow-md border-t-4 border-blue-500">
-                    <h3 class="text-lg font-bold mb-3 text-gray-700 flex justify-between items-center">
-                        <span><i class="fas fa-door-open text-blue-500 mr-2"></i>Available Rooms (Khali)</span>
-                        <span class="bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full font-bold" id="vacantCount">0</span>
-                    </h3>
-                    <div id="vacantRoomsList" class="space-y-3">
-                        <!-- Vacant rooms will load here -->
+                <!-- NEW: Available Rooms Premium Card -->
+                <div class="bg-gray-800 text-white p-5 rounded-xl shadow-lg mb-6 cursor-pointer transform hover:scale-[1.01] transition" onclick="openVacantHousesModal()">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="text-xl font-bold"><i class="fas fa-key text-yellow-400 mr-2"></i>Available Rooms</h3>
+                            <p class="text-sm text-gray-300 mt-1">Tap to view & assign new tenants</p>
+                        </div>
+                        <div class="bg-yellow-400 text-gray-900 text-3xl font-black h-14 w-14 flex items-center justify-center rounded-full shadow-inner" id="vacantCountBadge">0</div>
                     </div>
                 </div>
 
@@ -86,16 +86,16 @@
                         <h3 class="text-xl font-bold text-green-600" id="statReceived">₹0</h3>
                     </div>
                     <div class="bg-white p-4 rounded-xl shadow border-l-4 border-red-500 col-span-2">
-                        <p class="text-sm text-gray-500">Total Pending</p>
+                        <p class="text-sm text-gray-500">Pending Collections (Rent+Bills)</p>
                         <h3 class="text-3xl font-bold text-red-600" id="statPending">₹0</h3>
                     </div>
                 </div>
 
-                <!-- Pending Collections Section -->
+                <!-- Pending Collections List -->
                 <div>
-                    <h3 class="text-lg font-bold mb-3 text-red-600"><i class="fas fa-clock mr-1"></i> Pending Collections</h3>
+                    <h3 class="text-lg font-bold mb-3 text-red-600"><i class="fas fa-clock mr-1"></i> Outstanding Dues</h3>
                     <div id="pendingRoomsList" class="space-y-3">
-                        <!-- Pending rooms will load here -->
+                        <!-- Pending rooms load here -->
                     </div>
                 </div>
             </div>
@@ -107,7 +107,7 @@
                     <button id="startNewMonthBtn" class="bg-gray-800 text-white px-3 py-2 rounded-lg text-sm font-bold shadow-md hover:bg-black"><i class="fas fa-calendar-plus mr-1"></i> Start New Month</button>
                 </div>
                 <div id="housesList" class="space-y-4"></div>
-                <button id="openAddHouseModal" class="fab fixed bottom-20 right-6 bg-blue-600 text-white w-14 h-14 rounded-full flex justify-center items-center text-2xl z-40"><i class="fas fa-plus"></i></button>
+                <button id="openAddHouseModal" class="fab fixed bottom-20 right-6 bg-blue-600 text-white w-14 h-14 rounded-full flex justify-center items-center text-2xl z-40 hover:bg-blue-700"><i class="fas fa-plus"></i></button>
             </div>
 
             <!-- TAB 3: TRANSACTION HISTORY -->
@@ -128,10 +128,10 @@
                 </div>
                 <div class="bg-white p-5 rounded-xl shadow border">
                     <h3 class="font-bold text-gray-700 mb-4"><i class="fas fa-university mr-2"></i> Payment Details</h3>
-                    <input type="text" id="upiIdInput" placeholder="UPI ID (e.g. 9876543210@ybl)" class="w-full border p-3 rounded-lg mb-3">
-                    <input type="text" id="bankAccInput" placeholder="Bank Account Number" class="w-full border p-3 rounded-lg mb-3">
-                    <input type="text" id="ifscInput" placeholder="IFSC Code" class="w-full border p-3 rounded-lg mb-4">
-                    <button id="saveProfileBtn" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg">Save Payment Details</button>
+                    <input type="text" id="upiIdInput" placeholder="UPI ID (e.g. 9876543210@ybl)" class="w-full border p-3 rounded-lg mb-3 outline-none focus:border-blue-500">
+                    <input type="text" id="bankAccInput" placeholder="Bank Account Number" class="w-full border p-3 rounded-lg mb-3 outline-none focus:border-blue-500">
+                    <input type="text" id="ifscInput" placeholder="IFSC Code" class="w-full border p-3 rounded-lg mb-4 outline-none focus:border-blue-500">
+                    <button id="saveProfileBtn" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700">Save Payment Details</button>
                 </div>
             </div>
         </main>
@@ -139,7 +139,7 @@
         <!-- BOTTOM NAVIGATION -->
         <nav class="fixed bottom-0 w-full bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.05)] border-t flex justify-around items-center z-40 h-16">
             <button class="nav-btn active flex flex-col items-center justify-center w-full h-full" onclick="switchTab('Analytics')">
-                <i class="fas fa-chart-pie text-xl mb-1"></i><span class="text-xs">Home</span>
+                <i class="fas fa-home text-xl mb-1"></i><span class="text-xs">Home</span>
             </button>
             <button class="nav-btn flex flex-col items-center justify-center w-full h-full" onclick="switchTab('Properties')">
                 <i class="fas fa-building text-xl mb-1"></i><span class="text-xs">Rooms</span>
@@ -155,35 +155,48 @@
 
     <!-- ================= ADD HOUSE MODAL ================= -->
     <div id="addHouseModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-50">
-        <div class="bg-white rounded-xl p-6 w-full max-w-md modal-content">
-            <div class="flex justify-between mb-4"><h3 class="font-bold text-xl">Add Property</h3><button id="closeAddHouseModal"><i class="fas fa-times text-xl text-gray-500"></i></button></div>
-            <input type="text" id="houseName" placeholder="House Name" class="w-full border p-3 rounded-lg mb-3" required>
-            <input type="text" id="houseAddress" placeholder="Address" class="w-full border p-3 rounded-lg mb-3" required>
-            <input type="number" id="roomCount" placeholder="Number of Rooms" class="w-full border p-3 rounded-lg mb-3" required>
+        <div class="bg-white rounded-xl p-6 w-full max-w-md modal-content shadow-2xl">
+            <div class="flex justify-between mb-4"><h3 class="font-bold text-xl text-gray-800">Add Property</h3><button id="closeAddHouseModal"><i class="fas fa-times text-xl text-gray-500 hover:text-red-500"></i></button></div>
+            <input type="text" id="houseName" placeholder="House Name" class="w-full border p-3 rounded-lg mb-3 outline-none focus:ring-2 focus:ring-blue-500" required>
+            <input type="text" id="houseAddress" placeholder="Address" class="w-full border p-3 rounded-lg mb-3 outline-none focus:ring-2 focus:ring-blue-500" required>
+            <input type="number" id="roomCount" placeholder="Number of Rooms" class="w-full border p-3 rounded-lg mb-3 outline-none focus:ring-2 focus:ring-blue-500" required>
             <div id="dynamicRoomsContainer" class="mt-2"></div>
-            <button id="savePropertyBtn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg mt-4">Save Property</button>
+            <button id="savePropertyBtn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg mt-4 hover:bg-blue-700">Save Property</button>
+        </div>
+    </div>
+
+    <!-- ================= NEW: VACANT EXPLORER MODAL (DRILL-DOWN) ================= -->
+    <div id="vacantExplorerModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[55]">
+        <div class="bg-white rounded-xl p-5 w-full max-w-md modal-content shadow-2xl">
+            <div class="flex justify-between items-center border-b pb-3 mb-3">
+                <h3 class="text-lg font-bold text-gray-800 flex items-center" id="veTitle">Vacant Properties</h3>
+                <button onclick="closeVacantExplorer()"><i class="fas fa-times text-xl text-gray-500 hover:text-red-500"></i></button>
+            </div>
+            <div id="veBody" class="space-y-3">
+                <!-- Data dynamically injected based on clicks -->
+            </div>
         </div>
     </div>
 
     <!-- ================= HOUSE DETAILS (ROOMS LIST) MODAL ================= -->
     <div id="houseDetailsModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-50">
-        <div class="bg-white rounded-xl p-6 w-full max-w-md modal-content">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md modal-content shadow-2xl">
             <div class="flex justify-between border-b pb-3 mb-4">
                 <div><h3 class="font-bold text-blue-600 text-xl" id="hdHouseName">House</h3><p class="text-sm text-gray-500" id="hdHouseAddress">Address</p></div>
-                <button id="closeHouseDetailsModal"><i class="fas fa-times text-xl text-gray-500"></i></button>
+                <button id="closeHouseDetailsModal"><i class="fas fa-times text-xl text-gray-500 hover:text-red-500"></i></button>
             </div>
             <div id="hdRoomsList" class="space-y-3"></div>
         </div>
     </div>
 
-    <!-- ================= ROOM MANAGER MODAL (VACANT/OCCUPIED) ================= -->
+    <!-- ================= ROOM MANAGER MODAL (ASSIGN/COLLECT) ================= -->
     <div id="roomManagerModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[60]">
-        <div class="bg-white rounded-xl p-5 w-full max-w-md modal-content border-t-4 border-blue-500">
+        <div class="bg-white rounded-xl p-5 w-full max-w-md modal-content border-t-4 border-blue-500 shadow-2xl">
             <div class="flex justify-between mb-3">
                 <h3 class="font-bold text-blue-600 text-lg">Room Manager</h3>
-                <button id="closeRoomManagerModal"><i class="fas fa-times text-xl text-gray-500"></i></button>
+                <button id="closeRoomManagerModal"><i class="fas fa-times text-xl text-gray-500 hover:text-red-500"></i></button>
             </div>
-            <div class="bg-blue-50 p-2 text-center rounded mb-4">
+            <div class="bg-blue-50 p-2 text-center rounded mb-4 shadow-sm border border-blue-100">
                 <p id="rmRoomName" class="font-bold text-xl text-gray-800">Room 101</p>
                 <p id="rmRoomId" class="text-xs font-mono text-blue-600 font-bold mt-1 tracking-wider">ID: XXX</p>
             </div>
@@ -191,7 +204,9 @@
             <input type="hidden" id="rmHouseId">
             <input type="hidden" id="rmRoomIdVal">
             
-            <div id="roomManagerBody"></div>
+            <div id="roomManagerBody">
+                <!-- Javascript will inject Vacant Form or Occupied Dashboard here -->
+            </div>
         </div>
     </div>
 
@@ -199,7 +214,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, updateDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBkvhFwXcd-UOatoJDXqmXO7m7W85Ir1FI",
@@ -214,7 +229,7 @@
         const db = getFirestore(app);
         let currentUserId = null;
 
-        // UI HELPERS (Real-time Feel)
+        // UI HELPERS
         window.showAlert = (type, title, msg, cb) => {
             const ab = document.getElementById('customAlert');
             document.getElementById('alertIcon').innerHTML = type === 'success' ? '✅' : '❌';
@@ -232,6 +247,13 @@
             document.getElementById('tab'+t).classList.remove('hidden');
             if(t==='Analytics' || t==='Properties') loadDashboardData();
             if(t==='History') loadHistoryData();
+        };
+
+        // CLOSE ALL MODALS FUNCTION (For Real-time clean transitions)
+        window.closeAllModals = () => {
+            ['addHouseModal', 'vacantExplorerModal', 'houseDetailsModal', 'roomManagerModal'].forEach(m => {
+                document.getElementById(m).classList.add('hidden');
+            });
         };
 
         // AUTH
@@ -254,8 +276,10 @@
         });
 
         document.getElementById('loginBtn').onclick = async () => {
+            const btn = document.getElementById('loginBtn'); btn.innerText = "Logging in..."; btn.disabled = true;
             try { await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPassword').value); } 
             catch(e) { showAlert('error', 'Login Failed', 'Invalid Email or Password'); }
+            btn.innerText = "Login"; btn.disabled = false;
         };
         document.getElementById('logoutBtn').onclick = () => signOut(auth);
         
@@ -274,7 +298,7 @@
         document.getElementById('openAddHouseModal').onclick = () => document.getElementById('addHouseModal').classList.remove('hidden');
         document.getElementById('closeAddHouseModal').onclick = () => document.getElementById('addHouseModal').classList.add('hidden');
         document.getElementById('roomCount').oninput = (e) => {
-            let html = ''; for(let i=1; i<=e.target.value; i++) html += `<div class="bg-gray-50 border p-3 rounded mb-2"><input type="text" id="rNo_${i}" placeholder="Room No" class="w-full border p-2 mb-2"><div class="flex gap-2"><input type="number" id="rAmt_${i}" placeholder="Rent ₹" class="w-full border p-2"><input type="number" id="wAmt_${i}" placeholder="Water ₹" class="w-full border p-2"></div></div>`;
+            let html = ''; for(let i=1; i<=e.target.value; i++) html += `<div class="bg-gray-50 border p-3 rounded mb-2"><input type="text" id="rNo_${i}" placeholder="Room No (eg 101)" class="w-full border p-2 mb-2 rounded focus:ring-1"><div class="flex gap-2"><input type="number" id="rAmt_${i}" placeholder="Base Rent ₹" class="w-full border p-2 rounded focus:ring-1"><input type="number" id="wAmt_${i}" placeholder="Water Bill ₹" class="w-full border p-2 rounded focus:ring-1"></div></div>`;
             document.getElementById('dynamicRoomsContainer').innerHTML = html;
         };
         
@@ -292,29 +316,32 @@
                         });
                     }
                 }
-                document.getElementById('addHouseModal').classList.add('hidden'); document.getElementById('savePropertyBtn').innerText = "Save Property";
-                await loadDashboardData();
-                showAlert('success', 'Saved', 'Property Added'); 
+                closeAllModals(); 
+                document.getElementById('savePropertyBtn').innerText = "Save Property";
+                await loadDashboardData(); // REAL TIME UPDATE
+                showAlert('success', 'Saved', 'Property and Rooms created successfully.'); 
             }
         };
 
-        // LOAD DASHBOARD (HOME PAGE DATA & ROOM LISTS)
+        // LOAD HOUSES, ANALYTICS & VACANT DATA (REAL-TIME)
         window.houseDataCache = {};
+        window.vacantDataCache = {}; // Special cache for the new Vacant Explorer
+        
         async function loadDashboardData() {
+            if(!currentUserId) return;
             const hList = document.getElementById('housesList'); 
             const pList = document.getElementById('pendingRoomsList');
-            const vList = document.getElementById('vacantRoomsList');
             
-            hList.innerHTML=''; pList.innerHTML=''; vList.innerHTML='';
+            hList.innerHTML=''; pList.innerHTML=''; 
             let tExp=0, tRec=0, tPen=0, vCount=0;
+            window.vacantDataCache = {}; 
             
             const q = query(collection(db, "houses"), where("ownerId", "==", currentUserId));
             const hSnaps = await getDocs(q);
 
             if(hSnaps.empty) {
                 hList.innerHTML = `<div class="text-center text-gray-400 mt-10"><p>No properties found.</p></div>`;
-                pList.innerHTML = `<p class="text-gray-400 text-sm">No collections pending.</p>`;
-                vList.innerHTML = `<p class="text-gray-400 text-sm">No rooms available.</p>`;
+                pList.innerHTML = `<p class="text-gray-400">No collections pending.</p>`;
                 return;
             }
 
@@ -330,26 +357,19 @@
                     if(r.occupancyStatus === "Occupied") {
                         const amt = r.rentAmount + r.waterBillFixed + (r.currentLightBill||0) + (r.penalty||0);
                         tExp += amt;
-                        if(r.paymentStatus === "Paid") tRec += amt;
-                        else { 
+                        if(r.paymentStatus === "Paid") {
+                            tRec += amt;
+                        } else { 
                             tPen += amt; 
-                            pList.innerHTML += `<div class="flex justify-between items-center bg-white p-3 rounded-lg shadow-sm border-l-4 border-red-500 cursor-pointer hover:bg-gray-50 transition" onclick="openRoomManager('${hDoc.id}', '${encRoom}')">
-                                <p class="font-bold text-gray-700">${hd.houseName} - Room ${r.roomNumber}<br><span class="text-xs text-gray-400">${r.tenantName}</span></p>
-                                <div class="font-bold text-red-600">₹${amt}</div>
-                            </div>`;
+                            pList.innerHTML += `<div class="flex justify-between items-center bg-white p-3 rounded-lg shadow-sm border-l-4 border-red-500 cursor-pointer hover:bg-gray-50 transition" onclick="openRoomManager('${hDoc.id}', '${encRoom}')"><div><p class="font-bold text-gray-700">${hd.houseName} - Room ${r.roomNumber}</p><p class="text-xs text-gray-500">${r.tenantName}</p></div><div class="font-bold text-red-600">₹${amt}</div></div>`;
                         }
                     } else if(r.occupancyStatus === "Vacant") {
                         vCount++;
-                        // Vacant Rooms on Home Page
-                        vList.innerHTML += `
-                        <div class="flex justify-between items-center bg-white p-3 rounded-lg shadow-sm border border-blue-200 cursor-pointer hover:bg-blue-50 transition" onclick="openRoomManager('${hDoc.id}', '${encRoom}')">
-                            <div>
-                                <p class="font-bold text-blue-700 text-lg">${hd.houseName} <span class="text-gray-700">- Room ${r.roomNumber}</span></p>
-                                <p class="text-xs text-gray-500 mt-1"><i class="fas fa-map-marker-alt"></i> ${hd.address}</p>
-                                <p class="text-sm font-bold text-gray-600 mt-1">Rent: ₹${r.rentAmount}</p>
-                            </div>
-                            <div class="bg-blue-600 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-md">ASSIGN</div>
-                        </div>`;
+                        // Add to Vacant Cache for Drill-down UI
+                        if(!window.vacantDataCache[hDoc.id]) {
+                            window.vacantDataCache[hDoc.id] = { name: hd.houseName, address: hd.address, rooms: [] };
+                        }
+                        window.vacantDataCache[hDoc.id].rooms.push({ id: rDoc.id, ...r });
                     }
                 });
                 window.houseDataCache[hDoc.id] = { name: hd.houseName, address: hd.address, rooms: roomsData };
@@ -357,13 +377,59 @@
             }
             
             document.getElementById('statExpected').innerText = "₹" + tExp; document.getElementById('statReceived').innerText = "₹" + tRec; document.getElementById('statPending').innerText = "₹" + tPen;
-            document.getElementById('vacantCount').innerText = vCount;
+            document.getElementById('vacantCountBadge').innerText = vCount;
             
-            if(tPen === 0 && tExp > 0) pList.innerHTML = `<p class="text-green-500 font-bold"><i class="fas fa-check-circle"></i> All collections complete!</p>`;
-            if(vCount === 0) vList.innerHTML = `<p class="text-gray-400 text-sm">All rooms are currently occupied.</p>`;
+            if(tPen === 0 && tExp > 0) pList.innerHTML = `<p class="text-green-500 font-bold bg-green-50 p-3 rounded border border-green-200"><i class="fas fa-check-circle"></i> All collections complete for this month!</p>`;
         }
 
-        // HOUSE DETAILS MODAL
+        // ================= NEW: VACANT EXPLORER DRILL-DOWN LOGIC =================
+        window.openVacantHousesModal = () => {
+            document.getElementById('veTitle').innerHTML = "Vacant Properties";
+            const body = document.getElementById('veBody');
+            body.innerHTML = '';
+            
+            const houseIds = Object.keys(window.vacantDataCache);
+            if(houseIds.length === 0) {
+                body.innerHTML = `<p class="text-center text-gray-500 mt-5"><i class="fas fa-home text-4xl mb-2 text-gray-300"></i><br>All rooms are currently occupied.</p>`;
+            } else {
+                houseIds.forEach(hId => {
+                    const h = window.vacantDataCache[hId];
+                    body.innerHTML += `
+                    <div class="bg-white border rounded-lg p-4 flex justify-between items-center shadow-sm cursor-pointer hover:border-blue-400 transition" onclick="openVacantRoomsView('${hId}')">
+                        <div>
+                            <h4 class="font-bold text-blue-700 text-lg">${h.name}</h4>
+                            <p class="text-xs text-gray-500">${h.address}</p>
+                        </div>
+                        <div class="bg-blue-100 text-blue-800 font-bold px-3 py-1 rounded text-xs shadow-sm">${h.rooms.length} Khali</div>
+                    </div>`;
+                });
+            }
+            document.getElementById('vacantExplorerModal').classList.remove('hidden');
+        };
+
+        window.openVacantRoomsView = (hId) => {
+            const h = window.vacantDataCache[hId];
+            // Update Title with Back Button
+            document.getElementById('veTitle').innerHTML = `<button onclick="openVacantHousesModal()" class="text-blue-500 mr-2 hover:text-blue-700"><i class="fas fa-arrow-left"></i></button> ${h.name}`;
+            
+            const body = document.getElementById('veBody');
+            body.innerHTML = '';
+            
+            h.rooms.forEach(r => {
+                const encRoom = encodeURIComponent(JSON.stringify(r));
+                body.innerHTML += `
+                <div class="bg-gray-50 border rounded-lg p-3 flex justify-between items-center shadow-sm cursor-pointer hover:bg-blue-50 transition border-l-4 border-gray-400" onclick="openRoomManager('${hId}', '${encRoom}')">
+                    <div>
+                        <h4 class="font-bold text-gray-800 text-lg">Room ${r.roomNumber}</h4>
+                        <p class="text-xs text-gray-600 font-semibold mt-1">Rent: ₹${r.rentAmount} | Water: ₹${r.waterBillFixed}</p>
+                    </div>
+                    <button class="bg-blue-600 text-white text-xs font-bold px-4 py-2 rounded shadow hover:bg-blue-700 transition">ASSIGN</button>
+                </div>`;
+            });
+        };
+        window.closeVacantExplorer = () => document.getElementById('vacantExplorerModal').classList.add('hidden');
+
+        // HOUSE DETAILS MODAL (Properties Tab)
         window.openHouseDetailsModal = (hId) => {
             const d = window.houseDataCache[hId]; document.getElementById('hdHouseName').innerText = d.name; document.getElementById('hdHouseAddress').innerText = d.address;
             const rList = document.getElementById('hdRoomsList'); rList.innerHTML = '';
@@ -371,8 +437,8 @@
                 let sClass = r.occupancyStatus === "Vacant" ? "bg-gray-100 border-gray-300" : (r.paymentStatus === "Paid" ? "bg-green-50 border-green-400" : "bg-red-50 border-red-300");
                 let sText = r.occupancyStatus === "Vacant" ? "VACANT" : (r.paymentStatus === "Paid" ? "PAID" : "PENDING");
                 rList.innerHTML += `<div class="border rounded-lg p-3 ${sClass} cursor-pointer shadow-sm hover:shadow-md transition" onclick="openRoomManager('${hId}', '${encodeURIComponent(JSON.stringify(r))}')">
-                    <div class="flex justify-between items-center mb-1"><span class="font-bold text-lg">Room ${r.roomNumber}</span><span class="text-xs bg-white px-2 rounded font-bold">${sText}</span></div>
-                    <p class="text-sm text-gray-600">${r.occupancyStatus==="Occupied" ? r.tenantName : "Ready to rent"}</p>
+                    <div class="flex justify-between items-center mb-1"><span class="font-bold text-lg">Room ${r.roomNumber}</span><span class="text-xs bg-white px-2 rounded font-bold shadow-sm">${sText}</span></div>
+                    <p class="text-sm text-gray-600">${r.occupancyStatus==="Occupied" ? r.tenantName : "Ready to assign"}</p>
                 </div>`;
             });
             document.getElementById('houseDetailsModal').classList.remove('hidden');
@@ -390,47 +456,47 @@
             
             if(r.occupancyStatus === "Vacant") {
                 body.innerHTML = `
-                    <div class="bg-gray-100 p-3 rounded mb-3 text-center"><span class="bg-gray-800 text-white px-3 py-1 rounded text-xs font-bold uppercase">Status: Vacant</span></div>
-                    <h4 class="font-bold text-gray-700 mb-2">Assign New Tenant</h4>
-                    <input type="text" id="tName" placeholder="Tenant Full Name (e.g. Rahul Kumar)" class="w-full border p-3 mb-2 rounded focus:ring-2 outline-none">
+                    <div class="bg-gray-200 p-2 rounded mb-3 text-center border"><span class="text-gray-800 text-xs font-bold uppercase tracking-wider">Status: Vacant</span></div>
+                    <h4 class="font-bold text-blue-700 mb-2">Assign New Tenant</h4>
+                    <input type="text" id="tName" placeholder="Tenant Full Name (e.g. Rahul Kumar)" class="w-full border p-3 mb-2 rounded focus:ring-2 focus:ring-blue-500 outline-none">
                     <div class="flex gap-2 mb-2">
-                        <input type="tel" id="tMob" placeholder="Mobile Number" class="w-1/2 border p-3 rounded focus:ring-2 outline-none">
-                        <input type="tel" id="tAlt" placeholder="Alt. Mobile" class="w-1/2 border p-3 rounded focus:ring-2 outline-none">
+                        <input type="tel" id="tMob" placeholder="Mobile Number" class="w-1/2 border p-3 rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                        <input type="tel" id="tAlt" placeholder="Alt. Mobile" class="w-1/2 border p-3 rounded focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
-                    <input type="email" id="tEmail" placeholder="Email ID (Optional)" class="w-full border p-3 mb-2 rounded focus:ring-2 outline-none">
-                    <input type="number" id="tDep" placeholder="Deposit Amount Received (₹)" class="w-full border-2 border-blue-400 p-3 mb-3 rounded focus:ring-2 outline-none">
+                    <input type="email" id="tEmail" placeholder="Email ID (Optional)" class="w-full border p-3 mb-2 rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                    <input type="number" id="tDep" placeholder="Deposit Received (₹)" class="w-full border-2 border-blue-400 p-3 mb-3 rounded focus:ring-2 outline-none font-bold">
                     
-                    <h4 class="font-bold text-gray-700 mb-2 mt-2 border-t pt-3">Room Default Setup</h4>
+                    <h4 class="font-bold text-gray-700 mb-2 mt-2 border-t pt-3">Monthly Setup</h4>
                     <div class="flex gap-2">
-                        <input type="number" id="rBase" value="${r.rentAmount}" placeholder="Base Rent" class="w-1/2 border p-3 rounded font-bold">
-                        <input type="number" id="wBase" value="${r.waterBillFixed}" placeholder="Water Bill" class="w-1/2 border p-3 rounded font-bold">
+                        <input type="number" id="rBase" value="${r.rentAmount}" placeholder="Base Rent" class="w-1/2 border p-3 rounded font-bold bg-gray-50">
+                        <input type="number" id="wBase" value="${r.waterBillFixed}" placeholder="Water Bill" class="w-1/2 border p-3 rounded font-bold bg-gray-50">
                     </div>
                     <button id="assignBtn" onclick="assignTenant('${r.roomNumber}')" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg mt-5 shadow hover:bg-blue-700 transition">Assign Tenant & Save</button>
                 `;
             } else {
                 const totalDue = r.rentAmount + r.waterBillFixed + (r.currentLightBill||0) + (r.penalty||0);
                 body.innerHTML = `
-                    <div class="bg-green-100 p-2 rounded mb-3 flex justify-between items-center"><span class="font-bold text-green-800">${r.tenantName}</span><button onclick="vacateRoom('${r.tenantName}', ${r.deposit})" class="bg-red-500 text-white px-2 py-1 rounded text-xs font-bold shadow">Vacate Room</button></div>
+                    <div class="bg-green-100 p-2 rounded mb-3 flex justify-between items-center border border-green-200"><span class="font-bold text-green-800 text-lg">${r.tenantName}</span><button onclick="vacateRoom('${r.tenantName}', ${r.deposit})" class="bg-red-500 text-white px-3 py-1 rounded text-xs font-bold shadow hover:bg-red-600 transition">Vacate Room</button></div>
                     
                     <div class="grid grid-cols-2 gap-2 mb-3 bg-gray-50 p-2 border rounded">
-                        <div><label class="text-xs text-gray-500 font-bold">Rent (₹)</label><input type="number" id="editRent" value="${r.rentAmount}" class="w-full border rounded p-2 font-bold bg-white"></div>
-                        <div><label class="text-xs text-gray-500 font-bold">Water (₹)</label><input type="number" id="editWater" value="${r.waterBillFixed}" class="w-full border rounded p-2 font-bold bg-white"></div>
-                        <div><label class="text-xs text-blue-600 font-bold">Light Bill (₹)</label><input type="number" id="editLight" value="${r.currentLightBill||''}" placeholder="0" class="w-full border rounded p-2 border-blue-300"></div>
-                        <div><label class="text-xs text-red-500 font-bold">Penalty (₹)</label><input type="number" id="editPen" value="${r.penalty||''}" placeholder="0" class="w-full border rounded p-2 border-red-300"></div>
+                        <div><label class="text-xs text-gray-500 font-bold">Rent (₹)</label><input type="number" id="editRent" value="${r.rentAmount}" class="w-full border rounded p-2 font-bold bg-white outline-none"></div>
+                        <div><label class="text-xs text-gray-500 font-bold">Water (₹)</label><input type="number" id="editWater" value="${r.waterBillFixed}" class="w-full border rounded p-2 font-bold bg-white outline-none"></div>
+                        <div><label class="text-xs text-blue-600 font-bold">Light Bill (₹)</label><input type="number" id="editLight" value="${r.currentLightBill||''}" placeholder="0" class="w-full border rounded p-2 border-blue-300 outline-none"></div>
+                        <div><label class="text-xs text-red-500 font-bold">Penalty (₹)</label><input type="number" id="editPen" value="${r.penalty||''}" placeholder="0" class="w-full border rounded p-2 border-red-300 outline-none"></div>
                     </div>
                     
-                    <div class="bg-gray-800 text-white p-3 rounded flex justify-between items-center mb-4 shadow">
+                    <div class="bg-gray-800 text-white p-3 rounded-lg flex justify-between items-center mb-4 shadow">
                         <span class="font-bold">Total Due:</span><span class="text-2xl font-bold">₹${totalDue}</span>
                     </div>
 
                     <div class="flex gap-2 mb-4">
-                        <select id="payMode" class="w-1/2 border p-3 rounded-lg font-bold bg-gray-100"><option>Cash</option><option>Online</option></select>
-                        <select id="payStatus" class="w-1/2 border p-3 rounded-lg font-bold ${r.paymentStatus==='Paid'?'bg-green-100 text-green-700':'bg-red-100 text-red-700'}"><option value="Pending" ${r.paymentStatus==='Pending'?'selected':''}>❌ Pending</option><option value="Paid" ${r.paymentStatus==='Paid'?'selected':''}>✅ Paid</option></select>
+                        <select id="payMode" class="w-1/2 border p-3 rounded-lg font-bold bg-gray-100 outline-none"><option>Cash</option><option>Online</option></select>
+                        <select id="payStatus" class="w-1/2 border p-3 rounded-lg font-bold outline-none ${r.paymentStatus==='Paid'?'bg-green-100 text-green-700 border-green-300':'bg-red-100 text-red-700 border-red-300'}"><option value="Pending" ${r.paymentStatus==='Pending'?'selected':''}>❌ Pending</option><option value="Paid" ${r.paymentStatus==='Paid'?'selected':''}>✅ Paid</option></select>
                     </div>
                     
                     <div class="flex gap-2">
-                        <button id="updateRoomBtn" onclick="saveRoomUpdates('${r.tenantName}')" class="w-3/4 bg-green-600 text-white font-bold py-3 rounded-lg shadow hover:bg-green-700 transition"><i class="fas fa-save mr-1"></i> Update Status</button>
-                        <button onclick="sendWhatsApp('${r.tenantMobile}', '${r.tenantName}', '${r.roomNumber}', ${r.rentAmount}, ${r.waterBillFixed}, ${r.currentLightBill||0}, ${r.penalty||0})" class="w-1/4 bg-green-500 text-white font-bold py-3 rounded-lg shadow hover:bg-green-600"><i class="fab fa-whatsapp text-xl"></i></button>
+                        <button id="updateRoomBtn" onclick="saveRoomUpdates('${r.tenantName}')" class="w-3/4 bg-green-600 text-white font-bold py-3 rounded-lg shadow hover:bg-green-700 transition"><i class="fas fa-save mr-1"></i> Update & Save</button>
+                        <button onclick="sendWhatsApp('${r.tenantMobile}', '${r.tenantName}', '${r.roomNumber}', ${r.rentAmount}, ${r.waterBillFixed}, ${r.currentLightBill||0}, ${r.penalty||0})" class="w-1/4 bg-green-500 text-white font-bold py-3 rounded-lg shadow hover:bg-green-600 transition"><i class="fab fa-whatsapp text-xl"></i></button>
                     </div>
                 `;
             }
@@ -438,41 +504,42 @@
         };
         document.getElementById('closeRoomManagerModal').onclick = () => document.getElementById('roomManagerModal').classList.add('hidden');
 
-        // LOG TRANSACTION (With Javascript Sorting fix to avoid Firebase Index errors)
+        // LOG TRANSACTION LOGIC (Strictly no Pending entries)
         async function logTransaction(rName, tName, amt, mode, type) {
-            await addDoc(collection(db, "transactions"), { ownerId: currentUserId, roomName: rName, tenantName: tName, amount: amt, mode: mode, type: type, date: new Date().toISOString() });
+            if(amt > 0) {
+                await addDoc(collection(db, "transactions"), { ownerId: currentUserId, roomName: rName, tenantName: tName, amount: amt, mode: mode, type: type, date: new Date().toISOString() });
+            }
         }
 
-        // 1. ASSIGN TENANT
+        // 1. ASSIGN TENANT (UNIQUE ID & REALTIME BACKGROUND UPDATE)
         window.assignTenant = async (rNo) => {
             const name = document.getElementById('tName').value, mob = document.getElementById('tMob').value, dep = Number(document.getElementById('tDep').value)||0;
-            if(!name || !mob) return showAlert('error', 'Incomplete', 'Name and Mobile are required.');
+            if(!name || !mob) return showAlert('warning', 'Incomplete', 'Name and Mobile are mandatory.');
             
             const btn = document.getElementById('assignBtn'); btn.innerText = "Assigning..."; btn.disabled = true;
             const hId = document.getElementById('rmHouseId').value, rId = document.getElementById('rmRoomIdVal').value;
             
+            // Unique ID: House(2) + Name(4) + Mobile(3)
             const hName = window.houseDataCache[hId].name;
             const prefix = hName.replace(/\s+/g, '').substring(0,2).toUpperCase();
             const tPrefix = name.replace(/\s+/g, '').substring(0,4).toUpperCase();
             const mSuffix = mob.slice(-3);
             const newTenantId = `${prefix}-${tPrefix}-${mSuffix}`;
 
-            // Close modal immediately for UX
-            document.getElementById('roomManagerModal').classList.add('hidden'); 
-            document.getElementById('houseDetailsModal').classList.add('hidden'); 
-
             await updateDoc(doc(db, "houses", hId, "rooms", rId), {
                 occupancyStatus: "Occupied", tenantName: name, tenantMobile: mob, tenantAlt: document.getElementById('tAlt').value, tenantEmail: document.getElementById('tEmail').value,
                 tenantUniqueId: newTenantId, deposit: dep, rentAmount: Number(document.getElementById('rBase').value), waterBillFixed: Number(document.getElementById('wBase').value), paymentStatus: "Pending"
             });
             
-            if(dep>0) await logTransaction(rNo, name, dep, "Cash/Online", "Deposit Received");
+            if(dep > 0) await logTransaction(rNo, name, dep, "Cash/Online", "Deposit Received");
             
+            // BACKGROUND UPDATE & SUCCESS POPUP
             await loadDashboardData(); 
-            showAlert('success', 'Tenant Assigned!', `Room allocated successfully.\nTenant ID: ${newTenantId}`);
+            closeAllModals(); 
+            showAlert('success', 'Tenant Assigned!', `Room successfully allocated.\nTenant ID: ${newTenantId}`);
         };
 
-        // 2. SAVE ROOM UPDATES & PAYMENTS
+        // 2. SAVE ROOM UPDATES & RENT COLLECTION
         window.saveRoomUpdates = async (tName) => {
             const btn = document.getElementById('updateRoomBtn'); btn.innerText = "Updating..."; btn.disabled = true;
             const hId = document.getElementById('rmHouseId').value, rId = document.getElementById('rmRoomIdVal').value, rNo = document.getElementById('rmRoomName').innerText;
@@ -480,52 +547,49 @@
             const light = Number(document.getElementById('editLight').value)||0, pen = Number(document.getElementById('editPen').value)||0;
             const status = document.getElementById('payStatus').value, mode = document.getElementById('payMode').value;
             
-            // Check if status changed to Paid so we log transaction
-            const oldStatus = document.getElementById('payStatus').options[document.getElementById('payStatus').selectedIndex].defaultSelected; 
-            
-            document.getElementById('roomManagerModal').classList.add('hidden'); 
-            document.getElementById('houseDetailsModal').classList.add('hidden'); 
-
             await updateDoc(doc(db, "houses", hId, "rooms", rId), { rentAmount: rBase, waterBillFixed: wBase, currentLightBill: light, penalty: pen, paymentStatus: status });
             
+            // ONLY LOG IN HISTORY IF STATUS IS "PAID"
             if(status === "Paid") {
                 const tot = rBase + wBase + light + pen;
                 await logTransaction(rNo, tName, tot, mode, "Rent Received");
             }
             
             await loadDashboardData(); 
-            showAlert('success', 'Updated', 'Room details and payments saved in real-time.');
+            closeAllModals(); 
+            showAlert('success', 'Updated Successfully', 'Room details saved in real-time.');
         };
 
-        // 3. VACATE ROOM
+        // 3. VACATE ROOM & DEPOSIT REFUND
         window.vacateRoom = async (tName, dep) => {
             const refund = prompt(`Tenant is leaving. Security Deposit was ₹${dep}.\nHow much are you refunding? (Enter amount):`, dep);
             if(refund === null) return;
             
-            document.getElementById('roomManagerModal').classList.add('hidden'); 
-            document.getElementById('houseDetailsModal').classList.add('hidden'); 
-
             const hId = document.getElementById('rmHouseId').value, rId = document.getElementById('rmRoomIdVal').value, rNo = document.getElementById('rmRoomName').innerText;
             await updateDoc(doc(db, "houses", hId, "rooms", rId), { occupancyStatus: "Vacant", tenantName: "", tenantMobile: "", tenantAlt: "", tenantEmail: "", tenantUniqueId: "Unassigned", deposit: 0, paymentStatus: "Pending", currentLightBill: 0, penalty: 0 });
             
             await logTransaction(rNo, tName, Number(refund), "Cash/Online", "Deposit Refunded");
             
             await loadDashboardData(); 
-            showAlert('success', 'Room Vacated', 'Room is now empty and available.');
+            closeAllModals(); 
+            showAlert('success', 'Room Vacated', 'Tenant removed. Room is now available.');
         };
 
         // 4. START NEW MONTH
         document.getElementById('startNewMonthBtn').onclick = async () => {
-            if(!confirm("Start New Month? This resets Light Bills & Penalties to 0, and Status to 'Pending'.")) return;
+            if(!confirm("Start New Month? This resets Light Bills to 0 and Status to 'Pending' for occupied rooms.")) return;
             const hSnaps = await getDocs(query(collection(db, "houses"), where("ownerId", "==", currentUserId)));
             for (const hDoc of hSnaps.docs) {
                 const rSnaps = await getDocs(collection(db, "houses", hDoc.id, "rooms"));
                 for (const rDoc of rSnaps.docs) {
-                    await updateDoc(doc(db, "houses", hDoc.id, "rooms", rDoc.id), { paymentStatus: "Pending", currentLightBill: 0, penalty: 0 });
+                    const rData = rDoc.data();
+                    if(rData.occupancyStatus === "Occupied") {
+                        await updateDoc(doc(db, "houses", hDoc.id, "rooms", rDoc.id), { paymentStatus: "Pending", currentLightBill: 0, penalty: 0 });
+                    }
                 }
             }
             await loadDashboardData(); 
-            showAlert('success', 'New Month Started', 'All rooms ready for new billing cycle.');
+            showAlert('success', 'New Month Started', 'All active rooms ready for new billing cycle.');
         };
 
         // 5. WHATSAPP INVOICE
@@ -536,36 +600,18 @@
             window.open(`https://wa.me/91${mob}?text=${text}`, '_blank');
         };
 
-        // 6. HISTORY LOGIC (Fixed Index Error with Client-side Sorting)
+        // 6. TRANSACTION HISTORY
         async function loadHistoryData() {
             const hList = document.getElementById('historyList'); hList.innerHTML = '';
-            const q = query(collection(db, "transactions"), where("ownerId", "==", currentUserId));
+            const q = query(collection(db, "transactions"), where("ownerId", "==", currentUserId), orderBy("date", "desc"));
             const snaps = await getDocs(q);
-            
-            if(snaps.empty) { hList.innerHTML = `<div class="text-center text-gray-400 mt-10"><p>No transactions yet.</p></div>`; return; }
-            
-            let txns = [];
-            snaps.forEach(d => txns.push(d.data()));
-            
-            // Sort by Date Descending in JS to bypass Firebase Composite Index errors
-            txns.sort((a,b) => new Date(b.date) - new Date(a.date));
-
-            txns.forEach(t => {
+            if(snaps.empty) { hList.innerHTML = `<div class="text-center text-gray-400 mt-10"><i class="fas fa-file-invoice-dollar text-4xl mb-2"></i><p>No successful transactions yet.</p></div>`; return; }
+            snaps.forEach(d => {
+                const t = d.data();
                 const dObj = new Date(t.date); const dateStr = dObj.toLocaleDateString() + ' ' + dObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 let c = t.type.includes("Refund") ? "text-red-600" : "text-green-600";
                 let badge = t.mode === "Online" ? "bg-blue-100 text-blue-800" : "bg-orange-100 text-orange-800";
-                
-                hList.innerHTML += `
-                <div class="bg-white p-3 rounded-lg shadow-sm border mb-2 flex justify-between items-center">
-                    <div>
-                        <p class="font-bold text-gray-800">${t.roomName} <span class="text-xs text-gray-500 font-normal">(${t.tenantName})</span></p>
-                        <p class="text-xs text-gray-500 mt-1">${dateStr} • <span class="font-bold">${t.type}</span></p>
-                    </div>
-                    <div class="text-right">
-                        <p class="font-bold text-lg ${c}">₹${t.amount}</p>
-                        <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded ${badge}">${t.mode}</span>
-                    </div>
-                </div>`;
+                hList.innerHTML += `<div class="bg-white p-4 rounded-lg shadow-sm border mb-2 flex justify-between items-center hover:shadow-md transition"><div><p class="font-bold text-gray-800">${t.roomName} <span class="text-xs text-gray-500 font-normal">(${t.tenantName})</span></p><p class="text-xs text-gray-500 mt-1">${dateStr} • <span class="font-bold">${t.type}</span></p></div><div class="text-right"><p class="font-bold text-lg ${c}">₹${t.amount}</p><span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded ${badge}">${t.mode}</span></div></div>`;
             });
         }
     </script>
