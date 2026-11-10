@@ -65,7 +65,6 @@
             <div id="tabAnalytics">
                 <h2 class="text-2xl font-bold text-gray-800 mb-4">Dashboard Overview</h2>
                 
-                <!-- Premium Vacant Rooms Card -->
                 <div class="bg-gray-800 text-white p-5 rounded-xl shadow-lg mb-6 cursor-pointer transform hover:scale-[1.01] transition border border-gray-700" onclick="openVacantHousesModal()">
                     <div class="flex justify-between items-center">
                         <div>
@@ -109,9 +108,12 @@
 
             <!-- TAB 3: TRANSACTION HISTORY -->
             <div id="tabHistory" class="hidden">
-                <h2 class="text-2xl font-bold text-gray-800 mb-4">Transaction History</h2>
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-gray-800">Transaction History</h2>
+                    <button onclick="loadHistoryData()" class="bg-blue-100 text-blue-600 px-3 py-2 rounded-lg text-sm font-bold hover:bg-blue-200 transition"><i class="fas fa-sync-alt mr-1"></i> Refresh</button>
+                </div>
                 <div id="historyList" class="space-y-3">
-                    <div class="text-center text-gray-400 mt-10"><i class="fas fa-receipt text-4xl mb-2"></i><p>No transactions yet.</p></div>
+                    <div class="text-center text-gray-400 mt-10"><i class="fas fa-receipt text-4xl mb-2"></i><p>Loading transactions...</p></div>
                 </div>
             </div>
 
@@ -150,7 +152,9 @@
         </nav>
     </div>
 
-    <!-- ================= ADD HOUSE MODAL ================= -->
+    <!-- ================= MODALS ================= -->
+    
+    <!-- ADD HOUSE MODAL -->
     <div id="addHouseModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-50">
         <div class="bg-white rounded-xl p-6 w-full max-w-md modal-content shadow-2xl">
             <div class="flex justify-between mb-4"><h3 class="font-bold text-xl text-gray-800">Add Property</h3><button id="closeAddHouseModal"><i class="fas fa-times text-xl text-gray-500 hover:text-red-500"></i></button></div>
@@ -162,7 +166,7 @@
         </div>
     </div>
 
-    <!-- ================= VACANT EXPLORER MODAL ================= -->
+    <!-- VACANT EXPLORER MODAL -->
     <div id="vacantExplorerModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[55]">
         <div class="bg-white rounded-xl p-5 w-full max-w-md modal-content shadow-2xl">
             <div class="flex justify-between items-center border-b pb-3 mb-3">
@@ -173,7 +177,7 @@
         </div>
     </div>
 
-    <!-- ================= HOUSE DETAILS MODAL ================= -->
+    <!-- HOUSE DETAILS MODAL -->
     <div id="houseDetailsModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-50">
         <div class="bg-white rounded-xl p-6 w-full max-w-md modal-content shadow-2xl">
             <div class="flex justify-between border-b pb-3 mb-4">
@@ -184,7 +188,7 @@
         </div>
     </div>
 
-    <!-- ================= ROOM MANAGER MODAL ================= -->
+    <!-- ROOM MANAGER MODAL -->
     <div id="roomManagerModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[60]">
         <div class="bg-white rounded-xl p-5 w-full max-w-md modal-content border-t-4 border-blue-500 shadow-2xl">
             <div class="flex justify-between mb-3">
@@ -205,7 +209,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, updateDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBkvhFwXcd-UOatoJDXqmXO7m7W85Ir1FI",
@@ -252,10 +256,9 @@
             event.currentTarget.classList.add('active');
             document.getElementById('tab'+t).classList.remove('hidden');
             if(t==='Analytics' || t==='Properties') loadDashboardData();
-            if(t==='History') loadHistoryData();
+            if(t==='History') window.loadHistoryData();
         };
 
-        // CLOSE ALL MODALS FUNCTION (Triggers background cleanup)
         window.closeAllModals = () => {
             ['addHouseModal', 'vacantExplorerModal', 'houseDetailsModal', 'roomManagerModal'].forEach(m => {
                 document.getElementById(m).classList.add('hidden');
@@ -325,16 +328,14 @@
                         });
                     }
                 }
-                
-                // BACKGROUND REFRESH & SUCCESS POPUP
                 closeAllModals(); 
-                await loadDashboardData(); 
-                showAlert('success', 'Updated Successfully', 'Room details saved in real-time.');
                 document.getElementById('savePropertyBtn').innerText = "Save Property";
+                await loadDashboardData();
+                showAlert('success', 'Updated Successfully', 'Property and rooms saved in real-time.'); 
             }
         };
 
-        // LOAD DASHBOARD DATA (Auto Refresh Engine)
+        // LOAD DASHBOARD DATA
         window.houseDataCache = {};
         window.vacantDataCache = {}; 
         
@@ -342,7 +343,6 @@
             if(!currentUserId) return;
             const hList = document.getElementById('housesList'); 
             const pList = document.getElementById('pendingRoomsList');
-            
             hList.innerHTML=''; pList.innerHTML=''; 
             let tExp=0, tRec=0, tPen=0, vCount=0;
             window.vacantDataCache = {}; 
@@ -386,7 +386,6 @@
             
             document.getElementById('statExpected').innerText = "₹" + tExp; document.getElementById('statReceived').innerText = "₹" + tRec; document.getElementById('statPending').innerText = "₹" + tPen;
             document.getElementById('vacantCountBadge').innerText = vCount;
-            
             if(tPen === 0 && tExp > 0) pList.innerHTML = `<p class="text-green-500 font-bold bg-green-50 p-3 rounded border border-green-200 shadow-sm"><i class="fas fa-check-circle"></i> All collections complete for this month!</p>`;
         }
 
@@ -455,13 +454,20 @@
                 body.innerHTML = `
                     <div class="bg-gray-200 p-2 rounded mb-3 text-center border"><span class="text-gray-800 text-xs font-bold uppercase tracking-wider">Status: Vacant</span></div>
                     <h4 class="font-bold text-blue-700 mb-2">Assign New Tenant</h4>
-                    <input type="text" id="tName" placeholder="Tenant Full Name (e.g. Rahul Kumar)" class="w-full border p-3 mb-2 rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                    <input type="text" id="tName" placeholder="Tenant Full Name" class="w-full border p-3 mb-2 rounded focus:ring-2 focus:ring-blue-500 outline-none">
                     <div class="flex gap-2 mb-2">
                         <input type="tel" id="tMob" placeholder="Mobile Number" class="w-1/2 border p-3 rounded focus:ring-2 focus:ring-blue-500 outline-none">
                         <input type="tel" id="tAlt" placeholder="Alt. Mobile" class="w-1/2 border p-3 rounded focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
                     <input type="email" id="tEmail" placeholder="Email ID (Optional)" class="w-full border p-3 mb-2 rounded focus:ring-2 focus:ring-blue-500 outline-none">
-                    <input type="number" id="tDep" placeholder="Deposit Received (₹)" class="w-full border-2 border-blue-400 p-3 mb-3 rounded focus:ring-2 outline-none font-bold">
+                    
+                    <div class="flex gap-2 mb-3">
+                        <input type="number" id="tDep" placeholder="Deposit Received (₹)" class="w-1/2 border-2 border-blue-400 p-3 rounded focus:ring-2 outline-none font-bold">
+                        <!-- Deposit Mode Dropdown -->
+                        <select id="tDepMode" class="w-1/2 border p-3 rounded-lg font-bold bg-gray-50 outline-none">
+                            <option>Cash</option><option>UPI</option><option>Debit Card</option><option>Bank Transfer</option>
+                        </select>
+                    </div>
                     
                     <h4 class="font-bold text-gray-700 mb-2 mt-2 border-t pt-3">Monthly Setup</h4>
                     <div class="flex gap-2">
@@ -487,8 +493,13 @@
                     </div>
 
                     <div class="flex gap-2 mb-4">
-                        <select id="payMode" class="w-1/2 border p-3 rounded-lg font-bold bg-gray-100 outline-none"><option>Cash</option><option>Online</option></select>
-                        <select id="payStatus" class="w-1/2 border p-3 rounded-lg font-bold outline-none ${r.paymentStatus==='Paid'?'bg-green-100 text-green-700 border-green-300':'bg-red-100 text-red-700 border-red-300'}"><option value="Pending" ${r.paymentStatus==='Pending'?'selected':''}>❌ Pending</option><option value="Paid" ${r.paymentStatus==='Paid'?'selected':''}>✅ Paid</option></select>
+                        <!-- Updated Payment Modes -->
+                        <select id="payMode" class="w-1/2 border p-3 rounded-lg font-bold bg-gray-100 outline-none">
+                            <option>Cash</option><option>UPI</option><option>Debit Card</option><option>Bank Transfer</option>
+                        </select>
+                        <select id="payStatus" class="w-1/2 border p-3 rounded-lg font-bold outline-none ${r.paymentStatus==='Paid'?'bg-green-100 text-green-700 border-green-300':'bg-red-100 text-red-700 border-red-300'}">
+                            <option value="Pending" ${r.paymentStatus==='Pending'?'selected':''}>❌ Pending</option><option value="Paid" ${r.paymentStatus==='Paid'?'selected':''}>✅ Paid</option>
+                        </select>
                     </div>
                     
                     <div class="flex gap-2">
@@ -508,35 +519,30 @@
             }
         }
 
-        // ================= BACKGROUND UPDATE CORE LOGIC =================
+        // ================= BACKGROUND UPDATE LOGIC =================
 
-        // 1. ASSIGN TENANT
         window.assignTenant = async (rNo) => {
-            const name = document.getElementById('tName').value, mob = document.getElementById('tMob').value, dep = Number(document.getElementById('tDep').value)||0;
+            const name = document.getElementById('tName').value, mob = document.getElementById('tMob').value;
+            const dep = Number(document.getElementById('tDep').value)||0, depMode = document.getElementById('tDepMode').value;
             if(!name || !mob) return showAlert('error', 'Incomplete', 'Name and Mobile are mandatory.');
             
             const hId = document.getElementById('rmHouseId').value, rId = document.getElementById('rmRoomIdVal').value;
-            
             const hName = window.houseDataCache[hId].name;
             const prefix = hName.replace(/\s+/g, '').substring(0,2).toUpperCase();
             const tPrefix = name.replace(/\s+/g, '').substring(0,4).toUpperCase();
-            const mSuffix = mob.slice(-3);
-            const newTenantId = `${prefix}-${tPrefix}-${mSuffix}`;
+            const newTenantId = `${prefix}-${tPrefix}-${mob.slice(-3)}`;
 
             await updateDoc(doc(db, "houses", hId, "rooms", rId), {
                 occupancyStatus: "Occupied", tenantName: name, tenantMobile: mob, tenantAlt: document.getElementById('tAlt').value, tenantEmail: document.getElementById('tEmail').value,
                 tenantUniqueId: newTenantId, deposit: dep, rentAmount: Number(document.getElementById('rBase').value), waterBillFixed: Number(document.getElementById('wBase').value), paymentStatus: "Pending"
             });
             
-            if(dep > 0) await logTransaction(rNo, name, dep, "Cash/Online", "Deposit Received");
+            if(dep > 0) await logTransaction(rNo, name, dep, depMode, "Deposit Received");
             
-            // BACKGROUND CLOSE & AUTO REFRESH (Exact requirement applied)
-            closeAllModals(); 
-            await loadDashboardData(); 
+            closeAllModals(); await loadDashboardData(); 
             showAlert('success', 'Updated Successfully', 'Room details saved in real-time.');
         };
 
-        // 2. SAVE ROOM UPDATES & RENT COLLECTION
         window.saveRoomUpdates = async (tName) => {
             const hId = document.getElementById('rmHouseId').value, rId = document.getElementById('rmRoomIdVal').value, rNo = document.getElementById('rmRoomName').innerText;
             const rBase = Number(document.getElementById('editRent').value), wBase = Number(document.getElementById('editWater').value);
@@ -550,67 +556,74 @@
                 await logTransaction(rNo, tName, tot, mode, "Rent Received");
             }
             
-            // BACKGROUND CLOSE & AUTO REFRESH
-            closeAllModals(); 
-            await loadDashboardData(); 
+            closeAllModals(); await loadDashboardData(); 
             showAlert('success', 'Updated Successfully', 'Room details saved in real-time.');
         };
 
-        // 3. VACATE ROOM & DEPOSIT REFUND
         window.vacateRoom = async (tName, dep) => {
-            const refund = prompt(`Tenant is leaving. Security Deposit was ₹${dep}.\nHow much are you refunding? (Enter amount):`, dep);
+            const refund = prompt(`Security Deposit was ₹${dep}.\nHow much are you refunding? (Enter amount):`, dep);
             if(refund === null) return;
             
             const hId = document.getElementById('rmHouseId').value, rId = document.getElementById('rmRoomIdVal').value, rNo = document.getElementById('rmRoomName').innerText;
             await updateDoc(doc(db, "houses", hId, "rooms", rId), { occupancyStatus: "Vacant", tenantName: "", tenantMobile: "", tenantAlt: "", tenantEmail: "", tenantUniqueId: "Unassigned", deposit: 0, paymentStatus: "Pending", currentLightBill: 0, penalty: 0 });
             
-            await logTransaction(rNo, tName, Number(refund), "Cash/Online", "Deposit Refunded");
-            
-            // BACKGROUND CLOSE & AUTO REFRESH
-            closeAllModals(); 
-            await loadDashboardData(); 
+            await logTransaction(rNo, tName, Number(refund), "Cash", "Deposit Refunded");
+            closeAllModals(); await loadDashboardData(); 
             showAlert('success', 'Updated Successfully', 'Room details saved in real-time.');
         };
 
-        // 4. START NEW MONTH
         document.getElementById('startNewMonthBtn').onclick = async () => {
-            if(!confirm("Start New Month? This resets Light Bills to 0 and Status to 'Pending' for occupied rooms.")) return;
+            if(!confirm("Start New Month? This resets Light Bills to 0 and Status to 'Pending'.")) return;
             const hSnaps = await getDocs(query(collection(db, "houses"), where("ownerId", "==", currentUserId)));
             for (const hDoc of hSnaps.docs) {
                 const rSnaps = await getDocs(collection(db, "houses", hDoc.id, "rooms"));
                 for (const rDoc of rSnaps.docs) {
-                    const rData = rDoc.data();
-                    if(rData.occupancyStatus === "Occupied") {
+                    if(rDoc.data().occupancyStatus === "Occupied") {
                         await updateDoc(doc(db, "houses", hDoc.id, "rooms", rDoc.id), { paymentStatus: "Pending", currentLightBill: 0, penalty: 0 });
                     }
                 }
             }
-            await loadDashboardData(); 
-            showAlert('success', 'Updated Successfully', 'Room details saved in real-time.');
+            await loadDashboardData(); showAlert('success', 'Updated Successfully', 'Room details saved in real-time.');
         };
 
-        // 5. WHATSAPP INVOICE
-        window.sendWhatsApp = (mob, name, rNo, rent, water, light, pen) => {
-            if(!mob) return alert("No mobile number saved for this tenant.");
-            const tot = rent+water+light+pen;
-            const text = `Hello ${name},%0A%0AHere is your Rent Invoice for ${rNo}:%0A- Rent: ₹${rent}%0A- Water: ₹${water}%0A- Light Bill: ₹${light}%0A- Penalty: ₹${pen}%0A%0ATotal Due: *₹${tot}*%0A%0APlease pay at your earliest convenience.%0AThanks!`;
-            window.open(`https://wa.me/91${mob}?text=${text}`, '_blank');
+        // 6. HISTORY LOGIC (SMART FIX FOR FIREBASE INDEX ERROR)
+        window.loadHistoryData = async () => {
+            try {
+                const hList = document.getElementById('historyList'); 
+                hList.innerHTML = `<div class="text-center text-gray-500 mt-10"><i class="fas fa-spinner fa-spin text-3xl mb-2"></i><p>Loading...</p></div>`;
+                
+                // Fetching WITHOUT orderBy to bypass Firebase Index requirements
+                const q = query(collection(db, "transactions"), where("ownerId", "==", currentUserId));
+                const snaps = await getDocs(q);
+                
+                if(snaps.empty) { 
+                    hList.innerHTML = `<div class="text-center text-gray-400 mt-10"><i class="fas fa-file-invoice-dollar text-4xl mb-2"></i><p>No successful transactions yet.</p></div>`; 
+                    return; 
+                }
+                
+                let transactions = [];
+                snaps.forEach(d => transactions.push(d.data()));
+                
+                // Sorting using Javascript to make it work instantly
+                transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                hList.innerHTML = '';
+                transactions.forEach(t => {
+                    const dObj = new Date(t.date); 
+                    const dateStr = dObj.toLocaleDateString() + ' ' + dObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    let c = t.type.includes("Refund") ? "text-red-600" : "text-green-600";
+                    let badgeClass = "bg-gray-100 text-gray-800";
+                    
+                    if(t.mode === "Online" || t.mode === "UPI") badgeClass = "bg-blue-100 text-blue-800";
+                    else if(t.mode === "Debit Card" || t.mode === "Bank Transfer") badgeClass = "bg-purple-100 text-purple-800";
+                    else if(t.mode === "Cash") badgeClass = "bg-orange-100 text-orange-800";
+                    
+                    hList.innerHTML += `<div class="bg-white p-4 rounded-lg shadow-sm border mb-2 flex justify-between items-center hover:shadow-md transition"><div><p class="font-bold text-gray-800">${t.roomName} <span class="text-xs text-gray-500 font-normal">(${t.tenantName})</span></p><p class="text-xs text-gray-500 mt-1">${dateStr} • <span class="font-bold">${t.type}</span></p></div><div class="text-right"><p class="font-bold text-lg ${c}">₹${t.amount}</p><span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded ${badgeClass}">${t.mode}</span></div></div>`;
+                });
+            } catch(error) {
+                console.error("History Error: ", error);
+            }
         };
-
-        // 6. TRANSACTION HISTORY
-        async function loadHistoryData() {
-            const hList = document.getElementById('historyList'); hList.innerHTML = '';
-            const q = query(collection(db, "transactions"), where("ownerId", "==", currentUserId), orderBy("date", "desc"));
-            const snaps = await getDocs(q);
-            if(snaps.empty) { hList.innerHTML = `<div class="text-center text-gray-400 mt-10"><i class="fas fa-file-invoice-dollar text-4xl mb-2"></i><p>No successful transactions yet.</p></div>`; return; }
-            snaps.forEach(d => {
-                const t = d.data();
-                const dObj = new Date(t.date); const dateStr = dObj.toLocaleDateString() + ' ' + dObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                let c = t.type.includes("Refund") ? "text-red-600" : "text-green-600";
-                let badge = t.mode === "Online" ? "bg-blue-100 text-blue-800" : "bg-orange-100 text-orange-800";
-                hList.innerHTML += `<div class="bg-white p-4 rounded-lg shadow-sm border mb-2 flex justify-between items-center hover:shadow-md transition"><div><p class="font-bold text-gray-800">${t.roomName} <span class="text-xs text-gray-500 font-normal">(${t.tenantName})</span></p><p class="text-xs text-gray-500 mt-1">${dateStr} • <span class="font-bold">${t.type}</span></p></div><div class="text-right"><p class="font-bold text-lg ${c}">₹${t.amount}</p><span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded ${badge}">${t.mode}</span></div></div>`;
-            });
-        }
     </script>
 </body>
 </html>
