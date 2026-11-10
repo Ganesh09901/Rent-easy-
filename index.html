@@ -36,7 +36,13 @@
             
             <div id="loginForm">
                 <input type="email" id="loginEmail" placeholder="Email ID" class="w-full border border-gray-300 p-3 rounded-lg mb-4 outline-none focus:ring-2 focus:ring-blue-500" required>
-                <input type="password" id="loginPassword" placeholder="Password" class="w-full border border-gray-300 p-3 rounded-lg mb-4 outline-none focus:ring-2 focus:ring-blue-500" required>
+                <input type="password" id="loginPassword" placeholder="Password" class="w-full border border-gray-300 p-3 rounded-lg mb-2 outline-none focus:ring-2 focus:ring-blue-500" required>
+                
+                <!-- Forgot Password Link -->
+                <div class="text-right mb-4">
+                    <span id="openForgotModal" class="text-sm text-blue-500 cursor-pointer hover:underline font-semibold">Forgot Password?</span>
+                </div>
+
                 <button id="loginBtn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition shadow">Login</button>
                 <p class="text-center text-sm text-gray-500 mt-4 cursor-pointer hover:text-blue-600 font-semibold" id="showRegisterBtn">Don't have an account? Register</p>
             </div>
@@ -154,6 +160,19 @@
 
     <!-- ================= MODALS ================= -->
     
+    <!-- FORGOT PASSWORD MODAL (NEW) -->
+    <div id="forgotModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[80]">
+        <div class="bg-white rounded-xl p-6 w-full max-w-sm modal-content shadow-2xl">
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                <h3 class="font-bold text-xl text-gray-800">Reset Password</h3>
+                <button id="closeForgotModal"><i class="fas fa-times text-xl text-gray-500 hover:text-red-500"></i></button>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Enter your registered email ID. We will send you a link to reset your password securely.</p>
+            <input type="email" id="resetEmailInput" placeholder="Enter Email ID" class="w-full border p-3 rounded-lg mb-4 outline-none focus:ring-2 focus:ring-blue-500" required>
+            <button id="sendResetBtn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg shadow hover:bg-blue-700 transition">Send Reset Link</button>
+        </div>
+    </div>
+
     <!-- ADD HOUSE MODAL -->
     <div id="addHouseModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-50">
         <div class="bg-white rounded-xl p-6 w-full max-w-md modal-content shadow-2xl">
@@ -218,8 +237,9 @@
 
     <!-- ================= JAVASCRIPT LOGIC ================= -->
     <script type="module">
+        // Added sendPasswordResetEmail in the import list
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -271,12 +291,12 @@
         };
 
         window.closeAllModals = () => {
-            ['addHouseModal', 'vacantExplorerModal', 'houseDetailsModal', 'roomManagerModal', 'transactionDetailsModal'].forEach(m => {
+            ['addHouseModal', 'vacantExplorerModal', 'houseDetailsModal', 'roomManagerModal', 'transactionDetailsModal', 'forgotModal'].forEach(m => {
                 document.getElementById(m).classList.add('hidden');
             });
         };
 
-        // AUTH LOGIC
+        // ================= AUTH LOGIC =================
         document.getElementById('showRegisterBtn').onclick = () => { document.getElementById('loginForm').classList.add('hidden'); document.getElementById('registerForm').classList.remove('hidden'); };
         document.getElementById('showLoginBtn').onclick = () => { document.getElementById('registerForm').classList.add('hidden'); document.getElementById('loginForm').classList.remove('hidden'); };
 
@@ -300,7 +320,30 @@
             catch(e) { showAlert('error', 'Login Failed', 'Invalid Email or Password'); }
         };
         document.getElementById('logoutBtn').onclick = () => signOut(auth);
+
+        // ================= FORGOT PASSWORD LOGIC (FIXED) =================
+        document.getElementById('openForgotModal').onclick = () => document.getElementById('forgotModal').classList.remove('hidden');
+        document.getElementById('closeForgotModal').onclick = () => document.getElementById('forgotModal').classList.add('hidden');
         
+        document.getElementById('sendResetBtn').onclick = async () => {
+            const email = document.getElementById('resetEmailInput').value;
+            if(!email) return showAlert('error', 'Required', 'Please enter your registered Email ID.');
+            
+            const btn = document.getElementById('sendResetBtn');
+            btn.innerText = "Sending Link..."; btn.disabled = true;
+            
+            try {
+                await sendPasswordResetEmail(auth, email);
+                document.getElementById('forgotModal').classList.add('hidden');
+                document.getElementById('resetEmailInput').value = '';
+                showAlert('success', 'Email Sent!', 'Please check your inbox (or spam folder) for the password reset link.');
+            } catch(error) {
+                showAlert('error', 'Error', error.message);
+            }
+            btn.innerText = "Send Reset Link"; btn.disabled = false;
+        };
+        
+        // PROFILE
         async function loadProfileData() {
             const dSnap = await getDoc(doc(db, "users", currentUserId));
             if (dSnap.exists()) {
@@ -311,7 +354,12 @@
             }
         }
         
-        // ADD PROPERTY LOGIC
+        document.getElementById('saveProfileBtn').onclick = async () => {
+            await updateDoc(doc(db, "users", currentUserId), { upiId: document.getElementById('upiIdInput').value, bankAcc: document.getElementById('bankAccInput').value, ifsc: document.getElementById('ifscInput').value }); 
+            showAlert('success', 'Updated Successfully', 'Profile payment details saved in real-time.'); 
+        };
+
+        // ADD PROPERTY
         document.getElementById('openAddHouseModal').onclick = () => document.getElementById('addHouseModal').classList.remove('hidden');
         document.getElementById('closeAddHouseModal').onclick = () => document.getElementById('addHouseModal').classList.add('hidden');
         document.getElementById('roomCount').oninput = (e) => {
@@ -599,13 +647,12 @@
             await loadDashboardData(); showAlert('success', 'Updated Successfully', 'Room details saved in real-time.');
         };
 
-        // ================= TRANSACTION HISTORY (FIXED) =================
+        // ================= TRANSACTION HISTORY =================
         window.loadHistoryData = async () => {
             try {
                 const hList = document.getElementById('historyList'); 
                 hList.innerHTML = `<div class="text-center text-gray-500 mt-10"><i class="fas fa-spinner fa-spin text-3xl mb-2"></i><p>Loading...</p></div>`;
                 
-                // Fetch without order to avoid Firebase Index blocking issue
                 const q = query(collection(db, "transactions"), where("ownerId", "==", currentUserId));
                 const snaps = await getDocs(q);
                 
@@ -617,12 +664,10 @@
                 let transactions = [];
                 snaps.forEach(d => transactions.push({ id: d.id, ...d.data() }));
                 
-                // Smart javascript sorting without Firebase index error
                 transactions.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
                 
                 hList.innerHTML = '';
                 transactions.forEach(t => {
-                    // Safe string handling
                     const safeRoom = t.roomName ? String(t.roomName).replace('Room ','') : 'N/A';
                     const safeTenant = t.tenantName || 'Unknown';
                     const safeType = t.type || 'Transaction';
@@ -634,7 +679,6 @@
                     const timeStr = dObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                     
                     let c = (safeType.includes("Refund")) ? "text-red-600" : "text-green-600";
-                    
                     const encData = encodeURIComponent(JSON.stringify({...t, roomName: safeRoom, tenantName: safeTenant, houseName: safeHouse, type: safeType, mode: safeMode, dateStr, timeStr}));
 
                     hList.innerHTML += `
