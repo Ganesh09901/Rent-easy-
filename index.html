@@ -205,6 +205,19 @@
         </div>
     </div>
 
+    <!-- ================= TRANSACTION DETAILS MODAL (NEW) ================= -->
+    <div id="transactionDetailsModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[70]">
+        <div class="bg-white rounded-xl p-5 w-full max-w-sm modal-content shadow-2xl border-t-4 border-blue-500">
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                <h3 class="font-bold text-gray-800 text-lg">Transaction Details</h3>
+                <button onclick="document.getElementById('transactionDetailsModal').classList.add('hidden')"><i class="fas fa-times text-xl text-gray-500 hover:text-red-500"></i></button>
+            </div>
+            <div class="space-y-3" id="tdBody">
+                <!-- Javascript will inject transaction info here -->
+            </div>
+        </div>
+    </div>
+
     <!-- ================= JAVASCRIPT LOGIC ================= -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -259,8 +272,9 @@
             if(t==='History') window.loadHistoryData();
         };
 
+        // CLOSE ALL MODALS FUNCTION (Triggers background cleanup)
         window.closeAllModals = () => {
-            ['addHouseModal', 'vacantExplorerModal', 'houseDetailsModal', 'roomManagerModal'].forEach(m => {
+            ['addHouseModal', 'vacantExplorerModal', 'houseDetailsModal', 'roomManagerModal', 'transactionDetailsModal'].forEach(m => {
                 document.getElementById(m).classList.add('hidden');
             });
         };
@@ -463,7 +477,6 @@
                     
                     <div class="flex gap-2 mb-3">
                         <input type="number" id="tDep" placeholder="Deposit Received (₹)" class="w-1/2 border-2 border-blue-400 p-3 rounded focus:ring-2 outline-none font-bold">
-                        <!-- Deposit Mode Dropdown -->
                         <select id="tDepMode" class="w-1/2 border p-3 rounded-lg font-bold bg-gray-50 outline-none">
                             <option>Cash</option><option>UPI</option><option>Debit Card</option><option>Bank Transfer</option>
                         </select>
@@ -493,7 +506,6 @@
                     </div>
 
                     <div class="flex gap-2 mb-4">
-                        <!-- Updated Payment Modes -->
                         <select id="payMode" class="w-1/2 border p-3 rounded-lg font-bold bg-gray-100 outline-none">
                             <option>Cash</option><option>UPI</option><option>Debit Card</option><option>Bank Transfer</option>
                         </select>
@@ -512,10 +524,19 @@
         };
         document.getElementById('closeRoomManagerModal').onclick = () => document.getElementById('roomManagerModal').classList.add('hidden');
 
-        // LOG TRANSACTION LOGIC
-        async function logTransaction(rName, tName, amt, mode, type) {
+        // LOG TRANSACTION LOGIC (WITH HOUSE NAME)
+        async function logTransaction(houseName, rName, tName, amt, mode, type) {
             if(amt > 0) {
-                await addDoc(collection(db, "transactions"), { ownerId: currentUserId, roomName: rName, tenantName: tName, amount: amt, mode: mode, type: type, date: new Date().toISOString() });
+                await addDoc(collection(db, "transactions"), { 
+                    ownerId: currentUserId, 
+                    houseName: houseName,
+                    roomName: rName, 
+                    tenantName: tName, 
+                    amount: amt, 
+                    mode: mode, 
+                    type: type, 
+                    date: new Date().toISOString() 
+                });
             }
         }
 
@@ -537,7 +558,7 @@
                 tenantUniqueId: newTenantId, deposit: dep, rentAmount: Number(document.getElementById('rBase').value), waterBillFixed: Number(document.getElementById('wBase').value), paymentStatus: "Pending"
             });
             
-            if(dep > 0) await logTransaction(rNo, name, dep, depMode, "Deposit Received");
+            if(dep > 0) await logTransaction(hName, rNo, name, dep, depMode, "Deposit Received");
             
             closeAllModals(); await loadDashboardData(); 
             showAlert('success', 'Updated Successfully', 'Room details saved in real-time.');
@@ -545,6 +566,7 @@
 
         window.saveRoomUpdates = async (tName) => {
             const hId = document.getElementById('rmHouseId').value, rId = document.getElementById('rmRoomIdVal').value, rNo = document.getElementById('rmRoomName').innerText;
+            const hName = window.houseDataCache[hId].name;
             const rBase = Number(document.getElementById('editRent').value), wBase = Number(document.getElementById('editWater').value);
             const light = Number(document.getElementById('editLight').value)||0, pen = Number(document.getElementById('editPen').value)||0;
             const status = document.getElementById('payStatus').value, mode = document.getElementById('payMode').value;
@@ -553,7 +575,7 @@
             
             if(status === "Paid") {
                 const tot = rBase + wBase + light + pen;
-                await logTransaction(rNo, tName, tot, mode, "Rent Received");
+                await logTransaction(hName, rNo, tName, tot, mode, "Rent Received");
             }
             
             closeAllModals(); await loadDashboardData(); 
@@ -565,15 +587,16 @@
             if(refund === null) return;
             
             const hId = document.getElementById('rmHouseId').value, rId = document.getElementById('rmRoomIdVal').value, rNo = document.getElementById('rmRoomName').innerText;
+            const hName = window.houseDataCache[hId].name;
             await updateDoc(doc(db, "houses", hId, "rooms", rId), { occupancyStatus: "Vacant", tenantName: "", tenantMobile: "", tenantAlt: "", tenantEmail: "", tenantUniqueId: "Unassigned", deposit: 0, paymentStatus: "Pending", currentLightBill: 0, penalty: 0 });
             
-            await logTransaction(rNo, tName, Number(refund), "Cash", "Deposit Refunded");
+            await logTransaction(hName, rNo, tName, Number(refund), "Cash", "Deposit Refunded");
             closeAllModals(); await loadDashboardData(); 
             showAlert('success', 'Updated Successfully', 'Room details saved in real-time.');
         };
 
         document.getElementById('startNewMonthBtn').onclick = async () => {
-            if(!confirm("Start New Month? This resets Light Bills to 0 and Status to 'Pending'.")) return;
+            if(!confirm("Start New Month? This resets Light Bills to 0 and Status to 'Pending' for occupied rooms.")) return;
             const hSnaps = await getDocs(query(collection(db, "houses"), where("ownerId", "==", currentUserId)));
             for (const hDoc of hSnaps.docs) {
                 const rSnaps = await getDocs(collection(db, "houses", hDoc.id, "rooms"));
@@ -586,13 +609,12 @@
             await loadDashboardData(); showAlert('success', 'Updated Successfully', 'Room details saved in real-time.');
         };
 
-        // 6. HISTORY LOGIC (SMART FIX FOR FIREBASE INDEX ERROR)
+        // ================= TRANSACTION HISTORY (SMART RENDER & POPUP) =================
         window.loadHistoryData = async () => {
             try {
                 const hList = document.getElementById('historyList'); 
                 hList.innerHTML = `<div class="text-center text-gray-500 mt-10"><i class="fas fa-spinner fa-spin text-3xl mb-2"></i><p>Loading...</p></div>`;
                 
-                // Fetching WITHOUT orderBy to bypass Firebase Index requirements
                 const q = query(collection(db, "transactions"), where("ownerId", "==", currentUserId));
                 const snaps = await getDocs(q);
                 
@@ -602,27 +624,78 @@
                 }
                 
                 let transactions = [];
-                snaps.forEach(d => transactions.push(d.data()));
+                snaps.forEach(d => transactions.push({ id: d.id, ...d.data() }));
                 
-                // Sorting using Javascript to make it work instantly
-                transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+                // Smart javascript sorting without Firebase index error
+                transactions.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
                 
                 hList.innerHTML = '';
                 transactions.forEach(t => {
                     const dObj = new Date(t.date); 
-                    const dateStr = dObj.toLocaleDateString() + ' ' + dObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                    let c = t.type.includes("Refund") ? "text-red-600" : "text-green-600";
-                    let badgeClass = "bg-gray-100 text-gray-800";
+                    const dateStr = dObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+                    const timeStr = dObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                     
-                    if(t.mode === "Online" || t.mode === "UPI") badgeClass = "bg-blue-100 text-blue-800";
-                    else if(t.mode === "Debit Card" || t.mode === "Bank Transfer") badgeClass = "bg-purple-100 text-purple-800";
-                    else if(t.mode === "Cash") badgeClass = "bg-orange-100 text-orange-800";
-                    
-                    hList.innerHTML += `<div class="bg-white p-4 rounded-lg shadow-sm border mb-2 flex justify-between items-center hover:shadow-md transition"><div><p class="font-bold text-gray-800">${t.roomName} <span class="text-xs text-gray-500 font-normal">(${t.tenantName})</span></p><p class="text-xs text-gray-500 mt-1">${dateStr} • <span class="font-bold">${t.type}</span></p></div><div class="text-right"><p class="font-bold text-lg ${c}">₹${t.amount}</p><span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded ${badgeClass}">${t.mode}</span></div></div>`;
+                    let c = (t.type && t.type.includes("Refund")) ? "text-red-600" : "text-green-600";
+                    const encData = encodeURIComponent(JSON.stringify({...t, dateStr, timeStr}));
+
+                    hList.innerHTML += `
+                    <div class="bg-white p-4 rounded-lg shadow-sm border mb-3 flex justify-between items-center hover:shadow-md transition cursor-pointer" onclick="openTransactionDetails('${encData}')">
+                        <div>
+                            <p class="font-bold text-gray-800">Room ${t.roomName.replace('Room ','')}</p>
+                            <p class="text-xs text-gray-500 mt-1"><i class="far fa-calendar-alt"></i> ${dateStr} • ${timeStr}</p>
+                        </div>
+                        <div class="text-right flex flex-col items-end">
+                            <p class="font-bold text-lg ${c}">₹${t.amount}</p>
+                            <div class="flex items-center mt-1 text-blue-500 text-[11px] font-bold">
+                                View Details <i class="fas fa-chevron-right ml-1"></i>
+                            </div>
+                        </div>
+                    </div>`;
                 });
             } catch(error) {
-                console.error("History Error: ", error);
+                document.getElementById('historyList').innerHTML = `<div class="text-center text-red-500 mt-10"><p>Error loading history.</p></div>`;
             }
+        };
+
+        window.openTransactionDetails = (encData) => {
+            const t = JSON.parse(decodeURIComponent(encData));
+            const body = document.getElementById('tdBody');
+            let c = (t.type && t.type.includes("Refund")) ? "text-red-600" : "text-green-600";
+            
+            body.innerHTML = `
+                <div class="text-center mb-5 mt-2">
+                    <p class="text-xs text-gray-400 uppercase tracking-widest font-bold mb-1">Amount ${t.type && t.type.includes("Refund") ? "Refunded" : "Received"}</p>
+                    <p class="text-4xl font-black ${c}">₹${t.amount}</p>
+                    <p class="text-xs text-gray-500 mt-2 font-semibold bg-gray-100 inline-block px-3 py-1 rounded-full">${t.type || 'Transaction'}</p>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-3 text-sm">
+                    <div class="flex justify-between items-center border-b border-gray-200 pb-2">
+                        <span class="text-gray-500 font-medium">Status</span>
+                        <span class="font-bold text-green-600"><i class="fas fa-check-circle"></i> Success</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-500 font-medium">Date & Time</span>
+                        <span class="font-bold text-gray-800 text-right">${t.dateStr}<br><span class="text-xs text-gray-500">${t.timeStr}</span></span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-500 font-medium">House</span>
+                        <span class="font-bold text-gray-800">${t.houseName || '-'}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-500 font-medium">Room Number</span>
+                        <span class="font-bold text-blue-600">${t.roomName}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-500 font-medium">Tenant</span>
+                        <span class="font-bold text-gray-800">${t.tenantName || '-'}</span>
+                    </div>
+                    <div class="flex justify-between items-center pt-2 border-t border-gray-200">
+                        <span class="text-gray-500 font-medium">Payment Mode</span>
+                        <span class="font-bold text-gray-800 uppercase bg-white border border-gray-300 px-2 py-1 rounded text-[11px] shadow-sm">${t.mode || 'N/A'}</span>
+                    </div>
+                </div>
+            `;
+            document.getElementById('transactionDetailsModal').classList.remove('hidden');
         };
     </script>
 </body>
