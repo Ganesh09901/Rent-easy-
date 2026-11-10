@@ -4,31 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rent Easy - Pro Dashboard</title>
-    <!-- Tailwind CSS for Premium Mobile-First UI -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome for Icons -->
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { background-color: #f3f4f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .hidden { display: none !important; }
-        .tab-content { padding-bottom: 80px; } /* Space for bottom nav */
-        
-        /* Modals */
-        .modal-overlay { background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); z-index: 50; }
+        .tab-content { padding-bottom: 80px; }
+        .modal-overlay { background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); }
         .modal-content { max-height: 90vh; overflow-y: auto; }
-        
-        /* Bottom Navigation Active State */
         .nav-btn.active { color: #3b82f6; border-top: 3px solid #3b82f6; font-weight: bold; }
         .nav-btn { color: #6b7280; border-top: 3px solid transparent; transition: all 0.3s; }
-        
-        /* Floating Action Button */
         .fab { box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
     </style>
 </head>
 <body class="text-gray-800">
 
     <!-- ================= CUSTOM ALERT ================= -->
-    <div id="customAlert" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4">
+    <div id="customAlert" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4" style="z-index: 9999;">
         <div class="bg-white rounded-xl p-6 w-full max-w-sm text-center shadow-2xl transform transition-all">
             <div id="alertIcon" class="text-5xl mb-3">✅</div>
             <h3 id="alertTitle" class="text-xl font-bold mb-2">Success</h3>
@@ -42,21 +36,19 @@
         <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
             <h2 class="text-3xl font-extrabold text-center text-blue-600 mb-6">Rent Easy</h2>
             
-            <!-- Login -->
             <div id="loginForm">
-                <input type="email" id="loginEmail" placeholder="Email ID" class="w-full border border-gray-300 p-3 rounded-lg mb-4 focus:ring-2 focus:ring-blue-500 outline-none" required>
-                <input type="password" id="loginPassword" placeholder="Password" class="w-full border border-gray-300 p-3 rounded-lg mb-2 focus:ring-2 focus:ring-blue-500 outline-none" required>
+                <input type="email" id="loginEmail" placeholder="Email ID" class="w-full border border-gray-300 p-3 rounded-lg mb-4 outline-none focus:ring-2 focus:ring-blue-500" required>
+                <input type="password" id="loginPassword" placeholder="Password" class="w-full border border-gray-300 p-3 rounded-lg mb-2 outline-none focus:ring-2 focus:ring-blue-500" required>
                 <div class="text-right mb-4"><span id="openForgotModal" class="text-sm text-blue-500 cursor-pointer hover:underline">Forgot Password?</span></div>
                 <button id="loginBtn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition">Login</button>
                 <p class="text-center text-sm text-gray-500 mt-4 cursor-pointer hover:text-blue-600" id="showRegisterBtn">Don't have an account? Register</p>
             </div>
 
-            <!-- Registration -->
             <div id="registerForm" class="hidden">
-                <input type="text" id="regName" placeholder="Full Name" class="w-full border border-gray-300 p-3 rounded-lg mb-4 focus:ring-2 focus:ring-blue-500 outline-none" required>
-                <input type="tel" id="regMobile" placeholder="Mobile Number" class="w-full border border-gray-300 p-3 rounded-lg mb-4 focus:ring-2 focus:ring-blue-500 outline-none" required>
-                <input type="email" id="regEmail" placeholder="Email ID" class="w-full border border-gray-300 p-3 rounded-lg mb-4 focus:ring-2 focus:ring-blue-500 outline-none" required>
-                <input type="password" id="regPassword" placeholder="Password (min 6 chars)" class="w-full border border-gray-300 p-3 rounded-lg mb-6 focus:ring-2 focus:ring-blue-500 outline-none" required>
+                <input type="text" id="regName" placeholder="Full Name" class="w-full border border-gray-300 p-3 rounded-lg mb-4 outline-none focus:ring-2 focus:ring-blue-500" required>
+                <input type="tel" id="regMobile" placeholder="Mobile Number" class="w-full border border-gray-300 p-3 rounded-lg mb-4 outline-none focus:ring-2 focus:ring-blue-500" required>
+                <input type="email" id="regEmail" placeholder="Email ID" class="w-full border border-gray-300 p-3 rounded-lg mb-4 outline-none focus:ring-2 focus:ring-blue-500" required>
+                <input type="password" id="regPassword" placeholder="Password (min 6 chars)" class="w-full border border-gray-300 p-3 rounded-lg mb-6 outline-none focus:ring-2 focus:ring-blue-500" required>
                 <button id="registerBtn" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 transition">Create Account</button>
                 <p class="text-center text-sm text-gray-500 mt-4 cursor-pointer hover:text-blue-600" id="showLoginBtn">Already have an account? Login</p>
             </div>
@@ -66,19 +58,16 @@
     <!-- ================= MAIN APP DASHBOARD ================= -->
     <div id="appContainer" class="hidden min-h-screen">
         
-        <!-- TOP HEADER -->
         <header class="bg-blue-600 text-white p-4 sticky top-0 z-40 shadow-md flex justify-between items-center">
             <h1 class="text-xl font-bold"><i class="fas fa-building mr-2"></i> Rent Easy</h1>
             <button id="logoutBtn" class="bg-red-500 px-3 py-1 rounded text-sm font-semibold hover:bg-red-600 shadow"><i class="fas fa-sign-out-alt mr-1"></i> Logout</button>
         </header>
 
-        <!-- MAIN CONTENT AREA -->
         <main class="p-4 tab-content max-w-3xl mx-auto">
             
             <!-- TAB 1: ANALYTICS -->
             <div id="tabAnalytics">
                 <h2 class="text-2xl font-bold text-gray-800 mb-4">This Month's Overview</h2>
-                
                 <div class="grid grid-cols-2 gap-4 mb-6">
                     <div class="bg-white p-4 rounded-xl shadow border-l-4 border-blue-500">
                         <p class="text-sm text-gray-500">Total Expected</p>
@@ -93,40 +82,28 @@
                         <h3 class="text-3xl font-bold text-red-600" id="statPending">₹0</h3>
                     </div>
                 </div>
-
                 <h3 class="text-lg font-bold mb-3 text-red-600"><i class="fas fa-exclamation-circle mr-1"></i> Pending Rooms</h3>
-                <div id="pendingRoomsList" class="space-y-3">
-                    <!-- Pending rooms will load here -->
-                    <p class="text-gray-500 text-sm">No pending rooms. Great job!</p>
-                </div>
+                <div id="pendingRoomsList" class="space-y-3"></div>
             </div>
 
-            <!-- TAB 2: PROPERTIES & ROOMS -->
+            <!-- TAB 2: PROPERTIES (HOUSES ONLY) -->
             <div id="tabProperties" class="hidden">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-2xl font-bold text-gray-800">My Houses</h2>
                 </div>
                 
-                <div id="housesList" class="space-y-5">
-                    <!-- Houses and Rooms will load here -->
-                    <div class="text-center text-gray-500 mt-10">
-                        <i class="fas fa-home text-4xl mb-3 text-gray-300"></i>
-                        <p>No houses added yet.</p>
-                        <p class="text-sm">Click the '+' button below to add your first property.</p>
-                    </div>
+                <div id="housesList" class="space-y-4">
+                    <!-- Houses populate here -->
                 </div>
                 
-                <!-- FAB Add House -->
                 <button id="openAddHouseModal" class="fab fixed bottom-20 right-6 bg-blue-600 text-white w-14 h-14 rounded-full flex justify-center items-center text-2xl hover:bg-blue-700 z-40">
                     <i class="fas fa-plus"></i>
                 </button>
             </div>
 
-            <!-- TAB 3: PROFILE & SETUP -->
+            <!-- TAB 3: PROFILE -->
             <div id="tabProfile" class="hidden">
                 <h2 class="text-2xl font-bold text-gray-800 mb-4">My Profile</h2>
-                
-                <!-- Owner ID Card -->
                 <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-5 rounded-xl shadow-lg mb-6 relative overflow-hidden">
                     <i class="fas fa-id-badge absolute -right-4 -bottom-4 text-8xl text-white opacity-20"></i>
                     <p class="text-blue-200 text-xs mb-1">RENT EASY OWNER ID</p>
@@ -135,19 +112,14 @@
                     <p class="mt-1 text-sm text-blue-200"><i class="fas fa-envelope mr-2"></i> <span id="profileEmail">Loading...</span></p>
                 </div>
 
-                <!-- Payment Details Setup -->
                 <div class="bg-white p-5 rounded-xl shadow-md border border-gray-200">
-                    <h3 class="font-bold text-gray-700 mb-4"><i class="fas fa-university mr-2"></i> Payment Receiving Details</h3>
-                    
+                    <h3 class="font-bold text-gray-700 mb-4"><i class="fas fa-university mr-2"></i> Payment Details</h3>
                     <label class="text-sm text-gray-600 font-semibold">UPI ID</label>
                     <input type="text" id="upiIdInput" placeholder="e.g. 9876543210@ybl" class="w-full border border-gray-300 p-3 rounded-lg mb-4 mt-1">
-                    
                     <label class="text-sm text-gray-600 font-semibold">Bank Account Number</label>
                     <input type="text" id="bankAccInput" placeholder="Account Number" class="w-full border border-gray-300 p-3 rounded-lg mb-4 mt-1">
-                    
                     <label class="text-sm text-gray-600 font-semibold">IFSC Code</label>
                     <input type="text" id="ifscInput" placeholder="e.g. SBIN0001234" class="w-full border border-gray-300 p-3 rounded-lg mb-4 mt-1">
-                    
                     <button id="saveProfileBtn" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700">Save Payment Details</button>
                 </div>
             </div>
@@ -157,84 +129,98 @@
         <!-- BOTTOM NAVIGATION -->
         <nav class="fixed bottom-0 w-full bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.05)] border-t border-gray-200 flex justify-around items-center z-40 h-16">
             <button class="nav-btn active flex flex-col items-center justify-center w-full h-full" onclick="switchTab('Analytics')">
-                <i class="fas fa-chart-pie text-xl mb-1"></i>
-                <span class="text-xs">Analytics</span>
+                <i class="fas fa-chart-pie text-xl mb-1"></i><span class="text-xs">Analytics</span>
             </button>
             <button class="nav-btn flex flex-col items-center justify-center w-full h-full" onclick="switchTab('Properties')">
-                <i class="fas fa-building text-xl mb-1"></i>
-                <span class="text-xs">Rooms</span>
+                <i class="fas fa-building text-xl mb-1"></i><span class="text-xs">Rooms</span>
             </button>
             <button class="nav-btn flex flex-col items-center justify-center w-full h-full" onclick="switchTab('Profile')">
-                <i class="fas fa-user-circle text-xl mb-1"></i>
-                <span class="text-xs">Profile</span>
+                <i class="fas fa-user-circle text-xl mb-1"></i><span class="text-xs">Profile</span>
             </button>
         </nav>
     </div>
 
     <!-- ================= ADD HOUSE MODAL ================= -->
-    <div id="addHouseModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4">
+    <div id="addHouseModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-50">
         <div class="bg-white rounded-xl p-6 w-full max-w-md modal-content shadow-2xl">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-bold">Add Property</h3>
                 <button id="closeAddHouseModal" class="text-gray-500 hover:text-red-500 text-2xl"><i class="fas fa-times"></i></button>
             </div>
-            
             <input type="text" id="houseName" placeholder="House/Building Name" class="w-full border p-3 rounded-lg mb-3" required>
             <input type="text" id="houseAddress" placeholder="Full Address" class="w-full border p-3 rounded-lg mb-3" required>
-            <input type="number" id="roomCount" placeholder="Number of Rooms (e.g. 3)" class="w-full border p-3 rounded-lg mb-3 border-blue-400 focus:ring-2 focus:ring-blue-500" required min="1">
-            
+            <input type="number" id="roomCount" placeholder="Number of Rooms (e.g. 3)" class="w-full border p-3 rounded-lg mb-3" required min="1">
             <div id="dynamicRoomsContainer" class="mt-2"></div>
-            
-            <button id="savePropertyBtn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg mt-4">Save Property & Rooms</button>
+            <button id="savePropertyBtn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg mt-4">Save Property</button>
         </div>
     </div>
 
-    <!-- ================= UPDATE COLLECTION POPUP ================= -->
-    <div id="collectionModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4">
-        <div class="bg-white rounded-xl p-6 w-full max-w-sm modal-content shadow-2xl border-t-4 border-blue-500">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-bold text-blue-600">Update Collection</h3>
+    <!-- ================= HOUSE DETAILS (ROOMS LIST) MODAL ================= -->
+    <div id="houseDetailsModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-50">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md modal-content shadow-2xl">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <div>
+                    <h3 class="text-xl font-bold text-blue-600" id="hdHouseName">House Name</h3>
+                    <p class="text-sm text-gray-500" id="hdHouseAddress">Address</p>
+                </div>
+                <button id="closeHouseDetailsModal" class="text-gray-500 hover:text-red-500 text-2xl"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div id="hdRoomsList" class="space-y-3">
+                <!-- Rooms of selected house will load here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= UPDATE ROOM POPUP ================= -->
+    <div id="collectionModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-50" style="z-index: 60;">
+        <div class="bg-white rounded-xl p-5 w-full max-w-sm modal-content shadow-2xl border-t-4 border-blue-500">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="text-lg font-bold text-blue-600">Update Room</h3>
                 <button id="closeCollectionModal" class="text-gray-500 text-xl"><i class="fas fa-times"></i></button>
             </div>
             
-            <p id="popupRoomName" class="text-gray-700 font-bold mb-4 text-center text-xl bg-blue-50 py-2 rounded">Room 101</p>
+            <div class="bg-blue-50 p-3 rounded text-center mb-4">
+                <p id="popupRoomName" class="text-gray-800 font-bold text-xl">Room 101</p>
+                <p class="text-xs text-blue-600 font-mono mt-1 font-bold" id="popupRoomIdDisplay">ID: RE-XXXXXX</p>
+            </div>
             
-            <!-- Hidden inputs to store IDs temporarily -->
             <input type="hidden" id="tempHouseId">
             <input type="hidden" id="tempRoomId">
-            <input type="hidden" id="baseRentAmt">
-            <input type="hidden" id="baseWaterAmt">
             
             <div class="space-y-3">
-                <div class="flex justify-between items-center bg-gray-50 p-2 rounded">
-                    <span class="text-gray-600 font-semibold">Base Rent</span>
-                    <span class="font-bold text-gray-800" id="displayBaseRent">₹0</span>
-                </div>
-                <div class="flex justify-between items-center bg-gray-50 p-2 rounded">
-                    <span class="text-gray-600 font-semibold">Fixed Water Bill</span>
-                    <span class="font-bold text-gray-800" id="displayWaterBill">₹0</span>
+                <!-- Editable Base Rent & Water -->
+                <div class="flex gap-2">
+                    <div class="w-1/2">
+                        <label class="text-xs text-gray-600 font-bold">Base Rent (₹)</label>
+                        <input type="number" id="updateBaseRent" class="w-full border border-gray-300 p-2 rounded-lg mt-1 font-bold">
+                    </div>
+                    <div class="w-1/2">
+                        <label class="text-xs text-gray-600 font-bold">Fixed Water (₹)</label>
+                        <input type="number" id="updateBaseWater" class="w-full border border-gray-300 p-2 rounded-lg mt-1 font-bold">
+                    </div>
                 </div>
 
+                <!-- Monthly Variables -->
                 <div>
-                    <label class="text-sm text-gray-600 font-bold">Update Light Bill (This Month)</label>
-                    <input type="number" id="updateLightBill" placeholder="Enter Light Bill Amount" class="w-full border border-gray-300 p-2 rounded-lg mt-1 focus:ring-2 focus:ring-blue-500">
+                    <label class="text-xs text-gray-600 font-bold">Current Light Bill</label>
+                    <input type="number" id="updateLightBill" placeholder="Add Light Bill Amount" class="w-full border border-gray-300 p-2 rounded-lg mt-1">
                 </div>
-                
                 <div>
-                    <label class="text-sm text-gray-600 font-bold text-red-500">Apply Penalty (Delay)</label>
-                    <input type="number" id="updatePenalty" placeholder="Enter Penalty Amount (0 if none)" class="w-full border border-red-300 p-2 rounded-lg mt-1 focus:ring-2 focus:ring-red-500">
+                    <label class="text-xs text-red-500 font-bold">Penalty (if delayed)</label>
+                    <input type="number" id="updatePenalty" placeholder="0" class="w-full border border-red-300 p-2 rounded-lg mt-1 focus:ring-red-500">
                 </div>
                 
                 <div class="mt-4 border-t pt-4">
                     <label class="text-sm text-gray-600 font-bold mb-2 block">Payment Status</label>
-                    <select id="paymentStatusSelect" class="w-full border p-3 rounded-lg bg-gray-50 font-bold">
+                    <select id="paymentStatusSelect" class="w-full border p-3 rounded-lg bg-gray-50 font-bold outline-none">
                         <option value="Pending" class="text-red-600">❌ Pending</option>
                         <option value="Paid" class="text-green-600">✅ Received (Paid)</option>
                     </select>
                 </div>
             </div>
             
-            <button id="saveCollectionBtn" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg mt-5 shadow-lg hover:bg-green-700">Save Updates</button>
+            <button id="saveCollectionBtn" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg mt-5 shadow-lg hover:bg-green-700">Save Room Details</button>
         </div>
     </div>
 
@@ -244,7 +230,6 @@
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Your Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyBkvhFwXcd-UOatoJDXqmXO7m7W85Ir1FI",
             authDomain: "rent-easy-web.firebaseapp.com",
@@ -258,10 +243,8 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // UI Variables
         let currentUserId = null;
         
-        // --- ALERT SYSTEM ---
         window.showAlert = function(type, title, message, callback = null) {
             const alertBox = document.getElementById('customAlert');
             document.getElementById('alertIcon').innerHTML = type === 'success' ? '✅' : type === 'error' ? '❌' : '⚠️';
@@ -269,45 +252,27 @@
             document.getElementById('alertTitle').className = `text-xl font-bold mb-2 ${type === 'success' ? 'text-green-600' : 'text-red-600'}`;
             document.getElementById('alertMessage').innerText = message;
             alertBox.classList.remove('hidden');
-            
-            document.getElementById('closeAlertBtn').onclick = () => {
-                alertBox.classList.add('hidden');
-                if(callback) callback();
-            };
+            document.getElementById('closeAlertBtn').onclick = () => { alertBox.classList.add('hidden'); if(callback) callback(); };
         };
 
-        // --- TAB SWITCHING LOGIC ---
         window.switchTab = function(tabName) {
-            document.getElementById('tabAnalytics').classList.add('hidden');
-            document.getElementById('tabProperties').classList.add('hidden');
-            document.getElementById('tabProfile').classList.add('hidden');
-            
+            ['Analytics', 'Properties', 'Profile'].forEach(t => document.getElementById('tab'+t).classList.add('hidden'));
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
             event.currentTarget.classList.add('active');
-            
             document.getElementById('tab' + tabName).classList.remove('hidden');
-            
-            if(tabName === 'Analytics') loadDashboardData();
+            if(tabName === 'Analytics' || tabName === 'Properties') loadDashboardData();
         };
 
-        // --- AUTH & LOGIN/REGISTRATION ---
-        document.getElementById('showRegisterBtn').onclick = () => {
-            document.getElementById('loginForm').classList.add('hidden');
-            document.getElementById('registerForm').classList.remove('hidden');
-        };
-        document.getElementById('showLoginBtn').onclick = () => {
-            document.getElementById('registerForm').classList.add('hidden');
-            document.getElementById('loginForm').classList.remove('hidden');
-        };
+        document.getElementById('showRegisterBtn').onclick = () => { document.getElementById('loginForm').classList.add('hidden'); document.getElementById('registerForm').classList.remove('hidden'); };
+        document.getElementById('showLoginBtn').onclick = () => { document.getElementById('registerForm').classList.add('hidden'); document.getElementById('loginForm').classList.remove('hidden'); };
 
-        onAuthStateChanged(auth, async (user) => {
+        onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUserId = user.uid;
                 if(document.getElementById('customAlert').classList.contains('hidden')) {
                     document.getElementById('authContainer').classList.add('hidden');
                     document.getElementById('appContainer').classList.remove('hidden');
-                    loadProfileData();
-                    loadDashboardData();
+                    loadProfileData(); loadDashboardData();
                 }
             } else {
                 currentUserId = null;
@@ -316,202 +281,191 @@
             }
         });
 
-        // Register
         document.getElementById('registerBtn').onclick = async () => {
-            const name = document.getElementById('regName').value, mobile = document.getElementById('regMobile').value;
-            const email = document.getElementById('regEmail').value, password = document.getElementById('regPassword').value;
-            if(!name || !mobile || !email || password.length < 6) return showAlert('error', 'Error', 'Fill all fields correctly.');
-            
+            const n = document.getElementById('regName').value, m = document.getElementById('regMobile').value, e = document.getElementById('regEmail').value, p = document.getElementById('regPassword').value;
+            if(!n || !m || !e || p.length < 6) return showAlert('error', 'Error', 'Fill all fields properly.');
             try {
-                const cred = await createUserWithEmailAndPassword(auth, email, password);
-                await setDoc(doc(db, "users", cred.user.uid), { ownerName: name, mobileNumber: mobile, emailId: email });
-                showAlert('success', 'Success', 'Account created! Logging in...', () => {
-                    document.getElementById('authContainer').classList.add('hidden');
-                    document.getElementById('appContainer').classList.remove('hidden');
-                    loadProfileData(); loadDashboardData();
-                });
-            } catch(e) { showAlert('error', 'Failed', e.message); }
+                const cred = await createUserWithEmailAndPassword(auth, e, p);
+                await setDoc(doc(db, "users", cred.user.uid), { ownerName: n, mobileNumber: m, emailId: e });
+                showAlert('success', 'Success', 'Account created! Logging in...', () => { document.getElementById('authContainer').classList.add('hidden'); document.getElementById('appContainer').classList.remove('hidden'); loadProfileData(); loadDashboardData(); });
+            } catch(er) { showAlert('error', 'Failed', er.message); }
         };
 
-        // Login & Logout
         document.getElementById('loginBtn').onclick = async () => {
             const e = document.getElementById('loginEmail').value, p = document.getElementById('loginPassword').value;
-            if(!e || !p) return showAlert('error', 'Error', 'Enter email and password');
+            if(!e || !p) return;
             try { await signInWithEmailAndPassword(auth, e, p); } catch(err) { showAlert('error', 'Login Failed', 'Invalid credentials'); }
         };
-        document.getElementById('logoutBtn').onclick = async () => {
-            await signOut(auth); document.getElementById('loginEmail').value = ""; document.getElementById('loginPassword').value = "";
-        };
+        
+        document.getElementById('logoutBtn').onclick = async () => { await signOut(auth); document.getElementById('loginEmail').value = ""; document.getElementById('loginPassword').value = ""; };
 
-        // --- PROFILE LOGIC ---
+        // Profile Loading
         async function loadProfileData() {
             if(!currentUserId) return;
             const docSnap = await getDoc(doc(db, "users", currentUserId));
             if (docSnap.exists()) {
-                const data = docSnap.data();
-                document.getElementById('profileName').innerText = data.ownerName + " (" + data.mobileNumber.slice(-4) + ")";
-                document.getElementById('profileMobile').innerText = data.mobileNumber;
-                document.getElementById('profileEmail').innerText = data.emailId;
-                
-                if(data.upiId) document.getElementById('upiIdInput').value = data.upiId;
-                if(data.bankAcc) document.getElementById('bankAccInput').value = data.bankAcc;
-                if(data.ifsc) document.getElementById('ifscInput').value = data.ifsc;
+                const d = docSnap.data();
+                document.getElementById('profileName').innerText = d.ownerName + " (" + d.mobileNumber.slice(-4) + ")";
+                document.getElementById('profileMobile').innerText = d.mobileNumber;
+                document.getElementById('profileEmail').innerText = d.emailId;
+                if(d.upiId) document.getElementById('upiIdInput').value = d.upiId;
+                if(d.bankAcc) document.getElementById('bankAccInput').value = d.bankAcc;
+                if(d.ifsc) document.getElementById('ifscInput').value = d.ifsc;
             }
         }
-        
         document.getElementById('saveProfileBtn').onclick = async () => {
-            const btn = document.getElementById('saveProfileBtn'); btn.innerText = "Saving...";
-            try {
-                await updateDoc(doc(db, "users", currentUserId), {
-                    upiId: document.getElementById('upiIdInput').value,
-                    bankAcc: document.getElementById('bankAccInput').value,
-                    ifsc: document.getElementById('ifscInput').value
-                });
-                showAlert('success', 'Profile Updated', 'Bank and UPI details saved.');
-            } catch(e) { showAlert('error', 'Error', e.message); }
-            finally { btn.innerText = "Save Payment Details"; }
+            try { await updateDoc(doc(db, "users", currentUserId), { upiId: document.getElementById('upiIdInput').value, bankAcc: document.getElementById('bankAccInput').value, ifsc: document.getElementById('ifscInput').value }); showAlert('success', 'Updated', 'Details saved.'); } catch(e) {}
         };
 
-        // --- PROPERTY ADDITION LOGIC ---
+        // Add House Logic
         document.getElementById('openAddHouseModal').onclick = () => document.getElementById('addHouseModal').classList.remove('hidden');
-        document.getElementById('closeAddHouseModal').onclick = () => {
-            document.getElementById('addHouseModal').classList.add('hidden');
-            document.getElementById('dynamicRoomsContainer').innerHTML = '';
-        };
+        document.getElementById('closeAddHouseModal').onclick = () => { document.getElementById('addHouseModal').classList.add('hidden'); document.getElementById('dynamicRoomsContainer').innerHTML = ''; };
 
         document.getElementById('roomCount').addEventListener('input', (e) => {
-            const count = parseInt(e.target.value) || 0;
-            const container = document.getElementById('dynamicRoomsContainer');
-            container.innerHTML = ''; 
-            for (let i = 1; i <= count; i++) {
-                container.innerHTML += `
-                    <div class="bg-gray-50 border p-3 rounded-lg mb-2">
-                        <h4 class="font-bold text-blue-600 mb-2">Room ${i}</h4>
-                        <input type="text" id="roomNo_${i}" placeholder="Room Name/No (e.g. 101)" class="w-full border p-2 rounded mb-2 text-sm">
-                        <div class="flex gap-2">
-                            <input type="number" id="rent_${i}" placeholder="Rent Amt" class="w-full border p-2 rounded text-sm">
-                            <input type="number" id="water_${i}" placeholder="Fixed Water" class="w-full border p-2 rounded text-sm">
-                        </div>
-                    </div>`;
+            const c = parseInt(e.target.value) || 0; const cont = document.getElementById('dynamicRoomsContainer'); cont.innerHTML = ''; 
+            for (let i = 1; i <= c; i++) {
+                cont.innerHTML += `<div class="bg-gray-50 border p-3 rounded-lg mb-2"><h4 class="font-bold text-blue-600 mb-2">Room ${i}</h4><input type="text" id="roomNo_${i}" placeholder="Room No (e.g. 101)" class="w-full border p-2 rounded mb-2 text-sm"><div class="flex gap-2"><input type="number" id="rent_${i}" placeholder="Rent Amt" class="w-full border p-2 rounded text-sm"><input type="number" id="water_${i}" placeholder="Water Bill" class="w-full border p-2 rounded text-sm"></div></div>`;
             }
         });
 
+        function generateUniqueId() {
+            return 'RE-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+        }
+
         document.getElementById('savePropertyBtn').onclick = async () => {
             const name = document.getElementById('houseName').value, addr = document.getElementById('houseAddress').value, count = parseInt(document.getElementById('roomCount').value);
-            if(!name || count < 1) return showAlert('error', 'Error', 'Enter details and at least 1 room');
+            if(!name || count < 1) return;
             document.getElementById('savePropertyBtn').innerText = "Saving...";
             try {
-                const houseRef = await addDoc(collection(db, "houses"), { ownerId: currentUserId, houseName: name, address: addr });
+                const hRef = await addDoc(collection(db, "houses"), { ownerId: currentUserId, houseName: name, address: addr });
                 for (let i = 1; i <= count; i++) {
                     const rNo = document.getElementById(`roomNo_${i}`).value, rAmt = document.getElementById(`rent_${i}`).value, wAmt = document.getElementById(`water_${i}`).value;
                     if(rNo && rAmt) {
-                        await addDoc(collection(db, "houses", houseRef.id, "rooms"), {
-                            roomNumber: rNo, rentAmount: Number(rAmt), waterBillFixed: Number(wAmt||0),
-                            currentLightBill: 0, penalty: 0, status: "Pending" // Default status new mahine me
+                        await addDoc(collection(db, "houses", hRef.id, "rooms"), {
+                            roomNumber: rNo, tenantUniqueId: generateUniqueId(), rentAmount: Number(rAmt), waterBillFixed: Number(wAmt||0),
+                            currentLightBill: 0, penalty: 0, status: "Pending"
                         });
                     }
                 }
-                document.getElementById('addHouseModal').classList.add('hidden');
-                showAlert('success', 'Saved', 'House and rooms created successfully!');
-                loadDashboardData(); // Refresh UI
-            } catch(e) { showAlert('error', 'Error', e.message); }
-            document.getElementById('savePropertyBtn').innerText = "Save Property & Rooms";
+                document.getElementById('addHouseModal').classList.add('hidden'); showAlert('success', 'Saved', 'House created!'); loadDashboardData();
+            } catch(e) {} document.getElementById('savePropertyBtn').innerText = "Save Property";
         };
 
-        // --- DASHBOARD & ANALYTICS LOAD ---
+        // Dashboard Data Loading (House List + Analytics)
+        window.houseDataCache = {}; // Global cache for house modal
+
         async function loadDashboardData() {
             if(!currentUserId) return;
-            const housesList = document.getElementById('housesList');
-            const pendingList = document.getElementById('pendingRoomsList');
+            const housesList = document.getElementById('housesList'); const pendingList = document.getElementById('pendingRoomsList');
             housesList.innerHTML = ''; pendingList.innerHTML = '';
-            
-            let totalExpected = 0, totalReceived = 0, totalPending = 0;
+            let tExp = 0, tRec = 0, tPen = 0; window.houseDataCache = {};
 
             const q = query(collection(db, "houses"), where("ownerId", "==", currentUserId));
-            const houseSnaps = await getDocs(q);
+            const hSnaps = await getDocs(q);
             
-            if(houseSnaps.empty) {
-                housesList.innerHTML = `<div class="text-center text-gray-400 mt-10"><i class="fas fa-home text-4xl mb-2"></i><p>No properties found.</p></div>`;
-                return;
-            }
+            if(hSnaps.empty) { housesList.innerHTML = `<div class="text-center text-gray-400 mt-10"><i class="fas fa-home text-4xl mb-2"></i><p>No properties found.</p></div>`; return; }
 
-            for (const houseDoc of houseSnaps.docs) {
-                const hData = houseDoc.data();
-                let houseHTML = `<div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
-                    <div class="bg-blue-600 text-white p-3"><h3 class="font-bold text-lg"><i class="fas fa-building mr-2"></i> ${hData.houseName}</h3><p class="text-xs text-blue-200">${hData.address}</p></div>
-                    <div class="p-3 grid grid-cols-2 gap-3">`;
+            for (const hDoc of hSnaps.docs) {
+                const hd = hDoc.data();
                 
-                const roomSnaps = await getDocs(collection(db, "houses", houseDoc.id, "rooms"));
-                roomSnaps.forEach(roomDoc => {
-                    const r = roomDoc.data();
-                    const rId = roomDoc.id;
-                    const hId = houseDoc.id;
+                // Fetch rooms for this house
+                const rSnaps = await getDocs(collection(db, "houses", hDoc.id, "rooms"));
+                let roomsData = [];
+                
+                rSnaps.forEach(rDoc => {
+                    const r = rDoc.data();
+                    roomsData.push({ id: rDoc.id, ...r });
                     
-                    // Calculation for analytics
-                    const totalRoomAmt = r.rentAmount + r.waterBillFixed + (r.currentLightBill || 0) + (r.penalty || 0);
-                    totalExpected += totalRoomAmt;
-                    
-                    let statusClass = r.status === "Paid" ? "bg-green-100 border-green-400 text-green-800" : "bg-red-50 border-red-300 text-red-800";
-                    let iconClass = r.status === "Paid" ? "fa-check-circle text-green-500" : "fa-exclamation-circle text-red-500";
-                    
-                    if(r.status === "Paid") { totalReceived += totalRoomAmt; } else { totalPending += totalRoomAmt; }
-                    
-                    // UI for Property Tab
-                    houseHTML += `
-                        <div class="border rounded-lg p-2 ${statusClass} cursor-pointer shadow-sm hover:shadow-md transition" onclick="openCollectionModal('${hId}', '${rId}', '${r.roomNumber}', ${r.rentAmount}, ${r.waterBillFixed}, ${r.currentLightBill||0}, ${r.penalty||0}, '${r.status}')">
-                            <div class="flex justify-between items-center mb-1">
-                                <span class="font-bold">Room ${r.roomNumber}</span>
-                                <i class="fas ${iconClass}"></i>
-                            </div>
-                            <div class="text-xs">
-                                Rent: ₹${r.rentAmount} <br>
-                                Status: <b>${r.status}</b>
-                            </div>
-                        </div>`;
-                        
-                    // UI for Analytics Pending List
-                    if(r.status === "Pending") {
-                        pendingList.innerHTML += `
-                        <div class="flex justify-between items-center bg-white p-3 rounded-lg shadow-sm border-l-4 border-red-500 cursor-pointer" onclick="switchTab('Properties')">
-                            <div><p class="font-bold text-gray-700">${hData.houseName} - Room ${r.roomNumber}</p><p class="text-xs text-gray-500">Includes Rent + Bills</p></div>
-                            <div class="font-bold text-red-600">₹${totalRoomAmt}</div>
-                        </div>`;
+                    const tAmt = r.rentAmount + r.waterBillFixed + (r.currentLightBill||0) + (r.penalty||0);
+                    tExp += tAmt;
+                    if(r.status === "Paid") { tRec += tAmt; } else { 
+                        tPen += tAmt; 
+                        pendingList.innerHTML += `<div class="flex justify-between items-center bg-white p-3 rounded-lg shadow-sm border-l-4 border-red-500 cursor-pointer"><p class="font-bold text-gray-700">${hd.houseName} - Room ${r.roomNumber}</p><div class="font-bold text-red-600">₹${tAmt}</div></div>`;
                     }
                 });
-                
-                houseHTML += `</div></div>`;
-                housesList.innerHTML += houseHTML;
+
+                // Cache room data for popup
+                window.houseDataCache[hDoc.id] = { name: hd.houseName, address: hd.address, rooms: roomsData };
+
+                // Render House Item in Properties Tab
+                housesList.innerHTML += `
+                    <div class="bg-white rounded-xl shadow-md p-4 flex justify-between items-center cursor-pointer border-l-4 border-blue-500 hover:bg-gray-50 transition" onclick="openHouseDetailsModal('${hDoc.id}')">
+                        <div>
+                            <h3 class="font-bold text-lg text-gray-800"><i class="fas fa-building text-blue-500 mr-2"></i> ${hd.houseName}</h3>
+                            <p class="text-xs text-gray-500 mt-1"><i class="fas fa-map-marker-alt mr-1"></i> ${hd.address}</p>
+                            <p class="text-xs text-gray-400 mt-1">Total Rooms: ${roomsData.length}</p>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-400 text-xl"></i>
+                    </div>`;
             }
             
-            // Update Stat Cards
-            document.getElementById('statExpected').innerText = "₹" + totalExpected;
-            document.getElementById('statReceived').innerText = "₹" + totalReceived;
-            document.getElementById('statPending').innerText = "₹" + totalPending;
-            
-            if(totalPending === 0) pendingList.innerHTML = `<p class="text-green-500 font-bold"><i class="fas fa-check-circle"></i> All collections complete for this month!</p>`;
+            document.getElementById('statExpected').innerText = "₹" + tExp; document.getElementById('statReceived').innerText = "₹" + tRec; document.getElementById('statPending').innerText = "₹" + tPen;
+            if(tPen === 0) pendingList.innerHTML = `<p class="text-green-500 font-bold"><i class="fas fa-check-circle"></i> All collections complete!</p>`;
         }
 
-        // --- COLLECTION UPDATE POPUP ---
-        window.openCollectionModal = function(hId, rId, rName, baseRent, baseWater, light, pen, status) {
+        // Open House Details Modal
+        window.openHouseDetailsModal = function(hId) {
+            const data = window.houseDataCache[hId];
+            document.getElementById('hdHouseName').innerText = data.name;
+            document.getElementById('hdHouseAddress').innerText = data.address;
+            
+            const rList = document.getElementById('hdRoomsList');
+            rList.innerHTML = '';
+            
+            data.rooms.forEach(r => {
+                let statusClass = r.status === "Paid" ? "bg-green-50 border-green-400" : "bg-red-50 border-red-300";
+                let iconClass = r.status === "Paid" ? "fa-check-circle text-green-500" : "fa-exclamation-circle text-red-500";
+                
+                // We encode the room data to pass to the update function safely
+                const rString = encodeURIComponent(JSON.stringify(r));
+
+                rList.innerHTML += `
+                    <div class="border rounded-lg p-3 ${statusClass} cursor-pointer shadow-sm hover:shadow-md transition" onclick="openCollectionModal('${hId}', '${rString}')">
+                        <div class="flex justify-between items-center border-b border-gray-200 pb-2 mb-2">
+                            <span class="font-bold text-blue-700 text-lg">Room ${r.roomNumber}</span>
+                            <span class="text-xs bg-white border px-2 py-1 rounded text-gray-700 font-mono font-bold shadow-sm">ID: ${r.tenantUniqueId}</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <div>
+                                <p class="text-gray-600">Base Rent: <span class="font-bold text-gray-800">₹${r.rentAmount}</span></p>
+                                <p class="text-gray-600">Status: <span class="font-bold ${r.status === 'Paid' ? 'text-green-700' : 'text-red-700'}">${r.status}</span></p>
+                            </div>
+                            <i class="fas ${iconClass} text-2xl"></i>
+                        </div>
+                    </div>`;
+            });
+            document.getElementById('houseDetailsModal').classList.remove('hidden');
+        };
+        document.getElementById('closeHouseDetailsModal').onclick = () => document.getElementById('houseDetailsModal').classList.add('hidden');
+
+        // Open specific Room Update Modal
+        window.openCollectionModal = function(hId, rStringEnc) {
+            const r = JSON.parse(decodeURIComponent(rStringEnc));
+            
             document.getElementById('tempHouseId').value = hId;
-            document.getElementById('tempRoomId').value = rId;
+            document.getElementById('tempRoomId').value = r.id;
             
-            document.getElementById('popupRoomName').innerText = "Room " + rName;
-            document.getElementById('displayBaseRent').innerText = "₹" + baseRent;
-            document.getElementById('displayWaterBill').innerText = "₹" + baseWater;
+            document.getElementById('popupRoomName').innerText = "Room " + r.roomNumber;
+            document.getElementById('popupRoomIdDisplay').innerText = "Tenant ID: " + r.tenantUniqueId;
             
-            document.getElementById('updateLightBill').value = light > 0 ? light : '';
-            document.getElementById('updatePenalty').value = pen > 0 ? pen : '';
-            document.getElementById('paymentStatusSelect').value = status || "Pending";
+            document.getElementById('updateBaseRent').value = r.rentAmount;
+            document.getElementById('updateBaseWater').value = r.waterBillFixed;
+            
+            document.getElementById('updateLightBill').value = r.currentLightBill > 0 ? r.currentLightBill : '';
+            document.getElementById('updatePenalty').value = r.penalty > 0 ? r.penalty : '';
+            document.getElementById('paymentStatusSelect').value = r.status || "Pending";
             
             document.getElementById('collectionModal').classList.remove('hidden');
         };
-
         document.getElementById('closeCollectionModal').onclick = () => document.getElementById('collectionModal').classList.add('hidden');
 
+        // Save Room Details (Update Rent, Water, Light, Penalty, Status)
         document.getElementById('saveCollectionBtn').onclick = async () => {
             const hId = document.getElementById('tempHouseId').value;
             const rId = document.getElementById('tempRoomId').value;
+            
+            const bRent = Number(document.getElementById('updateBaseRent').value) || 0;
+            const bWater = Number(document.getElementById('updateBaseWater').value) || 0;
             const light = Number(document.getElementById('updateLightBill').value) || 0;
             const penalty = Number(document.getElementById('updatePenalty').value) || 0;
             const status = document.getElementById('paymentStatusSelect').value;
@@ -519,18 +473,22 @@
             document.getElementById('saveCollectionBtn').innerText = "Updating...";
             try {
                 await updateDoc(doc(db, "houses", hId, "rooms", rId), {
+                    rentAmount: bRent,
+                    waterBillFixed: bWater,
                     currentLightBill: light,
                     penalty: penalty,
                     status: status,
                     lastUpdated: new Date()
                 });
+                
                 document.getElementById('collectionModal').classList.add('hidden');
-                showAlert('success', 'Updated', 'Room collection details saved successfully.');
-                loadDashboardData(); // Refresh sab data
+                document.getElementById('houseDetailsModal').classList.add('hidden'); // Close house details to force refresh cleanly
+                
+                showAlert('success', 'Updated', 'Room details saved successfully.');
+                loadDashboardData(); 
             } catch(e) { showAlert('error', 'Error', e.message); }
-            document.getElementById('saveCollectionBtn').innerText = "Save Updates";
+            document.getElementById('saveCollectionBtn').innerText = "Save Room Details";
         };
-
     </script>
 </body>
 </html>
