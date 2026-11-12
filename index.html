@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rent Easy - Ultimate SaaS</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- jsPDF Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body { background-color: #f4f7fb; font-family: 'Segoe UI', system-ui, sans-serif; }
@@ -32,11 +35,11 @@
 
     <!-- ================= CUSTOM ALERT POPUP ================= -->
     <div id="customAlert" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4" style="z-index: 9999;">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl transform transition-all scale-100 border-t-4 border-green-500">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl border-t-4 border-green-500">
             <div id="alertIcon" class="text-6xl mb-4 drop-shadow-sm">✅</div>
             <h3 id="alertTitle" class="text-2xl font-extrabold mb-2 text-gray-800">Updated</h3>
             <p id="alertMessage" class="text-gray-500 text-sm mb-6 font-medium">Data saved successfully.</p>
-            <button id="closeAlertBtn" class="w-full bg-green-500 text-white font-bold py-3.5 rounded-xl hover:bg-green-600 shadow-lg transition text-lg">Continue</button>
+            <button id="closeAlertBtn" class="w-full bg-green-500 text-white font-bold py-3.5 rounded-xl hover:bg-green-600 shadow-lg transition">Continue</button>
         </div>
     </div>
 
@@ -46,10 +49,10 @@
             <h2 class="text-4xl font-black text-center text-blue-600 mb-8 tracking-tight"><i class="fas fa-building mr-2"></i>Rent Easy</h2>
             
             <div id="loginForm">
-                <input type="email" id="loginEmail" placeholder="Email ID" class="w-full bg-gray-50 border border-gray-200 p-4 rounded-xl mb-4 outline-none focus:ring-2 focus:ring-blue-400 transition" required>
-                <input type="password" id="loginPassword" placeholder="Password" class="w-full bg-gray-50 border border-gray-200 p-4 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400 transition" required>
-                <div class="text-right mb-6"><span id="openForgotModal" class="text-sm text-blue-500 cursor-pointer hover:text-blue-700 font-semibold transition">Forgot Password?</span></div>
-                <button id="loginBtn" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition shadow-lg text-lg flex justify-center items-center"><span id="loginBtnText">Login</span></button>
+                <input type="email" id="loginEmail" placeholder="Email ID" class="w-full bg-gray-50 border border-gray-200 p-4 rounded-xl mb-4 outline-none focus:ring-2 focus:ring-blue-400" required>
+                <input type="password" id="loginPassword" placeholder="Password" class="w-full bg-gray-50 border border-gray-200 p-4 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400" required>
+                <div class="text-right mb-6"><span id="openForgotModal" class="text-sm text-blue-500 cursor-pointer hover:text-blue-700 font-semibold">Forgot Password?</span></div>
+                <button id="loginBtn" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition shadow-lg text-lg"><span id="loginBtnText">Login</span></button>
                 <p class="text-center text-sm text-gray-500 mt-6 cursor-pointer hover:text-blue-600 font-semibold" id="showRegisterBtn">New here? <span class="text-blue-500">Create Account</span></p>
             </div>
 
@@ -72,18 +75,13 @@
         </header>
 
         <main class="p-4 tab-content max-w-3xl mx-auto">
-            
-            <!-- TAB 1: ANALYTICS (HOME) -->
+            <!-- TAB 1: HOME -->
             <div id="tabAnalytics">
                 <h2 class="text-2xl font-extrabold text-gray-800 mb-5">Dashboard Overview</h2>
-                
                 <div class="bg-gray-900 text-white p-6 rounded-2xl shadow-xl mb-6 cursor-pointer transform hover:scale-[1.01] transition border border-gray-800 relative overflow-hidden" onclick="openVacantHousesModal()">
                     <div class="absolute -right-4 -top-4 opacity-10"><i class="fas fa-key text-9xl"></i></div>
                     <div class="flex justify-between items-center relative z-10">
-                        <div>
-                            <h3 class="text-xl font-bold flex items-center"><i class="fas fa-key text-yellow-400 mr-2"></i> Available Rooms</h3>
-                            <p class="text-sm text-gray-400 mt-1">Tap to view & assign new tenants</p>
-                        </div>
+                        <div><h3 class="text-xl font-bold flex items-center"><i class="fas fa-key text-yellow-400 mr-2"></i> Available Rooms</h3><p class="text-sm text-gray-400 mt-1">Tap to view & assign</p></div>
                         <div class="bg-yellow-400 text-gray-900 text-3xl font-black h-14 w-14 flex items-center justify-center rounded-full shadow-inner" id="vacantCountBadge">0</div>
                     </div>
                 </div>
@@ -98,7 +96,7 @@
                         <h3 class="text-2xl font-black text-green-600" id="statReceived">₹0</h3>
                     </div>
                     <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-red-500 col-span-2">
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Pending Collections (Rent+Bills)</p>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Pending Collections</p>
                         <h3 class="text-4xl font-black text-red-600" id="statPending">₹0</h3>
                     </div>
                 </div>
@@ -119,136 +117,94 @@
                 <button id="openAddHouseModal" class="fab fixed bottom-24 right-6 bg-blue-600 text-white w-14 h-14 rounded-full flex justify-center items-center text-2xl z-40 hover:bg-blue-700 transition"><i class="fas fa-plus"></i></button>
             </div>
 
-            <!-- TAB 3: TRANSACTION HISTORY -->
+            <!-- TAB 3: HISTORY -->
             <div id="tabHistory" class="hidden">
                 <div class="flex justify-between items-center mb-5">
                     <h2 class="text-2xl font-extrabold text-gray-800">History</h2>
-                    <button onclick="loadHistoryData()" class="bg-blue-50 text-blue-600 px-4 py-2 rounded-xl text-sm font-bold hover:bg-blue-100 transition shadow-sm border border-blue-100"><i class="fas fa-sync-alt mr-1"></i> Refresh</button>
+                    <button onclick="loadHistoryData()" class="bg-blue-50 text-blue-600 px-4 py-2 rounded-xl text-sm font-bold shadow-sm border"><i class="fas fa-sync-alt mr-1"></i> Refresh</button>
                 </div>
-                <div id="historyList" class="space-y-3">
-                    <div class="text-center text-gray-400 mt-10"><i class="fas fa-receipt text-4xl mb-2"></i><p>Loading transactions...</p></div>
-                </div>
+                <div id="historyList" class="space-y-3"></div>
             </div>
 
             <!-- TAB 4: PROFILE -->
             <div id="tabProfile" class="hidden">
                 <h2 class="text-2xl font-extrabold text-gray-800 mb-5">My Profile</h2>
-                
-                <div class="bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white p-6 rounded-3xl shadow-2xl mb-6 relative overflow-hidden border border-gray-700">
-                    <div class="absolute -right-4 -bottom-4 opacity-10"><i class="fas fa-fingerprint text-9xl"></i></div>
+                <div class="bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white p-6 rounded-3xl shadow-2xl mb-6 relative overflow-hidden">
                     <div class="relative z-10">
                         <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <p class="text-xs text-blue-400 font-bold tracking-widest uppercase mb-1">Owner Asset ID</p>
-                                <p class="text-lg font-mono font-bold bg-gray-800 px-3 py-1 rounded-lg border border-gray-600 inline-block shadow-inner" id="ownerAssetId">RE-OWN-XXXX</p>
-                            </div>
-                            <i class="fas fa-shield-alt text-2xl text-green-400"></i>
+                            <div><p class="text-xs text-blue-400 font-bold uppercase mb-1">Owner Asset ID</p><p class="text-lg font-mono font-bold bg-gray-800 px-3 py-1 rounded-lg border border-gray-600" id="ownerAssetId">RE-OWN-XXXX</p></div>
                         </div>
-                        <h3 class="text-3xl font-black uppercase tracking-wide mb-4" id="profileName">Loading...</h3>
-                        <div class="space-y-2">
-                            <p class="text-lg font-medium text-gray-200"><i class="fas fa-phone-alt mr-3 text-blue-400"></i><span id="profileMobile">...</span></p>
-                            <p class="text-sm font-medium text-gray-400"><i class="fas fa-envelope mr-3 text-blue-400"></i><span id="profileEmail">...</span></p>
-                        </div>
+                        <h3 class="text-3xl font-black uppercase mb-4" id="profileName">Loading...</h3>
+                        <p class="text-lg font-medium"><i class="fas fa-phone-alt mr-3 text-blue-400"></i><span id="profileMobile">...</span></p>
+                        <p class="text-sm font-medium"><i class="fas fa-envelope mr-3 text-blue-400"></i><span id="profileEmail">...</span></p>
                     </div>
                 </div>
 
                 <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                    <!-- NEW TENANT ACCESS MANAGER BUTTON -->
                     <h3 class="font-bold text-gray-800 mb-2"><i class="fas fa-users-cog mr-2 text-blue-500"></i> Tenant Portal Access</h3>
-                    <p class="text-xs text-gray-500 mb-4 font-medium">Grant your tenants access to view their bills & payment history via Email ID.</p>
-                    <button onclick="openTenantAccessModal()" class="w-full bg-blue-50 text-blue-600 font-bold py-3.5 rounded-xl border border-blue-200 shadow-sm hover:bg-blue-100 transition mb-6 flex items-center justify-center text-sm"><i class="fas fa-envelope-open-text mr-2"></i> Manage Tenant Access</button>
+                    <p class="text-xs text-gray-500 mb-4 font-medium">Grant tenants access via Email ID.</p>
+                    <button onclick="openTenantAccessModal()" class="w-full bg-blue-50 text-blue-600 font-bold py-3.5 rounded-xl border border-blue-200 hover:bg-blue-100 mb-6 flex items-center justify-center"><i class="fas fa-envelope-open-text mr-2"></i> Manage Tenant Access</button>
 
-                    <!-- Payment Details -->
-                    <h3 class="font-bold text-gray-800 mb-4 border-t pt-5"><i class="fas fa-university mr-2 text-green-500"></i> Receiving Payment Details</h3>
-                    <input type="text" id="upiIdInput" placeholder="UPI ID (e.g. 9876543210@ybl)" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400 transition font-medium">
-                    <input type="text" id="bankAccInput" placeholder="Bank Account Number" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400 transition font-medium">
-                    <input type="text" id="ifscInput" placeholder="IFSC Code" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-6 outline-none focus:ring-2 focus:ring-blue-400 transition font-medium">
-                    
-                    <button id="saveProfileBtn" class="w-full bg-green-500 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-green-600 transition text-lg flex justify-center items-center"><i class="fas fa-save mr-2"></i> Save Settings</button>
+                    <h3 class="font-bold text-gray-800 mb-4 border-t pt-5"><i class="fas fa-university mr-2 text-green-500"></i> Payment Details</h3>
+                    <input type="text" id="upiIdInput" placeholder="UPI ID" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400">
+                    <input type="text" id="bankAccInput" placeholder="Bank Account Number" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400">
+                    <input type="text" id="ifscInput" placeholder="IFSC Code" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-6 outline-none focus:ring-2 focus:ring-blue-400">
+                    <button id="saveProfileBtn" class="w-full bg-green-500 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-green-600 text-lg flex justify-center items-center"><i class="fas fa-save mr-2"></i> Save Settings</button>
                 </div>
             </div>
         </main>
 
         <!-- BOTTOM NAVIGATION -->
         <nav class="fixed bottom-0 w-full bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.05)] border-t border-gray-100 flex justify-around items-center z-40 h-[72px] pb-2">
-            <button class="nav-btn active flex flex-col items-center justify-center w-full h-full pt-1" onclick="switchTab('Analytics')">
-                <div class="nav-indicator"></div><i class="fas fa-home text-xl mb-1"></i><span class="text-[10px] font-bold uppercase tracking-wider">Home</span>
-            </button>
-            <button class="nav-btn flex flex-col items-center justify-center w-full h-full pt-1" onclick="switchTab('Properties')">
-                <div class="nav-indicator"></div><i class="fas fa-building text-xl mb-1"></i><span class="text-[10px] font-bold uppercase tracking-wider">Rooms</span>
-            </button>
-            <button class="nav-btn flex flex-col items-center justify-center w-full h-full pt-1" onclick="switchTab('History')">
-                <div class="nav-indicator"></div><i class="fas fa-history text-xl mb-1"></i><span class="text-[10px] font-bold uppercase tracking-wider">History</span>
-            </button>
-            <button class="nav-btn flex flex-col items-center justify-center w-full h-full pt-1" onclick="switchTab('Profile')">
-                <div class="nav-indicator"></div><i class="fas fa-user-circle text-xl mb-1"></i><span class="text-[10px] font-bold uppercase tracking-wider">Profile</span>
-            </button>
+            <button class="nav-btn active flex flex-col items-center justify-center w-full h-full pt-1" onclick="switchTab('Analytics')"><div class="nav-indicator"></div><i class="fas fa-home text-xl mb-1"></i><span class="text-[10px] font-bold uppercase">Home</span></button>
+            <button class="nav-btn flex flex-col items-center justify-center w-full h-full pt-1" onclick="switchTab('Properties')"><div class="nav-indicator"></div><i class="fas fa-building text-xl mb-1"></i><span class="text-[10px] font-bold uppercase">Rooms</span></button>
+            <button class="nav-btn flex flex-col items-center justify-center w-full h-full pt-1" onclick="switchTab('History')"><div class="nav-indicator"></div><i class="fas fa-history text-xl mb-1"></i><span class="text-[10px] font-bold uppercase">History</span></button>
+            <button class="nav-btn flex flex-col items-center justify-center w-full h-full pt-1" onclick="switchTab('Profile')"><div class="nav-indicator"></div><i class="fas fa-user-circle text-xl mb-1"></i><span class="text-[10px] font-bold uppercase">Profile</span></button>
         </nav>
     </div>
 
     <!-- ================= MODALS ================= -->
     
-    <!-- TENANT ACCESS MODAL (NEW) -->
+    <!-- TENANT ACCESS MODAL -->
     <div id="tenantAccessModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[80]">
         <div class="bg-white rounded-2xl p-6 w-full max-w-md modal-content shadow-2xl border-t-4 border-blue-500">
-            <div class="flex justify-between items-center mb-4 border-b pb-3">
-                <h3 class="font-extrabold text-blue-600 text-xl"><i class="fas fa-users-cog mr-2"></i> Tenant Access</h3>
-                <button onclick="document.getElementById('tenantAccessModal').classList.add('hidden')" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 transition"><i class="fas fa-times"></i></button>
-            </div>
-
-            <!-- Add / Update Form -->
+            <div class="flex justify-between items-center mb-4 border-b pb-3"><h3 class="font-extrabold text-blue-600 text-xl"><i class="fas fa-users-cog mr-2"></i> Tenant Access</h3><button onclick="document.getElementById('tenantAccessModal').classList.add('hidden')" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 transition"><i class="fas fa-times"></i></button></div>
             <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-5">
-                <h4 class="text-xs font-bold text-gray-500 mb-2 uppercase tracking-widest">Grant / Update Access</h4>
-                <select id="taRoomSelect" class="w-full bg-white border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400 text-sm font-bold text-gray-700">
-                    <option value="">Loading Rooms...</option>
-                </select>
-                <input type="email" id="taEmailInput" placeholder="Tenant Email ID" class="w-full bg-white border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400 text-sm font-medium">
-                <button onclick="grantTenantAccess()" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-md hover:bg-blue-700 transition flex items-center justify-center"><i class="fas fa-plus-circle mr-2"></i> Add / Update Access</button>
+                <select id="taRoomSelect" class="w-full bg-white border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 text-sm font-bold text-gray-700"></select>
+                <input type="email" id="taEmailInput" placeholder="Tenant Email ID" class="w-full bg-white border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 text-sm font-medium">
+                <button onclick="grantTenantAccess()" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-md hover:bg-blue-700 transition"><i class="fas fa-plus-circle mr-2"></i> Add / Update Access</button>
             </div>
-
-            <!-- Active Access List -->
             <h4 class="text-xs font-bold text-gray-500 mb-3 uppercase tracking-widest border-t pt-4">Active Access</h4>
-            <div id="taAccessList" class="space-y-3">
-                <p class="text-xs text-gray-400 text-center py-2"><i class="fas fa-spinner fa-spin mr-2"></i>Loading data...</p>
-            </div>
+            <div id="taAccessList" class="space-y-3"></div>
         </div>
     </div>
 
     <!-- FORGOT PASSWORD MODAL -->
     <div id="forgotModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[80]">
         <div class="bg-white rounded-2xl p-6 w-full max-w-sm modal-content shadow-2xl">
-            <div class="flex justify-between items-center mb-4 border-b pb-3">
-                <h3 class="font-bold text-xl text-gray-800">Reset Password</h3>
-                <button id="closeForgotModal" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 hover:bg-red-50 transition"><i class="fas fa-times"></i></button>
-            </div>
-            <p class="text-sm text-gray-600 mb-4">Enter your registered email ID. We will send you a secure reset link.</p>
-            <input type="email" id="resetEmailInput" placeholder="Enter Email ID" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-4 outline-none focus:ring-2 focus:ring-blue-400" required>
-            <button id="sendResetBtn" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-lg hover:bg-blue-700 transition">Send Reset Link</button>
+            <div class="flex justify-between items-center mb-4 border-b pb-3"><h3 class="font-bold text-xl text-gray-800">Reset Password</h3><button id="closeForgotModal" class="bg-gray-100 w-8 h-8 rounded-full"><i class="fas fa-times text-gray-500"></i></button></div>
+            <p class="text-sm text-gray-600 mb-4">Enter your registered email ID.</p>
+            <input type="email" id="resetEmailInput" placeholder="Email ID" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-4 outline-none focus:ring-2 focus:ring-blue-400" required>
+            <button id="sendResetBtn" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-lg hover:bg-blue-700 transition">Send Link</button>
         </div>
     </div>
 
     <!-- ADD HOUSE MODAL -->
     <div id="addHouseModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-md modal-content shadow-2xl">
-            <div class="flex justify-between items-center mb-5 border-b pb-3">
-                <h3 class="font-extrabold text-xl text-gray-800">Add Property</h3>
-                <button id="closeAddHouseModal" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 transition"><i class="fas fa-times"></i></button>
-            </div>
-            <input type="text" id="houseName" placeholder="House Name" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400" required>
-            <input type="text" id="houseAddress" placeholder="Address (e.g. G1 Gujarat Housing...)" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400" required>
-            <input type="number" id="roomCount" placeholder="Number of Rooms" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400" required>
+            <div class="flex justify-between items-center mb-5 border-b pb-3"><h3 class="font-extrabold text-xl text-gray-800">Add Property</h3><button id="closeAddHouseModal" class="bg-gray-100 w-8 h-8 rounded-full"><i class="fas fa-times text-gray-500"></i></button></div>
+            <input type="text" id="houseName" placeholder="House Name" class="w-full bg-gray-50 border p-3.5 rounded-xl mb-3 outline-none" required>
+            <input type="text" id="houseAddress" placeholder="Address" class="w-full bg-gray-50 border p-3.5 rounded-xl mb-3 outline-none" required>
+            <input type="number" id="roomCount" placeholder="Number of Rooms" class="w-full bg-gray-50 border p-3.5 rounded-xl mb-3 outline-none" required>
             <div id="dynamicRoomsContainer" class="mt-2 space-y-2"></div>
-            <button id="savePropertyBtn" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl mt-5 shadow-lg hover:bg-blue-700 transition text-lg">Save Property</button>
+            <button id="savePropertyBtn" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl mt-5 shadow-lg">Save Property</button>
         </div>
     </div>
 
     <!-- VACANT EXPLORER MODAL -->
     <div id="vacantExplorerModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[55]">
         <div class="bg-white rounded-2xl p-5 w-full max-w-md modal-content shadow-2xl">
-            <div class="flex justify-between items-center border-b pb-3 mb-4">
-                <h3 class="text-lg font-bold text-gray-800 flex items-center" id="veTitle">Vacant Properties</h3>
-                <button onclick="closeVacantExplorer()" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 transition"><i class="fas fa-times"></i></button>
-            </div>
+            <div class="flex justify-between items-center border-b pb-3 mb-4"><h3 class="text-lg font-bold text-gray-800" id="veTitle">Vacant Properties</h3><button onclick="closeVacantExplorer()" class="bg-gray-100 w-8 h-8 rounded-full"><i class="fas fa-times text-gray-500"></i></button></div>
             <div id="veBody" class="space-y-3"></div>
         </div>
     </div>
@@ -259,28 +215,24 @@
             <div class="flex justify-between border-b pb-4 mb-5 items-start">
                 <div>
                     <h3 class="font-extrabold text-blue-600 text-2xl" id="hdHouseName">House</h3>
-                    <p class="text-sm text-gray-500 flex items-center mt-1.5 bg-gray-50 p-1.5 rounded-lg border border-gray-100">
-                        <i class="fas fa-map-marker-alt text-red-500 mr-2 ml-1"></i>
-                        <span id="hdHouseAddress" class="truncate max-w-[200px]">Address</span>
-                        <a id="hdMapLink" href="#" target="_blank" class="ml-2 bg-blue-100 text-blue-600 p-1 rounded hover:bg-blue-200 transition flex items-center justify-center" title="View on Map"><i class="fas fa-external-link-alt text-[10px]"></i></a>
-                    </p>
+                    <p class="text-sm text-gray-500 flex items-center mt-1.5 bg-gray-50 p-1.5 rounded-lg border border-gray-100"><i class="fas fa-map-marker-alt text-red-500 mr-2 ml-1"></i><span id="hdHouseAddress"></span></p>
                 </div>
-                <button id="closeHouseDetailsModal" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 hover:bg-red-50 transition"><i class="fas fa-times"></i></button>
+                <button id="closeHouseDetailsModal" class="bg-gray-100 w-8 h-8 rounded-full"><i class="fas fa-times text-gray-500"></i></button>
             </div>
             <div id="hdRoomsList" class="space-y-3"></div>
         </div>
     </div>
 
-    <!-- ROOM MANAGER MODAL -->
+    <!-- ================= ROOM MANAGER MODAL (WITH METER READING SYSTEM) ================= -->
     <div id="roomManagerModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[60]">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-md modal-content border-t-4 border-blue-500 shadow-2xl">
+        <div class="bg-white rounded-2xl p-5 w-full max-w-md modal-content border-t-4 border-blue-500 shadow-2xl">
             <div class="flex justify-between items-center mb-4 border-b pb-3">
                 <h3 class="font-bold text-gray-800 text-lg">Room Manager</h3>
-                <button id="closeRoomManagerModal" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 transition"><i class="fas fa-times"></i></button>
+                <button id="closeRoomManagerModal" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500"><i class="fas fa-times"></i></button>
             </div>
-            <div class="bg-gradient-to-r from-blue-50 to-blue-100 p-3 text-center rounded-xl mb-5 shadow-sm border border-blue-200">
-                <p id="rmRoomName" class="font-black text-2xl text-blue-900">Room 101</p>
-                <p id="rmRoomId" class="text-xs font-mono text-blue-600 font-bold mt-1 tracking-widest uppercase bg-white inline-block px-2 py-0.5 rounded-full border border-blue-200">ID: XXX</p>
+            <div class="bg-gradient-to-r from-blue-50 to-blue-100 p-3 text-center rounded-xl mb-4 shadow-sm border border-blue-200">
+                <p id="rmRoomName" class="font-black text-2xl text-blue-900">Room</p>
+                <p id="rmRoomId" class="text-xs font-mono text-blue-600 font-bold mt-1 uppercase bg-white inline-block px-2 py-0.5 rounded-full border border-blue-200">ID: XXX</p>
             </div>
             <input type="hidden" id="rmHouseId">
             <input type="hidden" id="rmRoomIdVal">
@@ -291,10 +243,7 @@
     <!-- TRANSACTION DETAILS MODAL -->
     <div id="transactionDetailsModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[70]">
         <div class="bg-white rounded-2xl p-6 w-full max-w-sm modal-content shadow-2xl border-t-4 border-blue-500">
-            <div class="flex justify-between items-center mb-4 border-b pb-3">
-                <h3 class="font-bold text-gray-800 text-lg">Transaction Details</h3>
-                <button onclick="document.getElementById('transactionDetailsModal').classList.add('hidden')" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 transition"><i class="fas fa-times"></i></button>
-            </div>
+            <div class="flex justify-between items-center mb-4 border-b pb-3"><h3 class="font-bold text-gray-800 text-lg">Transaction Details</h3><button onclick="document.getElementById('transactionDetailsModal').classList.add('hidden')" class="bg-gray-100 w-8 h-8 rounded-full"><i class="fas fa-times text-gray-500"></i></button></div>
             <div class="space-y-3" id="tdBody"></div>
         </div>
     </div>
@@ -302,14 +251,11 @@
     <!-- DELETE TRANSACTION MODAL -->
     <div id="deleteTransactionModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[80]">
         <div class="bg-white rounded-2xl p-6 w-full max-w-sm modal-content shadow-2xl border-t-4 border-red-500">
-            <div class="flex justify-between items-center mb-4 border-b pb-3">
-                <h3 class="font-extrabold text-red-600 text-xl"><i class="fas fa-trash-alt mr-2"></i> Delete Entry</h3>
-                <button onclick="document.getElementById('deleteTransactionModal').classList.add('hidden')" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 transition"><i class="fas fa-times"></i></button>
-            </div>
-            <p class="text-sm text-gray-600 mb-4 font-medium">Please provide a reason. This entry will be voided and saved as a note in your history.</p>
+            <div class="flex justify-between items-center mb-4 border-b pb-3"><h3 class="font-extrabold text-red-600 text-xl"><i class="fas fa-trash-alt mr-2"></i> Delete Entry</h3><button onclick="document.getElementById('deleteTransactionModal').classList.add('hidden')" class="bg-gray-100 w-8 h-8 rounded-full"><i class="fas fa-times text-gray-500"></i></button></div>
+            <p class="text-sm text-gray-600 mb-4 font-medium">Please provide a reason. This entry will be voided and saved as a note in history.</p>
             <input type="hidden" id="delTxId">
-            <input type="text" id="delTxReason" placeholder="Reason (e.g. Wrong amount entered)" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-5 outline-none focus:ring-2 focus:ring-red-400 font-medium" required>
-            <button id="confirmDeleteTxBtn" class="w-full bg-red-500 text-white font-bold py-3.5 rounded-xl shadow-lg hover:bg-red-600 transition text-lg"><i class="fas fa-times-circle mr-2"></i> Confirm Delete</button>
+            <input type="text" id="delTxReason" placeholder="Reason (e.g. Wrong amount)" class="w-full bg-gray-50 border p-3.5 rounded-xl mb-5 outline-none" required>
+            <button id="confirmDeleteTxBtn" class="w-full bg-red-500 text-white font-bold py-3.5 rounded-xl shadow-lg hover:bg-red-600 text-lg">Confirm Delete</button>
         </div>
     </div>
 
@@ -332,186 +278,108 @@
         const db = getFirestore(app);
         let currentUserId = null;
 
-        // UI HELPERS
         window.showLoader = () => document.getElementById('globalLoader').classList.remove('hidden');
         window.hideLoader = () => document.getElementById('globalLoader').classList.add('hidden');
-
         window.showAlert = (type, title, msg, cb) => {
             const ab = document.getElementById('customAlert');
             const icon = document.getElementById('alertIcon');
             const titleEl = document.getElementById('alertTitle');
             const btn = document.getElementById('closeAlertBtn');
             const box = ab.querySelector('.bg-white');
-
             if(type === 'success') {
-                icon.innerHTML = '✅';
-                titleEl.className = 'text-2xl font-extrabold mb-2 text-gray-800';
+                icon.innerHTML = '✅'; titleEl.className = 'text-2xl font-extrabold mb-2 text-gray-800';
                 box.className = 'bg-white rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl transform transition-all scale-100 border-t-4 border-green-500';
-                btn.className = 'w-full bg-green-500 text-white font-bold py-3.5 rounded-xl hover:bg-green-600 shadow-lg transition text-lg';
+                btn.className = 'w-full bg-green-500 text-white font-bold py-3.5 rounded-xl hover:bg-green-600 shadow-lg text-lg';
             } else {
-                icon.innerHTML = '❌';
-                titleEl.className = 'text-2xl font-extrabold mb-2 text-gray-800';
+                icon.innerHTML = '❌'; titleEl.className = 'text-2xl font-extrabold mb-2 text-gray-800';
                 box.className = 'bg-white rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl transform transition-all scale-100 border-t-4 border-red-500';
-                btn.className = 'w-full bg-red-500 text-white font-bold py-3.5 rounded-xl hover:bg-red-600 shadow-lg transition text-lg';
+                btn.className = 'w-full bg-red-500 text-white font-bold py-3.5 rounded-xl hover:bg-red-600 shadow-lg text-lg';
             }
-            
-            titleEl.innerText = title;
-            document.getElementById('alertMessage').innerText = msg;
-            ab.classList.remove('hidden');
+            titleEl.innerText = title; document.getElementById('alertMessage').innerText = msg; ab.classList.remove('hidden');
             document.getElementById('closeAlertBtn').onclick = () => { ab.classList.add('hidden'); if(cb) cb(); };
         };
 
         window.switchTab = (t) => {
             ['Analytics', 'Properties', 'History', 'Profile'].forEach(x => document.getElementById('tab'+x).classList.add('hidden'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); event.currentTarget.classList.add('active');
             document.getElementById('tab'+t).classList.remove('hidden');
             if(t==='Analytics' || t==='Properties') loadDashboardData();
             if(t==='History') window.loadHistoryData();
         };
 
         window.closeAllModals = () => {
-            ['addHouseModal', 'vacantExplorerModal', 'houseDetailsModal', 'roomManagerModal', 'transactionDetailsModal', 'forgotModal', 'deleteTransactionModal', 'tenantAccessModal'].forEach(m => {
-                document.getElementById(m).classList.add('hidden');
-            });
+            ['addHouseModal', 'vacantExplorerModal', 'houseDetailsModal', 'roomManagerModal', 'transactionDetailsModal', 'forgotModal', 'deleteTransactionModal', 'tenantAccessModal'].forEach(m => document.getElementById(m).classList.add('hidden'));
         };
 
         // AUTHENTICATION
         document.getElementById('showRegisterBtn').onclick = () => { document.getElementById('loginForm').classList.add('hidden'); document.getElementById('registerForm').classList.remove('hidden'); };
         document.getElementById('showLoginBtn').onclick = () => { document.getElementById('registerForm').classList.add('hidden'); document.getElementById('loginForm').classList.remove('hidden'); };
-
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUserId = user.uid;
                 if(document.getElementById('customAlert').classList.contains('hidden')){
-                    document.getElementById('authContainer').classList.add('hidden');
-                    document.getElementById('appContainer').classList.remove('hidden');
-                    loadProfileData(); 
-                    await loadDashboardData();
+                    document.getElementById('authContainer').classList.add('hidden'); document.getElementById('appContainer').classList.remove('hidden');
+                    loadProfileData(); await loadDashboardData();
                 }
-            } else {
-                currentUserId = null;
-                document.getElementById('authContainer').classList.remove('hidden');
-                document.getElementById('appContainer').classList.add('hidden');
-            }
+            } else { currentUserId = null; document.getElementById('authContainer').classList.remove('hidden'); document.getElementById('appContainer').classList.add('hidden'); }
         });
-
         document.getElementById('loginBtn').onclick = async () => {
-            const btnText = document.getElementById('loginBtnText'); btnText.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Checking...';
-            try { await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPassword').value); } 
-            catch(e) { showAlert('error', 'Login Failed', 'Invalid Email or Password'); }
-            btnText.innerHTML = "Login";
+            document.getElementById('loginBtnText').innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Checking...';
+            try { await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPassword').value); } catch(e) { showAlert('error', 'Login Failed', 'Invalid Email or Password'); }
+            document.getElementById('loginBtnText').innerHTML = "Login";
         };
         document.getElementById('logoutBtn').onclick = () => signOut(auth);
 
+        // FORGOT PASSWORD
         document.getElementById('openForgotModal').onclick = () => document.getElementById('forgotModal').classList.remove('hidden');
         document.getElementById('closeForgotModal').onclick = () => document.getElementById('forgotModal').classList.add('hidden');
         document.getElementById('sendResetBtn').onclick = async () => {
             const email = document.getElementById('resetEmailInput').value;
             if(!email) return showAlert('error', 'Required', 'Please enter your registered Email ID.');
-            try {
-                await sendPasswordResetEmail(auth, email);
-                document.getElementById('forgotModal').classList.add('hidden');
-                document.getElementById('resetEmailInput').value = '';
-                showAlert('success', 'Email Sent!', 'Please check your inbox (or spam folder) for the reset link.');
-            } catch(error) { showAlert('error', 'Error', error.message); }
+            try { await sendPasswordResetEmail(auth, email); document.getElementById('forgotModal').classList.add('hidden'); document.getElementById('resetEmailInput').value = ''; showAlert('success', 'Email Sent!', 'Please check your inbox.'); } catch(e) { showAlert('error', 'Error', e.message); }
         };
         
-        // PROFILE SETTINGS
+        // PROFILE
         async function loadProfileData() {
             const dSnap = await getDoc(doc(db, "users", currentUserId));
             if (dSnap.exists()) {
                 const d = dSnap.data();
-                document.getElementById('profileName').innerText = d.ownerName;
-                document.getElementById('profileMobile').innerText = d.mobileNumber;
-                document.getElementById('profileEmail').innerText = d.emailId;
-                const assetId = "RE-OWN-" + currentUserId.substring(0, 6).toUpperCase();
-                document.getElementById('ownerAssetId').innerText = assetId;
-                
-                if(d.upiId) document.getElementById('upiIdInput').value = d.upiId;
-                if(d.bankAcc) document.getElementById('bankAccInput').value = d.bankAcc;
-                if(d.ifsc) document.getElementById('ifscInput').value = d.ifsc;
+                document.getElementById('profileName').innerText = d.ownerName; document.getElementById('profileMobile').innerText = d.mobileNumber; document.getElementById('profileEmail').innerText = d.emailId;
+                document.getElementById('ownerAssetId').innerText = "RE-OWN-" + currentUserId.substring(0, 6).toUpperCase();
+                if(d.upiId) document.getElementById('upiIdInput').value = d.upiId; if(d.bankAcc) document.getElementById('bankAccInput').value = d.bankAcc; if(d.ifsc) document.getElementById('ifscInput').value = d.ifsc;
             }
         }
-        
         document.getElementById('saveProfileBtn').onclick = async () => {
-            showLoader();
-            await updateDoc(doc(db, "users", currentUserId), { 
-                upiId: document.getElementById('upiIdInput').value, 
-                bankAcc: document.getElementById('bankAccInput').value, 
-                ifsc: document.getElementById('ifscInput').value
-            }); 
-            hideLoader();
-            showAlert('success', 'Updated Successfully', 'Profile payment details saved in real-time.'); 
+            showLoader(); await updateDoc(doc(db, "users", currentUserId), { upiId: document.getElementById('upiIdInput').value, bankAcc: document.getElementById('bankAccInput').value, ifsc: document.getElementById('ifscInput').value }); 
+            hideLoader(); showAlert('success', 'Updated Successfully', 'Profile payment details saved.'); 
         };
 
-        // ================= TENANT PORTAL ACCESS MANAGER =================
+        // TENANT ACCESS MANAGER
         window.openTenantAccessModal = () => {
-            const select = document.getElementById('taRoomSelect');
-            const list = document.getElementById('taAccessList');
-            select.innerHTML = '<option value="">Select House - Room</option>';
-            list.innerHTML = '';
-            
-            let hasAccess = false;
-
-            // Use the globally cached data from Dashboard
+            const select = document.getElementById('taRoomSelect'); const list = document.getElementById('taAccessList');
+            select.innerHTML = '<option value="">Select House - Room</option>'; list.innerHTML = ''; let hasAccess = false;
             Object.keys(window.houseDataCache || {}).forEach(hId => {
                 const h = window.houseDataCache[hId];
                 h.rooms.forEach(r => {
-                    // Only Occupied rooms or all rooms depending on preference. Allowing all.
                     select.innerHTML += `<option value="${hId}|${r.id}">Room ${r.roomNumber} (${h.name})</option>`;
-                    
                     if(r.accessEmail) {
                         hasAccess = true;
-                        list.innerHTML += `
-                        <div class="bg-white border rounded-xl p-3.5 flex justify-between items-center shadow-sm hover:shadow-md transition mb-3">
-                            <div>
-                                <p class="font-bold text-gray-800 text-sm">Room ${r.roomNumber} <span class="text-[10px] font-normal text-gray-500">(${h.name})</span></p>
-                                <p class="text-xs text-blue-600 font-medium mt-1 tracking-wide"><i class="fas fa-envelope mr-1"></i> ${r.accessEmail}</p>
-                            </div>
-                            <button onclick="removeTenantAccess('${hId}', '${r.id}')" class="bg-red-50 text-red-500 h-9 w-9 rounded-full flex justify-center items-center hover:bg-red-100 transition border border-red-100 shadow-sm"><i class="fas fa-trash-alt text-xs"></i></button>
-                        </div>`;
+                        list.innerHTML += `<div class="bg-white border rounded-xl p-3.5 flex justify-between items-center shadow-sm mb-3"><div><p class="font-bold text-gray-800 text-sm">Room ${r.roomNumber} <span class="text-[10px] text-gray-500">(${h.name})</span></p><p class="text-xs text-blue-600 font-medium mt-1"><i class="fas fa-envelope mr-1"></i> ${r.accessEmail}</p></div><button onclick="removeTenantAccess('${hId}', '${r.id}')" class="bg-red-50 text-red-500 h-9 w-9 rounded-full flex justify-center items-center hover:bg-red-100 border border-red-100 shadow-sm"><i class="fas fa-trash-alt text-xs"></i></button></div>`;
                     }
                 });
             });
-
             if(!hasAccess) list.innerHTML = '<p class="text-xs text-gray-500 text-center py-4 bg-gray-50 rounded-xl border border-dashed">No tenant access granted yet.</p>';
-            
             document.getElementById('tenantAccessModal').classList.remove('hidden');
         };
-
         window.grantTenantAccess = async () => {
-            const val = document.getElementById('taRoomSelect').value;
-            const email = document.getElementById('taEmailInput').value;
-            if(!val || !email) return showAlert('error', 'Required', 'Please select a room and enter an Email ID.');
-            
-            showLoader();
-            const [hId, rId] = val.split('|');
-            try {
-                await updateDoc(doc(db, "houses", hId, "rooms", rId), { accessEmail: email });
-                await loadDashboardData(); // Refresh cache quietly
-                document.getElementById('taEmailInput').value = '';
-                document.getElementById('taRoomSelect').value = '';
-                openTenantAccessModal(); // Re-render list
-                hideLoader();
-                showAlert('success', 'Access Granted', 'Tenant can now view their details using this email.');
-            } catch (e) {
-                hideLoader(); showAlert('error', 'Error', e.message);
-            }
+            const val = document.getElementById('taRoomSelect').value, email = document.getElementById('taEmailInput').value;
+            if(!val || !email) return showAlert('error', 'Required', 'Select room and enter Email ID.');
+            showLoader(); const [hId, rId] = val.split('|');
+            try { await updateDoc(doc(db, "houses", hId, "rooms", rId), { accessEmail: email }); await loadDashboardData(); document.getElementById('taEmailInput').value = ''; document.getElementById('taRoomSelect').value = ''; openTenantAccessModal(); hideLoader(); showAlert('success', 'Access Granted', 'Tenant can now view their details.'); } catch (e) { hideLoader(); showAlert('error', 'Error', e.message); }
         };
-
         window.removeTenantAccess = async (hId, rId) => {
-            if(!confirm('Are you sure you want to revoke access?')) return;
-            showLoader();
-            try {
-                await updateDoc(doc(db, "houses", hId, "rooms", rId), { accessEmail: "" });
-                await loadDashboardData();
-                openTenantAccessModal(); // Re-render list
-                hideLoader();
-                showAlert('success', 'Access Removed', 'Tenant access has been successfully revoked.');
-            } catch (e) {
-                hideLoader(); showAlert('error', 'Error', e.message);
-            }
+            if(!confirm('Revoke access?')) return; showLoader();
+            try { await updateDoc(doc(db, "houses", hId, "rooms", rId), { accessEmail: "" }); await loadDashboardData(); openTenantAccessModal(); hideLoader(); showAlert('success', 'Access Removed', 'Tenant access revoked.'); } catch (e) { hideLoader(); showAlert('error', 'Error', e.message); }
         };
 
         // ADD PROPERTY
@@ -521,7 +389,6 @@
             let html = ''; for(let i=1; i<=e.target.value; i++) html += `<div class="bg-gray-50 border p-3 rounded-xl mb-2"><input type="text" id="rNo_${i}" placeholder="Room No (eg 101)" class="w-full bg-white border p-2 mb-2 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"><div class="flex gap-2"><input type="number" id="rAmt_${i}" placeholder="Base Rent ₹" class="w-full bg-white border p-2 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"><input type="number" id="wAmt_${i}" placeholder="Water Bill ₹" class="w-full bg-white border p-2 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"></div></div>`;
             document.getElementById('dynamicRoomsContainer').innerHTML = html;
         };
-        
         document.getElementById('savePropertyBtn').onclick = async () => {
             const c = parseInt(document.getElementById('roomCount').value);
             if(c>0) {
@@ -532,139 +399,72 @@
                         await addDoc(collection(db, "houses", hRef.id, "rooms"), {
                             roomNumber: document.getElementById(`rNo_${i}`).value, tenantUniqueId: 'Unassigned', accessEmail: "",
                             rentAmount: Number(document.getElementById(`rAmt_${i}`).value), waterBillFixed: Number(document.getElementById(`wAmt_${i}`).value),
-                            occupancyStatus: "Vacant", paymentStatus: "Pending", currentLightBill: 0, penalty: 0
+                            occupancyStatus: "Vacant", paymentStatus: "Pending", 
+                            meterOld: 0, meterNew: 0, meterUnitRate: 10, currentLightBill: 0, penalty: 0
                         });
                     }
                 }
-                await loadDashboardData();
-                hideLoader();
-                closeAllModals(); 
-                document.getElementById('houseName').value = ''; document.getElementById('houseAddress').value = ''; document.getElementById('roomCount').value = '';
-                document.getElementById('dynamicRoomsContainer').innerHTML = '';
-                showAlert('success', 'Updated Successfully', 'Property and rooms saved in real-time.'); 
+                await loadDashboardData(); hideLoader(); closeAllModals(); 
+                document.getElementById('houseName').value = ''; document.getElementById('houseAddress').value = ''; document.getElementById('roomCount').value = ''; document.getElementById('dynamicRoomsContainer').innerHTML = '';
+                showAlert('success', 'Saved Successfully', 'Property and rooms saved in real-time.'); 
             }
         };
 
         // DASHBOARD DATA
-        window.houseDataCache = {};
-        window.vacantDataCache = {}; 
-        
+        window.houseDataCache = {}; window.vacantDataCache = {}; 
         async function loadDashboardData() {
             if(!currentUserId) return;
-            const hList = document.getElementById('housesList'); 
-            const pList = document.getElementById('pendingRoomsList');
-            
-            if(hList.innerHTML === '') { // Only show loading text on initial load, not background syncs
-                hList.innerHTML=`<div class="flex flex-col items-center justify-center py-10 text-blue-500"><i class="fas fa-circle-notch fa-spin text-4xl mb-3"></i><p class="text-sm font-bold text-gray-500">Syncing properties...</p></div>`;
-            }
-            
-            let tExp=0, tRec=0, tPen=0, vCount=0;
-            let tempHouseCache = {};
-            let tempVacantCache = {};
-            
-            let htmlBufferHouses = '';
-            let htmlBufferPending = '';
+            const hList = document.getElementById('housesList'); const pList = document.getElementById('pendingRoomsList');
+            if(hList.innerHTML === '') hList.innerHTML=`<div class="flex flex-col items-center justify-center py-10 text-blue-500"><i class="fas fa-circle-notch fa-spin text-4xl mb-3"></i><p class="text-sm font-bold text-gray-500">Syncing properties...</p></div>`;
+            let tExp=0, tRec=0, tPen=0, vCount=0; let tempHouseCache = {}; let tempVacantCache = {};
+            let htmlBufferHouses = ''; let htmlBufferPending = '';
+            const q = query(collection(db, "houses"), where("ownerId", "==", currentUserId)); const hSnaps = await getDocs(q);
 
-            const q = query(collection(db, "houses"), where("ownerId", "==", currentUserId));
-            const hSnaps = await getDocs(q);
-
-            if(hSnaps.empty) {
-                hList.innerHTML = `<div class="text-center text-gray-400 mt-10"><p>No properties found.</p></div>`;
-                pList.innerHTML = `<p class="text-gray-400">No collections pending.</p>`;
-                return;
-            }
+            if(hSnaps.empty) { hList.innerHTML = `<div class="text-center text-gray-400 mt-10"><p>No properties found.</p></div>`; pList.innerHTML = `<p class="text-gray-400">No collections pending.</p>`; return; }
 
             for (const hDoc of hSnaps.docs) {
-                const hd = hDoc.data(); 
-                const rSnaps = await getDocs(collection(db, "houses", hDoc.id, "rooms"));
-                let roomsData = [];
-                
+                const hd = hDoc.data(); const rSnaps = await getDocs(collection(db, "houses", hDoc.id, "rooms")); let roomsData = [];
                 rSnaps.forEach(rDoc => {
                     const r = rDoc.data(); roomsData.push({ id: rDoc.id, ...r });
                     const encRoom = encodeURIComponent(JSON.stringify({id: rDoc.id, ...r}));
-                    
                     if(r.occupancyStatus === "Occupied") {
-                        const amt = r.rentAmount + r.waterBillFixed + (r.currentLightBill||0) + (r.penalty||0);
-                        tExp += amt;
-                        if(r.paymentStatus === "Paid") {
-                            tRec += amt;
-                        } else { 
-                            tPen += amt; 
-                            htmlBufferPending += `<div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-red-500 cursor-pointer hover:shadow-md transition mb-3" onclick="openRoomManager('${hDoc.id}', '${encRoom}')"><div><p class="font-bold text-gray-800">${hd.houseName} - Room ${r.roomNumber}</p><p class="text-xs text-gray-500 font-medium">${r.tenantName}</p></div><div class="font-black text-red-600 text-lg">₹${amt}</div></div>`;
+                        const amt = r.rentAmount + r.waterBillFixed + (r.currentLightBill||0) + (r.penalty||0); tExp += amt;
+                        if(r.paymentStatus === "Paid") tRec += amt; else { 
+                            tPen += amt; htmlBufferPending += `<div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-red-500 cursor-pointer hover:shadow-md transition mb-3" onclick="openRoomManager('${hDoc.id}', '${encRoom}')"><div><p class="font-bold text-gray-800">${hd.houseName} - Room ${r.roomNumber}</p><p class="text-xs text-gray-500 font-medium">${r.tenantName}</p></div><div class="font-black text-red-600 text-lg">₹${amt}</div></div>`;
                         }
                     } else if(r.occupancyStatus === "Vacant") {
-                        vCount++;
-                        if(!tempVacantCache[hDoc.id]) tempVacantCache[hDoc.id] = { name: hd.houseName, address: hd.address, rooms: [] };
+                        vCount++; if(!tempVacantCache[hDoc.id]) tempVacantCache[hDoc.id] = { name: hd.houseName, address: hd.address, rooms: [] };
                         tempVacantCache[hDoc.id].rooms.push({ id: rDoc.id, ...r });
                     }
                 });
                 tempHouseCache[hDoc.id] = { name: hd.houseName, address: hd.address, rooms: roomsData };
-                
-                const encodedAddress = encodeURIComponent(hd.address);
-                htmlBufferHouses += `
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex justify-between items-center cursor-pointer border-l-4 border-l-blue-500 mb-4 hover:shadow-md transition" onclick="openHouseDetailsModal('${hDoc.id}')">
-                        <div>
-                            <h3 class="font-extrabold text-gray-800 text-lg">${hd.houseName}</h3>
-                            <div class="text-xs text-gray-500 mt-1.5 flex items-center bg-gray-50 px-2 py-1 rounded inline-flex border border-gray-100">
-                                <i class="fas fa-map-marker-alt text-red-400 mr-1.5"></i> 
-                                <span class="truncate max-w-[150px]">${hd.address}</span>
-                                <a href="https://www.google.com/maps/search/?api=1&query=${encodedAddress}" target="_blank" onclick="event.stopPropagation()" class="text-blue-500 hover:text-blue-700 ml-2 bg-blue-100 p-1 rounded transition" title="View on Map"><i class="fas fa-external-link-alt text-[10px]"></i></a>
-                            </div>
-                        </div>
-                        <div class="bg-gray-50 h-10 w-10 rounded-full flex items-center justify-center border border-gray-200"><i class="fas fa-chevron-right text-gray-400"></i></div>
-                    </div>`;
+                htmlBufferHouses += `<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex justify-between items-center cursor-pointer border-l-4 border-l-blue-500 mb-4 hover:shadow-md transition" onclick="openHouseDetailsModal('${hDoc.id}')"><div><h3 class="font-extrabold text-gray-800 text-lg">${hd.houseName}</h3><div class="text-xs text-gray-500 mt-1.5 flex items-center bg-gray-50 px-2 py-1 rounded inline-flex border border-gray-100"><i class="fas fa-map-marker-alt text-red-400 mr-1.5"></i><span class="truncate max-w-[150px]">${hd.address}</span><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(hd.address)}" target="_blank" onclick="event.stopPropagation()" class="text-blue-500 hover:text-blue-700 ml-2 bg-blue-100 p-1 rounded transition"><i class="fas fa-external-link-alt text-[10px]"></i></a></div></div><div class="bg-gray-50 h-10 w-10 rounded-full flex items-center justify-center border border-gray-200"><i class="fas fa-chevron-right text-gray-400"></i></div></div>`;
             }
-            
-            // Assign parsed data
-            window.houseDataCache = tempHouseCache;
-            window.vacantDataCache = tempVacantCache;
-            hList.innerHTML = htmlBufferHouses;
-            pList.innerHTML = htmlBufferPending;
-
-            document.getElementById('statExpected').innerText = "₹" + tExp; document.getElementById('statReceived').innerText = "₹" + tRec; document.getElementById('statPending').innerText = "₹" + tPen;
-            document.getElementById('vacantCountBadge').innerText = vCount;
+            window.houseDataCache = tempHouseCache; window.vacantDataCache = tempVacantCache;
+            hList.innerHTML = htmlBufferHouses; pList.innerHTML = htmlBufferPending;
+            document.getElementById('statExpected').innerText = "₹" + tExp; document.getElementById('statReceived').innerText = "₹" + tRec; document.getElementById('statPending').innerText = "₹" + tPen; document.getElementById('vacantCountBadge').innerText = vCount;
             if(tPen === 0 && tExp > 0) pList.innerHTML = `<p class="text-green-600 font-bold bg-green-50 p-4 rounded-xl border border-green-200 shadow-sm flex items-center"><i class="fas fa-check-circle text-xl mr-2"></i> All collections complete!</p>`;
         }
 
-        // VACANT EXPLORER DRILL-DOWN
+        // VACANT EXPLORER
         window.openVacantHousesModal = () => {
             document.getElementById('veTitle').innerHTML = "Vacant Properties";
             const body = document.getElementById('veBody'); body.innerHTML = '';
             const houseIds = Object.keys(window.vacantDataCache);
-            if(houseIds.length === 0) {
-                body.innerHTML = `<p class="text-center text-gray-500 mt-5"><i class="fas fa-home text-5xl mb-3 text-gray-300"></i><br>All rooms are currently occupied.</p>`;
-            } else {
+            if(houseIds.length === 0) { body.innerHTML = `<p class="text-center text-gray-500 mt-5"><i class="fas fa-home text-5xl mb-3 text-gray-300"></i><br>All rooms are currently occupied.</p>`; } else {
                 houseIds.forEach(hId => {
                     const h = window.vacantDataCache[hId];
-                    const encodedAddress = encodeURIComponent(h.address);
-                    body.innerHTML += `
-                    <div class="bg-white border rounded-xl p-4 flex justify-between items-center shadow-sm cursor-pointer hover:border-blue-400 transition mb-3" onclick="openVacantRoomsView('${hId}')">
-                        <div>
-                            <h4 class="font-extrabold text-blue-700 text-lg">${h.name}</h4>
-                            <p class="text-xs text-gray-500 mt-1 flex items-center bg-gray-50 px-1 rounded inline-flex">
-                                <span class="truncate max-w-[120px]">${h.address}</span>
-                                <a href="https://www.google.com/maps/search/?api=1&query=${encodedAddress}" target="_blank" onclick="event.stopPropagation()" class="text-blue-500 ml-2"><i class="fas fa-external-link-alt text-[10px]"></i></a>
-                            </p>
-                        </div>
-                        <div class="bg-blue-100 text-blue-800 font-black px-3 py-1.5 rounded-lg text-xs shadow-sm">${h.rooms.length} Khali</div>
-                    </div>`;
+                    body.innerHTML += `<div class="bg-white border rounded-xl p-4 flex justify-between items-center shadow-sm cursor-pointer hover:border-blue-400 transition mb-3" onclick="openVacantRoomsView('${hId}')"><div><h4 class="font-extrabold text-blue-700 text-lg">${h.name}</h4><p class="text-xs text-gray-500 mt-1 flex items-center bg-gray-50 px-1 rounded inline-flex"><span class="truncate max-w-[120px]">${h.address}</span><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(h.address)}" target="_blank" onclick="event.stopPropagation()" class="text-blue-500 ml-2"><i class="fas fa-external-link-alt text-[10px]"></i></a></p></div><div class="bg-blue-100 text-blue-800 font-black px-3 py-1.5 rounded-lg text-xs shadow-sm">${h.rooms.length} Khali</div></div>`;
                 });
             }
             document.getElementById('vacantExplorerModal').classList.remove('hidden');
         };
-
         window.openVacantRoomsView = (hId) => {
             const h = window.vacantDataCache[hId];
             document.getElementById('veTitle').innerHTML = `<button onclick="openVacantHousesModal()" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-600 mr-2 hover:bg-gray-200"><i class="fas fa-arrow-left"></i></button> ${h.name}`;
             const body = document.getElementById('veBody'); body.innerHTML = '';
-            
             h.rooms.forEach(r => {
-                const encRoom = encodeURIComponent(JSON.stringify(r));
-                body.innerHTML += `
-                <div class="bg-gray-50 border rounded-xl p-4 flex justify-between items-center shadow-sm cursor-pointer hover:bg-blue-50 transition border-l-4 border-l-gray-400 mb-3" onclick="openRoomManager('${hId}', '${encRoom}')">
-                    <div><h4 class="font-extrabold text-gray-800 text-lg">Room ${r.roomNumber}</h4><p class="text-xs text-gray-500 font-bold mt-1 bg-white px-2 py-1 rounded inline-block border">Rent: ₹${r.rentAmount} | Water: ₹${r.waterBillFixed}</p></div>
-                    <button class="bg-blue-600 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition tracking-wide">ASSIGN</button>
-                </div>`;
+                body.innerHTML += `<div class="bg-gray-50 border rounded-xl p-4 flex justify-between items-center shadow-sm cursor-pointer hover:bg-blue-50 transition border-l-4 border-l-gray-400 mb-3" onclick="openRoomManager('${hId}', '${encodeURIComponent(JSON.stringify(r))}')"><div><h4 class="font-extrabold text-gray-800 text-lg">Room ${r.roomNumber}</h4><p class="text-xs text-gray-500 font-bold mt-1 bg-white px-2 py-1 rounded inline-block border">Rent: ₹${r.rentAmount} | Water: ₹${r.waterBillFixed}</p></div><button class="bg-blue-600 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition tracking-wide">ASSIGN</button></div>`;
             });
         };
         window.closeVacantExplorer = () => document.getElementById('vacantExplorerModal').classList.add('hidden');
@@ -672,26 +472,45 @@
         // HOUSE DETAILS MODAL
         window.openHouseDetailsModal = (hId) => {
             const d = window.houseDataCache[hId]; 
-            document.getElementById('hdHouseName').innerText = d.name; 
-            document.getElementById('hdHouseAddress').innerText = d.address;
+            document.getElementById('hdHouseName').innerText = d.name; document.getElementById('hdHouseAddress').innerText = d.address;
             document.getElementById('hdMapLink').href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.address)}`;
-            
             const rList = document.getElementById('hdRoomsList'); rList.innerHTML = '';
             d.rooms.forEach(r => {
                 let sClass = r.occupancyStatus === "Vacant" ? "bg-gray-50 border-gray-200 border-l-gray-400" : (r.paymentStatus === "Paid" ? "bg-green-50 border-green-200 border-l-green-400" : "bg-red-50 border-red-200 border-l-red-400");
                 let sText = r.occupancyStatus === "Vacant" ? "VACANT" : (r.paymentStatus === "Paid" ? "PAID" : "PENDING");
                 let sBadge = r.occupancyStatus === "Vacant" ? "bg-white text-gray-600" : (r.paymentStatus === "Paid" ? "bg-green-500 text-white" : "bg-red-500 text-white");
-
-                rList.innerHTML += `<div class="border border-l-4 rounded-xl p-4 ${sClass} cursor-pointer shadow-sm hover:shadow-md transition mb-3" onclick="openRoomManager('${hId}', '${encodeURIComponent(JSON.stringify(r))}')">
-                    <div class="flex justify-between items-center mb-1.5"><span class="font-extrabold text-lg text-gray-800">Room ${r.roomNumber}</span><span class="text-[10px] px-2.5 py-1 rounded-full font-bold shadow-sm tracking-wider ${sBadge}">${sText}</span></div>
-                    <p class="text-sm font-medium ${r.occupancyStatus==="Occupied" ? 'text-gray-700' : 'text-gray-400'}">${r.occupancyStatus==="Occupied" ? r.tenantName : "Ready to assign"}</p>
-                </div>`;
+                rList.innerHTML += `<div class="border border-l-4 rounded-xl p-4 ${sClass} cursor-pointer shadow-sm hover:shadow-md transition mb-3" onclick="openRoomManager('${hId}', '${encodeURIComponent(JSON.stringify(r))}')"><div class="flex justify-between items-center mb-1.5"><span class="font-extrabold text-lg text-gray-800">Room ${r.roomNumber}</span><span class="text-[10px] px-2.5 py-1 rounded-full font-bold shadow-sm tracking-wider ${sBadge}">${sText}</span></div><p class="text-sm font-medium ${r.occupancyStatus==="Occupied" ? 'text-gray-700' : 'text-gray-400'}">${r.occupancyStatus==="Occupied" ? r.tenantName : "Ready to assign"}</p></div>`;
             });
             document.getElementById('houseDetailsModal').classList.remove('hidden');
         };
         document.getElementById('closeHouseDetailsModal').onclick = () => document.getElementById('houseDetailsModal').classList.add('hidden');
 
-        // ROOM MANAGER MODAL
+        // ================= ROOM MANAGER (WITH METER LOGIC) =================
+        
+        // Auto Calculate Meter
+        window.calculateMeter = () => {
+            const oldRead = Number(document.getElementById('meterOld').value)||0;
+            const newRead = Number(document.getElementById('meterNew').value)||0;
+            const rate = Number(document.getElementById('meterRate').value)||0;
+            
+            let units = newRead - oldRead;
+            if(units < 0) units = 0; // Prevent negative bill
+            
+            const totalLight = units * rate;
+            
+            document.getElementById('meterUnits').innerText = units + ' Units';
+            document.getElementById('editLight').value = totalLight;
+            calculateTotalDue();
+        };
+
+        window.calculateTotalDue = () => {
+            const rBase = Number(document.getElementById('editRent').value)||0;
+            const wBase = Number(document.getElementById('editWater').value)||0;
+            const light = Number(document.getElementById('editLight').value)||0;
+            const pen = Number(document.getElementById('editPen').value)||0;
+            document.getElementById('totalDueDisplay').innerText = "₹" + (rBase + wBase + light + pen);
+        };
+
         window.openRoomManager = (hId, rStringEnc) => {
             const r = JSON.parse(decodeURIComponent(rStringEnc));
             document.getElementById('rmHouseId').value = hId; document.getElementById('rmRoomIdVal').value = r.id;
@@ -710,68 +529,84 @@
                         <input type="tel" id="tAlt" placeholder="Alt. Mobile" class="w-1/2 bg-gray-50 border p-3.5 rounded-xl focus:ring-2 focus:ring-blue-400 outline-none transition">
                     </div>
                     <input type="email" id="tEmail" placeholder="Email ID (Optional)" class="w-full bg-gray-50 border p-3.5 mb-3 rounded-xl focus:ring-2 focus:ring-blue-400 outline-none transition">
-                    
                     <div class="flex gap-3 mb-4">
                         <input type="number" id="tDep" placeholder="Deposit (₹)" class="w-1/2 border-2 border-blue-400 p-3.5 rounded-xl focus:ring-2 outline-none font-bold text-blue-700 bg-blue-50">
-                        <select id="tDepMode" class="w-1/2 border p-3.5 rounded-xl font-bold bg-gray-50 outline-none text-gray-700">
-                            <option>Cash</option><option>UPI</option><option>Debit Card</option><option>Bank Transfer</option>
-                        </select>
+                        <select id="tDepMode" class="w-1/2 border p-3.5 rounded-xl font-bold bg-gray-50 outline-none text-gray-700"><option>Cash</option><option>UPI</option><option>Debit Card</option><option>Bank Transfer</option></select>
                     </div>
-                    
-                    <h4 class="font-bold text-gray-800 mb-3 mt-4 border-t pt-4 text-sm uppercase tracking-wide">Monthly Base Setup</h4>
-                    <div class="flex gap-3">
+                    <h4 class="font-bold text-gray-800 mb-3 mt-4 border-t pt-4 text-sm uppercase tracking-wide">Monthly Setup</h4>
+                    <div class="flex gap-3 mb-3">
                         <input type="number" id="rBase" value="${r.rentAmount}" placeholder="Rent" class="w-1/2 border p-3.5 rounded-xl font-bold bg-gray-50 outline-none">
                         <input type="number" id="wBase" value="${r.waterBillFixed}" placeholder="Water" class="w-1/2 border p-3.5 rounded-xl font-bold bg-gray-50 outline-none">
                     </div>
-                    <button id="assignBtn" onclick="assignTenant('${r.roomNumber}')" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl mt-6 shadow-lg hover:bg-blue-700 transition text-lg tracking-wide">Assign Tenant & Save</button>
+                    <div class="bg-yellow-50 border border-yellow-200 p-3 rounded-xl">
+                        <label class="text-xs font-bold text-gray-500 uppercase tracking-widest block mb-1">Starting Meter Reading</label>
+                        <div class="flex gap-2">
+                            <input type="number" id="mStart" value="${r.meterOld || 0}" placeholder="Start Reading" class="w-1/2 border p-2 rounded-lg font-bold outline-none">
+                            <input type="number" id="mRate" value="${r.meterUnitRate || 10}" placeholder="Rate/Unit" class="w-1/2 border p-2 rounded-lg font-bold outline-none">
+                        </div>
+                    </div>
+                    <button id="assignBtn" onclick="assignTenant('${r.roomNumber}')" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl mt-5 shadow-lg hover:bg-blue-700 transition text-lg tracking-wide">Assign Tenant & Save</button>
                 `;
             } else {
                 const totalDue = r.rentAmount + r.waterBillFixed + (r.currentLightBill||0) + (r.penalty||0);
+                
                 body.innerHTML = `
                     <div class="bg-green-50 p-3 rounded-xl mb-4 flex justify-between items-center border border-green-200"><span class="font-black text-green-800 text-lg">${r.tenantName}</span><button onclick="vacateRoom('${r.tenantName}', ${r.deposit})" class="bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow hover:bg-red-600 transition">Vacate Room</button></div>
                     
+                    <!-- NEW METER CALCULATION UI -->
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-3 mb-3">
+                        <div class="flex justify-between items-center mb-2 border-b border-yellow-200 pb-1">
+                            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest"><i class="fas fa-bolt text-yellow-500 mr-1"></i> Meter Calculation</span>
+                            <span class="text-xs font-black text-blue-600 bg-white px-2 py-0.5 rounded shadow-sm border border-gray-100" id="meterUnits">0 Units</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <div><label class="text-[10px] text-gray-500 font-bold block mb-1">Old Read</label><input type="number" id="meterOld" value="${r.meterOld || 0}" oninput="calculateMeter()" class="w-full border rounded p-2 text-sm font-bold bg-white outline-none focus:ring-1"></div>
+                            <div><label class="text-[10px] text-blue-600 font-bold block mb-1">New Read</label><input type="number" id="meterNew" value="${r.meterNew || 0}" oninput="calculateMeter()" class="w-full border border-blue-400 rounded p-2 text-sm font-bold bg-blue-50 outline-none focus:ring-1 focus:bg-white transition"></div>
+                            <div><label class="text-[10px] text-gray-500 font-bold block mb-1">Rate/Unit(₹)</label><input type="number" id="meterRate" value="${r.meterUnitRate || 10}" oninput="calculateMeter()" class="w-full border rounded p-2 text-sm font-bold bg-white outline-none focus:ring-1"></div>
+                        </div>
+                    </div>
+
                     <div class="grid grid-cols-2 gap-3 mb-4 bg-gray-50 p-3 border rounded-xl">
-                        <div><label class="text-[10px] text-gray-500 font-bold uppercase tracking-wider block mb-1">Rent (₹)</label><input type="number" id="editRent" value="${r.rentAmount}" class="w-full border rounded-lg p-2.5 font-bold bg-white outline-none"></div>
-                        <div><label class="text-[10px] text-gray-500 font-bold uppercase tracking-wider block mb-1">Water (₹)</label><input type="number" id="editWater" value="${r.waterBillFixed}" class="w-full border rounded-lg p-2.5 font-bold bg-white outline-none"></div>
-                        <div><label class="text-[10px] text-blue-600 font-bold uppercase tracking-wider block mb-1">Light (₹)</label><input type="number" id="editLight" value="${r.currentLightBill||''}" placeholder="0" class="w-full border rounded-lg p-2.5 border-blue-300 outline-none bg-blue-50 focus:bg-white transition"></div>
-                        <div><label class="text-[10px] text-red-500 font-bold uppercase tracking-wider block mb-1">Penalty (₹)</label><input type="number" id="editPen" value="${r.penalty||''}" placeholder="0" class="w-full border rounded-lg p-2.5 border-red-300 outline-none bg-red-50 focus:bg-white transition"></div>
+                        <div><label class="text-[10px] text-gray-500 font-bold uppercase tracking-wider block mb-1">Rent (₹)</label><input type="number" id="editRent" value="${r.rentAmount}" oninput="calculateTotalDue()" class="w-full border rounded-lg p-2.5 font-bold bg-white outline-none"></div>
+                        <div><label class="text-[10px] text-gray-500 font-bold uppercase tracking-wider block mb-1">Water (₹)</label><input type="number" id="editWater" value="${r.waterBillFixed}" oninput="calculateTotalDue()" class="w-full border rounded-lg p-2.5 font-bold bg-white outline-none"></div>
+                        <div><label class="text-[10px] text-yellow-600 font-bold uppercase tracking-wider block mb-1">Light (Auto) ₹</label><input type="number" id="editLight" value="${r.currentLightBill||0}" readonly class="w-full border rounded-lg p-2.5 border-yellow-300 outline-none bg-yellow-100 font-bold text-gray-700"></div>
+                        <div><label class="text-[10px] text-red-500 font-bold uppercase tracking-wider block mb-1">Penalty (₹)</label><input type="number" id="editPen" value="${r.penalty||''}" placeholder="0" oninput="calculateTotalDue()" class="w-full border rounded-lg p-2.5 border-red-300 outline-none bg-red-50 focus:bg-white transition"></div>
                     </div>
                     
                     <div class="bg-gray-900 text-white p-4 rounded-xl flex justify-between items-center mb-5 shadow-lg border border-gray-700">
-                        <span class="font-bold text-gray-300 uppercase text-xs tracking-widest">Total Due:</span><span class="text-3xl font-black text-white">₹${totalDue}</span>
+                        <span class="font-bold text-gray-300 uppercase text-xs tracking-widest">Total Due:</span><span class="text-3xl font-black text-white" id="totalDueDisplay">₹${totalDue}</span>
                     </div>
 
                     <div class="flex gap-3 mb-5">
-                        <select id="payMode" class="w-1/2 border p-3.5 rounded-xl font-bold bg-gray-50 outline-none text-gray-700">
-                            <option>Cash</option><option>UPI</option><option>Debit Card</option><option>Bank Transfer</option>
-                        </select>
-                        <select id="payStatus" class="w-1/2 border p-3.5 rounded-xl font-bold outline-none ${r.paymentStatus==='Paid'?'bg-green-50 text-green-700 border-green-300':'bg-red-50 text-red-700 border-red-300'} transition">
-                            <option value="Pending" ${r.paymentStatus==='Pending'?'selected':''}>❌ Pending</option><option value="Paid" ${r.paymentStatus==='Paid'?'selected':''}>✅ Paid</option>
-                        </select>
+                        <select id="payMode" class="w-1/2 border p-3.5 rounded-xl font-bold bg-gray-50 outline-none text-gray-700"><option>Cash</option><option>UPI</option><option>Debit Card</option><option>Bank Transfer</option></select>
+                        <select id="payStatus" class="w-1/2 border p-3.5 rounded-xl font-bold outline-none ${r.paymentStatus==='Paid'?'bg-green-50 text-green-700 border-green-300':'bg-red-50 text-red-700 border-red-300'} transition"><option value="Pending" ${r.paymentStatus==='Pending'?'selected':''}>❌ Pending</option><option value="Paid" ${r.paymentStatus==='Paid'?'selected':''}>✅ Paid</option></select>
                     </div>
                     
                     <button id="updateRoomBtn" onclick="saveRoomUpdates('${r.tenantName}')" class="w-full bg-green-500 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-green-600 transition mb-4 text-lg"><i class="fas fa-save mr-2"></i> Save Changes</button>
                     
                     <div class="flex gap-3 border-t pt-4">
-                        <button onclick="downloadInvoiceAndSend('whatsapp', '${r.tenantMobile}', '${r.tenantEmail}', '${r.tenantName}', '${r.roomNumber}', ${r.rentAmount}, ${r.waterBillFixed}, ${r.currentLightBill||0}, ${r.penalty||0}, '${r.tenantUniqueId}')" class="w-1/2 bg-gray-100 text-gray-800 font-bold py-3 rounded-xl shadow-sm hover:bg-green-50 hover:text-green-600 border border-gray-200 transition flex items-center justify-center text-xs tracking-wide uppercase"><i class="fab fa-whatsapp text-lg mr-2 text-green-500"></i> + PDF</button>
-                        <button onclick="downloadInvoiceAndSend('email', '${r.tenantMobile}', '${r.tenantEmail}', '${r.tenantName}', '${r.roomNumber}', ${r.rentAmount}, ${r.waterBillFixed}, ${r.currentLightBill||0}, ${r.penalty||0}, '${r.tenantUniqueId}')" class="w-1/2 bg-gray-100 text-gray-800 font-bold py-3 rounded-xl shadow-sm hover:bg-blue-50 hover:text-blue-600 border border-gray-200 transition flex items-center justify-center text-xs tracking-wide uppercase"><i class="fas fa-envelope text-lg mr-2 text-blue-500"></i> + PDF</button>
+                        <button onclick="downloadInvoiceAndSend('whatsapp', '${r.tenantMobile}', '${r.tenantEmail}', '${r.tenantName}', '${r.roomNumber}', ${r.rentAmount}, ${r.waterBillFixed}, document.getElementById('editLight').value, document.getElementById('editPen').value, '${r.tenantUniqueId}', document.getElementById('meterOld').value, document.getElementById('meterNew').value, document.getElementById('meterRate').value)" class="w-1/2 bg-gray-100 text-gray-800 font-bold py-3 rounded-xl shadow-sm hover:bg-green-50 hover:text-green-600 border border-gray-200 transition flex items-center justify-center text-xs tracking-wide uppercase"><i class="fab fa-whatsapp text-lg mr-2 text-green-500"></i> + PDF</button>
+                        <button onclick="downloadInvoiceAndSend('email', '${r.tenantMobile}', '${r.tenantEmail}', '${r.tenantName}', '${r.roomNumber}', ${r.rentAmount}, ${r.waterBillFixed}, document.getElementById('editLight').value, document.getElementById('editPen').value, '${r.tenantUniqueId}', document.getElementById('meterOld').value, document.getElementById('meterNew').value, document.getElementById('meterRate').value)" class="w-1/2 bg-gray-100 text-gray-800 font-bold py-3 rounded-xl shadow-sm hover:bg-blue-50 hover:text-blue-600 border border-gray-200 transition flex items-center justify-center text-xs tracking-wide uppercase"><i class="fas fa-envelope text-lg mr-2 text-blue-500"></i> + PDF</button>
                     </div>
                 `;
+                // Initial calculation
+                setTimeout(() => window.calculateMeter(), 100);
             }
             document.getElementById('roomManagerModal').classList.remove('hidden');
         };
         document.getElementById('closeRoomManagerModal').onclick = () => document.getElementById('roomManagerModal').classList.add('hidden');
 
-        // PDF & INVOICE SENDER
-        window.downloadInvoiceAndSend = (type, mob, email, name, rNo, rent, water, light, pen, tId) => {
+        // INVOICE (MODIFIED FOR METER DETAILS)
+        window.downloadInvoiceAndSend = (type, mob, email, name, rNo, rent, water, light, pen, tId, mOld, mNew, mRate) => {
             if (type === 'whatsapp' && (!mob || mob === 'undefined')) return showAlert('error', 'Missing Data', 'No WhatsApp number saved.');
             if (type === 'email' && (!email || email === 'undefined')) return showAlert('error', 'Missing Data', 'No Email ID saved.');
 
-            const tot = rent + water + light + pen;
+            const lAmt = Number(light)||0; const pAmt = Number(pen)||0;
+            const tot = Number(rent) + Number(water) + lAmt + pAmt;
+            const units = Number(mNew) - Number(mOld);
             const dateStr = new Date().toLocaleDateString('en-GB');
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
             
+            const { jsPDF } = window.jspdf; const doc = new jsPDF();
             doc.setFont("helvetica", "bold"); doc.setFontSize(24); doc.setTextColor(37, 99, 235);
             doc.text("RENT INVOICE", 105, 25, null, null, "center");
             
@@ -780,15 +615,14 @@
             doc.text(`Room Number: ${rNo}`, 20, 65); doc.text(`Asset ID: ${tId}`, 20, 75);
             
             doc.setDrawColor(200, 200, 200); doc.line(20, 85, 190, 85);
-            
             doc.setFont("helvetica", "bold"); doc.setTextColor(0, 0, 0);
             doc.text("Description", 20, 95); doc.text("Amount (INR)", 150, 95);
             doc.setFont("helvetica", "normal"); doc.line(20, 100, 190, 100);
             
             doc.text("Base Rent", 20, 110); doc.text(`Rs. ${rent}`, 150, 110);
             doc.text("Water Bill", 20, 120); doc.text(`Rs. ${water}`, 150, 120);
-            doc.text("Electricity Bill", 20, 130); doc.text(`Rs. ${light}`, 150, 130);
-            doc.text("Late Penalty", 20, 140); doc.text(`Rs. ${pen}`, 150, 140);
+            doc.text(`Electricity Bill (${units > 0 ? units : 0} Units @ Rs.${mRate})`, 20, 130); doc.text(`Rs. ${lAmt}`, 150, 130);
+            doc.text("Late Penalty", 20, 140); doc.text(`Rs. ${pAmt}`, 150, 140);
             doc.line(20, 148, 190, 148);
             
             doc.setFont("helvetica", "bold"); doc.setFontSize(16);
@@ -796,23 +630,15 @@
             
             doc.setFontSize(9); doc.setFont("helvetica", "italic"); doc.setTextColor(150, 150, 150);
             doc.text("Digitally generated by Rent Easy SaaS.", 105, 180, null, null, "center");
-            
             doc.save(`Invoice_Room_${rNo}_${name.replace(/\s+/g, '_')}.pdf`);
-            const textMsg = `Hello ${name},%0A%0AHere is your Rent Invoice for Room ${rNo} (Date: ${dateStr}):%0A- Rent: Rs.${rent}%0A- Water: Rs.${water}%0A- Light Bill: Rs.${light}%0A- Penalty: Rs.${pen}%0A%0ATotal Due: *Rs.${tot}*%0A%0AI have also downloaded the PDF Invoice and will attach it here.%0APlease pay at your earliest convenience.%0AThanks!`;
 
-            setTimeout(() => {
-                if (type === 'whatsapp') window.open(`https://wa.me/91${mob}?text=${textMsg}`, '_blank');
-                else if (type === 'email') window.open(`mailto:${email}?subject=Rent Invoice - Room ${rNo}&body=${textMsg}`, '_blank');
-            }, 800);
+            const textMsg = `Hello ${name},%0A%0AHere is your Rent Invoice for Room ${rNo} (Date: ${dateStr}):%0A- Rent: Rs.${rent}%0A- Water: Rs.${water}%0A- Light Bill (${units > 0 ? units : 0} Units): Rs.${lAmt}%0A- Penalty: Rs.${pAmt}%0A%0ATotal Due: *Rs.${tot}*%0A%0AI have also downloaded the PDF Invoice and will attach it here.%0APlease pay at your earliest convenience.%0AThanks!`;
+            setTimeout(() => { if (type === 'whatsapp') window.open(`https://wa.me/91${mob}?text=${textMsg}`, '_blank'); else if (type === 'email') window.open(`mailto:${email}?subject=Rent Invoice - Room ${rNo}&body=${textMsg}`, '_blank'); }, 800);
         };
 
         // BACKGROUND LOGIC
         async function logTransaction(houseName, rName, tName, amt, mode, type) {
-            if(amt > 0) {
-                await addDoc(collection(db, "transactions"), { 
-                    ownerId: currentUserId, houseName: houseName || "N/A", roomName: rName, tenantName: tName, amount: amt, mode: mode, type: type, status: 'Active', date: new Date().toISOString() 
-                });
-            }
+            if(amt > 0) { await addDoc(collection(db, "transactions"), { ownerId: currentUserId, houseName: houseName || "N/A", roomName: rName, tenantName: tName, amount: amt, mode: mode, type: type, status: 'Active', date: new Date().toISOString() }); }
         }
 
         window.assignTenant = async (rNo) => {
@@ -829,7 +655,8 @@
 
             await updateDoc(doc(db, "houses", hId, "rooms", rId), {
                 occupancyStatus: "Occupied", tenantName: name, tenantMobile: mob, tenantAlt: document.getElementById('tAlt').value, tenantEmail: document.getElementById('tEmail').value,
-                tenantUniqueId: newTenantId, deposit: dep, rentAmount: Number(document.getElementById('rBase').value), waterBillFixed: Number(document.getElementById('wBase').value), paymentStatus: "Pending"
+                tenantUniqueId: newTenantId, deposit: dep, rentAmount: Number(document.getElementById('rBase').value), waterBillFixed: Number(document.getElementById('wBase').value), 
+                paymentStatus: "Pending", meterOld: Number(document.getElementById('mStart').value)||0, meterNew: Number(document.getElementById('mStart').value)||0, meterUnitRate: Number(document.getElementById('mRate').value)||10
             });
             if(dep > 0) await logTransaction(hName, rNo, name, dep, depMode, "Deposit Received");
             
@@ -843,9 +670,10 @@
             const hName = window.houseDataCache[hId].name;
             const rBase = Number(document.getElementById('editRent').value), wBase = Number(document.getElementById('editWater').value);
             const light = Number(document.getElementById('editLight').value)||0, pen = Number(document.getElementById('editPen').value)||0;
+            const mOld = Number(document.getElementById('meterOld').value)||0, mNew = Number(document.getElementById('meterNew').value)||0, mRate = Number(document.getElementById('meterRate').value)||10;
             const status = document.getElementById('payStatus').value, mode = document.getElementById('payMode').value;
             
-            await updateDoc(doc(db, "houses", hId, "rooms", rId), { rentAmount: rBase, waterBillFixed: wBase, currentLightBill: light, penalty: pen, paymentStatus: status });
+            await updateDoc(doc(db, "houses", hId, "rooms", rId), { rentAmount: rBase, waterBillFixed: wBase, currentLightBill: light, penalty: pen, paymentStatus: status, meterOld: mOld, meterNew: mNew, meterUnitRate: mRate });
             if(status === "Paid") await logTransaction(hName, rNo, tName, (rBase + wBase + light + pen), mode, "Rent Received");
             
             await loadDashboardData(); hideLoader(); closeAllModals(); 
@@ -860,28 +688,32 @@
             const hId = document.getElementById('rmHouseId').value, rId = document.getElementById('rmRoomIdVal').value, rNo = document.getElementById('rmRoomName').innerText;
             const hName = window.houseDataCache[hId].name;
             
-            // Retain accessEmail if it exists, otherwise clear tenant data
-            await updateDoc(doc(db, "houses", hId, "rooms", rId), { occupancyStatus: "Vacant", tenantName: "", tenantMobile: "", tenantAlt: "", tenantEmail: "", tenantUniqueId: "Unassigned", deposit: 0, paymentStatus: "Pending", currentLightBill: 0, penalty: 0 });
+            await updateDoc(doc(db, "houses", hId, "rooms", rId), { occupancyStatus: "Vacant", tenantName: "", tenantMobile: "", tenantAlt: "", tenantEmail: "", tenantUniqueId: "Unassigned", deposit: 0, paymentStatus: "Pending", currentLightBill: 0, penalty: 0, meterOld: 0, meterNew: 0 });
             await logTransaction(hName, rNo, tName, Number(refund), "Cash", "Deposit Refunded");
             await loadDashboardData(); hideLoader(); closeAllModals(); 
             showAlert('success', 'Room Vacated', 'Details updated in real-time.');
         };
 
+        // NEW MONTH (METER SHIFT LOGIC)
         document.getElementById('startNewMonthBtn').onclick = async () => {
-            if(!confirm("Start New Month? This resets Light Bills to 0 and Status to 'Pending' for occupied rooms.")) return;
+            if(!confirm("Start New Month?\n\nThis will:\n1. Move last month's New Meter Reading to Old Reading.\n2. Reset Light Bill & Penalty to 0.\n3. Mark all as 'Pending'.")) return;
             showLoader();
             const hSnaps = await getDocs(query(collection(db, "houses"), where("ownerId", "==", currentUserId)));
             for (const hDoc of hSnaps.docs) {
                 const rSnaps = await getDocs(collection(db, "houses", hDoc.id, "rooms"));
                 for (const rDoc of rSnaps.docs) {
-                    if(rDoc.data().occupancyStatus === "Occupied") await updateDoc(doc(db, "houses", hDoc.id, "rooms", rDoc.id), { paymentStatus: "Pending", currentLightBill: 0, penalty: 0 });
+                    const rData = rDoc.data();
+                    if(rData.occupancyStatus === "Occupied") {
+                        // Shift New Reading to Old Reading for the new month
+                        await updateDoc(doc(db, "houses", hDoc.id, "rooms", rDoc.id), { paymentStatus: "Pending", currentLightBill: 0, penalty: 0, meterOld: rData.meterNew });
+                    }
                 }
             }
             await loadDashboardData(); hideLoader();
-            showAlert('success', 'New Month Started', 'Room details saved in real-time.');
+            showAlert('success', 'New Month Started', 'Meter readings shifted & bills resetted.');
         };
 
-        // ================= TRANSACTION HISTORY (WITH SOFT DELETE) =================
+        // TRANSACTION HISTORY (WITH SOFT DELETE)
         window.loadHistoryData = async () => {
             try {
                 const hList = document.getElementById('historyList'); 
@@ -896,85 +728,34 @@
                 hList.innerHTML = '';
                 transactions.forEach(t => {
                     const safeRoom = t.roomName ? String(t.roomName).replace('Room ','') : 'N/A';
-                    const dObj = new Date(t.date || 0); 
-                    const dateStr = dObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-                    const timeStr = dObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                    
-                    const isDeleted = t.status === 'Deleted';
-                    let c = (t.type && t.type.includes("Refund")) ? "text-red-500" : "text-green-500";
-                    if(isDeleted) c = "text-gray-400 line-through";
+                    const dObj = new Date(t.date || 0); const dateStr = dObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }); const timeStr = dObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    const isDeleted = t.status === 'Deleted'; let c = (t.type && t.type.includes("Refund")) ? "text-red-500" : "text-green-500"; if(isDeleted) c = "text-gray-400 line-through";
 
                     const delBtn = isDeleted ? '' : `<button onclick="event.stopPropagation(); openDeleteTxModal('${t.id}')" class="bg-red-50 text-red-500 h-8 w-8 rounded-full flex items-center justify-center hover:bg-red-100 hover:text-red-600 transition border border-red-100 shadow-sm ml-3"><i class="fas fa-trash-alt text-xs"></i></button>`;
                     const noteHtml = isDeleted ? `<div class="w-full mt-3 bg-red-50 border border-red-100 p-2 rounded-lg text-xs text-red-600 font-semibold flex items-start"><i class="fas fa-info-circle mt-0.5 mr-1.5"></i> <span>Void Note: ${t.deleteReason}</span></div>` : '';
 
                     const encData = encodeURIComponent(JSON.stringify({...t, roomName: safeRoom, tenantName: (t.tenantName||'Unknown'), houseName: (t.houseName||'-'), type: (t.type||'Transaction'), mode: (t.mode||'N/A'), dateStr, timeStr}));
 
-                    hList.innerHTML += `
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-3 hover:shadow-md transition cursor-pointer flex flex-col" onclick="${isDeleted ? '' : `openTransactionDetails('${encData}')`}">
-                        <div class="flex justify-between items-center w-full">
-                            <div>
-                                <p class="font-extrabold text-gray-800 text-lg ${isDeleted ? 'text-gray-400' : ''}">Room ${safeRoom}</p>
-                                <p class="text-xs text-gray-500 mt-1"><i class="far fa-calendar-alt mr-1"></i> ${dateStr}</p>
-                            </div>
-                            <div class="text-right flex items-center">
-                                <div class="flex flex-col items-end mr-1">
-                                    <p class="font-black text-xl ${c}">₹${t.amount || 0}</p>
-                                    ${isDeleted ? `<span class="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-0.5 rounded mt-1">DELETED</span>` : `<div class="flex items-center mt-1 text-blue-500 text-[10px] font-bold uppercase tracking-wide bg-blue-50 px-2 py-0.5 rounded">View <i class="fas fa-chevron-right ml-1"></i></div>`}
-                                </div>
-                                ${delBtn}
-                            </div>
-                        </div>
-                        ${noteHtml}
-                    </div>`;
+                    hList.innerHTML += `<div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-3 hover:shadow-md transition cursor-pointer flex flex-col" onclick="${isDeleted ? '' : `openTransactionDetails('${encData}')`}"><div class="flex justify-between items-center w-full"><div><p class="font-extrabold text-gray-800 text-lg ${isDeleted ? 'text-gray-400' : ''}">Room ${safeRoom}</p><p class="text-xs text-gray-500 mt-1"><i class="far fa-calendar-alt mr-1"></i> ${dateStr}</p></div><div class="text-right flex items-center"><div class="flex flex-col items-end mr-1"><p class="font-black text-xl ${c}">₹${t.amount || 0}</p>${isDeleted ? `<span class="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-0.5 rounded mt-1">DELETED</span>` : `<div class="flex items-center mt-1 text-blue-500 text-[10px] font-bold uppercase tracking-wide bg-blue-50 px-2 py-0.5 rounded">View <i class="fas fa-chevron-right ml-1"></i></div>`}</div>${delBtn}</div></div>${noteHtml}</div>`;
                 });
             } catch(e) { document.getElementById('historyList').innerHTML = `<div class="text-center text-red-500 mt-10"><p>Error: ${e.message}</p></div>`; }
         };
 
         window.openTransactionDetails = (encData) => {
-            const t = JSON.parse(decodeURIComponent(encData));
-            const body = document.getElementById('tdBody');
-            let c = (t.type && t.type.includes("Refund")) ? "text-red-500" : "text-green-500";
-            let bgType = (t.type && t.type.includes("Refund")) ? "bg-red-50 text-red-700 border-red-200" : "bg-green-50 text-green-700 border-green-200";
-            
-            body.innerHTML = `
-                <div class="text-center mb-6 mt-2">
-                    <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Amount ${t.type && t.type.includes("Refund") ? "Refunded" : "Received"}</p>
-                    <p class="text-5xl font-black ${c} tracking-tight">₹${t.amount}</p>
-                    <p class="text-[10px] mt-3 font-bold inline-block px-3 py-1 rounded-full border uppercase tracking-wider ${bgType}">${t.type}</p>
-                </div>
-                <div class="bg-gray-50 p-5 rounded-xl border border-gray-100 space-y-4 text-sm shadow-inner">
-                    <div class="flex justify-between items-center border-b border-gray-200 pb-3"><span class="text-gray-500 font-bold text-xs uppercase tracking-wide">Status</span><span class="font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded"><i class="fas fa-check-circle mr-1"></i> Success</span></div>
-                    <div class="flex justify-between items-center"><span class="text-gray-500 font-bold text-xs uppercase tracking-wide">Date & Time</span><span class="font-bold text-gray-800 text-right">${t.dateStr}<br><span class="text-xs text-gray-500">${t.timeStr}</span></span></div>
-                    <div class="flex justify-between items-center"><span class="text-gray-500 font-bold text-xs uppercase tracking-wide">House</span><span class="font-bold text-gray-800 text-right max-w-[150px] truncate">${t.houseName}</span></div>
-                    <div class="flex justify-between items-center"><span class="text-gray-500 font-bold text-xs uppercase tracking-wide">Room No.</span><span class="font-black text-blue-600 text-lg">${t.roomName}</span></div>
-                    <div class="flex justify-between items-center"><span class="text-gray-500 font-bold text-xs uppercase tracking-wide">Tenant</span><span class="font-bold text-gray-800">${t.tenantName}</span></div>
-                    <div class="flex justify-between items-center pt-3 border-t border-gray-200"><span class="text-gray-500 font-bold text-xs uppercase tracking-wide">Payment Mode</span><span class="font-black text-gray-800 uppercase bg-white border border-gray-200 px-2 py-1 rounded shadow-sm text-xs">${t.mode}</span></div>
-                </div>
-            `;
+            const t = JSON.parse(decodeURIComponent(encData)); const body = document.getElementById('tdBody');
+            let c = (t.type && t.type.includes("Refund")) ? "text-red-500" : "text-green-500"; let bgType = (t.type && t.type.includes("Refund")) ? "bg-red-50 text-red-700 border-red-200" : "bg-green-50 text-green-700 border-green-200";
+            body.innerHTML = `<div class="text-center mb-6 mt-2"><p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Amount ${t.type && t.type.includes("Refund") ? "Refunded" : "Received"}</p><p class="text-5xl font-black ${c} tracking-tight">₹${t.amount}</p><p class="text-[10px] mt-3 font-bold inline-block px-3 py-1 rounded-full border uppercase tracking-wider ${bgType}">${t.type}</p></div><div class="bg-gray-50 p-5 rounded-xl border border-gray-100 space-y-4 text-sm shadow-inner"><div class="flex justify-between items-center border-b border-gray-200 pb-3"><span class="text-gray-500 font-bold text-xs uppercase tracking-wide">Status</span><span class="font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded"><i class="fas fa-check-circle mr-1"></i> Success</span></div><div class="flex justify-between items-center"><span class="text-gray-500 font-bold text-xs uppercase tracking-wide">Date & Time</span><span class="font-bold text-gray-800 text-right">${t.dateStr}<br><span class="text-xs text-gray-500">${t.timeStr}</span></span></div><div class="flex justify-between items-center"><span class="text-gray-500 font-bold text-xs uppercase tracking-wide">House</span><span class="font-bold text-gray-800 text-right max-w-[150px] truncate">${t.houseName}</span></div><div class="flex justify-between items-center"><span class="text-gray-500 font-bold text-xs uppercase tracking-wide">Room No.</span><span class="font-black text-blue-600 text-lg">${t.roomName}</span></div><div class="flex justify-between items-center"><span class="text-gray-500 font-bold text-xs uppercase tracking-wide">Tenant</span><span class="font-bold text-gray-800">${t.tenantName}</span></div><div class="flex justify-between items-center pt-3 border-t border-gray-200"><span class="text-gray-500 font-bold text-xs uppercase tracking-wide">Payment Mode</span><span class="font-black text-gray-800 uppercase bg-white border border-gray-200 px-2 py-1 rounded shadow-sm text-xs">${t.mode}</span></div></div>`;
             document.getElementById('transactionDetailsModal').classList.remove('hidden');
         };
 
-        // DELETE TRANSACTION REASON LOGIC
-        window.openDeleteTxModal = (txId) => {
-            document.getElementById('delTxId').value = txId;
-            document.getElementById('delTxReason').value = '';
-            document.getElementById('deleteTransactionModal').classList.remove('hidden');
-        };
-
+        window.openDeleteTxModal = (txId) => { document.getElementById('delTxId').value = txId; document.getElementById('delTxReason').value = ''; document.getElementById('deleteTransactionModal').classList.remove('hidden'); };
         document.getElementById('confirmDeleteTxBtn').onclick = async () => {
-            const txId = document.getElementById('delTxId').value;
-            const reason = document.getElementById('delTxReason').value;
+            const txId = document.getElementById('delTxId').value; const reason = document.getElementById('delTxReason').value;
             if(!reason) return showAlert('error', 'Required', 'Please write a reason before deleting.');
-
             showLoader();
             try {
-                await updateDoc(doc(db, "transactions", txId), {
-                    status: 'Deleted', deleteReason: reason, deletedAt: new Date().toISOString()
-                });
-                closeAllModals();
-                await window.loadHistoryData();
-                hideLoader();
-                showAlert('success', 'Entry Voided', 'The transaction has been marked as deleted.');
+                await updateDoc(doc(db, "transactions", txId), { status: 'Deleted', deleteReason: reason, deletedAt: new Date().toISOString() });
+                closeAllModals(); await window.loadHistoryData(); hideLoader(); showAlert('success', 'Entry Voided', 'The transaction has been marked as deleted.');
             } catch(e) { hideLoader(); showAlert('error', 'Error', e.message); }
         };
     </script>
