@@ -1,1 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rent Easy - Tenant Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f4f7fb; font-family: 'Segoe UI', system-ui, sans-serif; }
+        .hidden { display: none !important; }
+        .modal-overlay { background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 50; transition: all 0.3s ease-in-out; }
+        .modal-content { animation: modalPop 0.3s ease-out; }
+        @keyframes modalPop { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+    </style>
+</head>
+<body class="text-gray-800">
 
+    <!-- GLOBAL LOADER -->
+    <div id="globalLoader" class="fixed inset-0 modal-overlay hidden flex flex-col justify-center items-center px-4" style="z-index: 99999;">
+        <i class="fas fa-circle-notch fa-spin text-6xl text-blue-500 mb-4 drop-shadow-lg"></i>
+        <p class="text-white font-bold tracking-widest uppercase text-sm animate-pulse">Loading...</p>
+    </div>
+
+    <!-- HEADER -->
+    <header class="bg-white text-blue-600 p-4 sticky top-0 z-40 shadow-sm flex justify-between items-center border-b border-gray-200">
+        <h1 class="text-xl font-black tracking-wide flex items-center cursor-pointer" onclick="showHome()"><i class="fas fa-house-user mr-2"></i> Rent Easy</h1>
+        <div>
+            <button id="navLoginBtn" onclick="showAuth()" class="bg-blue-600 text-white px-5 py-2 rounded-xl text-sm font-bold shadow hover:bg-blue-700 transition">Tenant Login</button>
+            <button id="navLogoutBtn" onclick="logoutUser()" class="hidden bg-red-50 text-red-600 px-4 py-2 rounded-xl text-sm font-bold shadow-sm border border-red-100 hover:bg-red-100 transition"><i class="fas fa-power-off mr-1"></i> Logout</button>
+        </div>
+    </header>
+
+    <!-- ================= 1. HOME PAGE (SEARCH VACANT ROOMS) ================= -->
+    <div id="homeView" class="min-h-[calc(100vh-70px)] flex flex-col pb-10">
+        <!-- Hero Search Section -->
+        <div class="bg-blue-600 text-white pt-10 pb-16 px-4 rounded-b-[40px] shadow-lg">
+            <div class="max-w-xl mx-auto text-center">
+                <h2 class="text-3xl sm:text-4xl font-black mb-3">Find Your Perfect Room</h2>
+                <p class="text-blue-100 text-sm mb-8 font-medium">Search by Area Name, City, or Pincode</p>
+                <div class="relative bg-white rounded-2xl shadow-2xl flex items-center p-2">
+                    <i class="fas fa-search text-gray-400 text-xl ml-3"></i>
+                    <input type="text" id="searchInput" placeholder="e.g. Surat, Gujarat, 395007" class="w-full text-gray-800 p-3 outline-none font-medium bg-transparent">
+                    <button onclick="searchRooms()" class="bg-gray-900 text-white px-6 py-3 rounded-xl font-bold hover:bg-black transition">Search</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Search Results -->
+        <div class="max-w-2xl mx-auto w-full px-4 -mt-8 relative z-10">
+            <div id="searchResults" class="space-y-4">
+                <div class="glass-card p-6 rounded-2xl shadow-sm border border-gray-100 text-center text-gray-500">
+                    <i class="fas fa-map-marked-alt text-5xl mb-3 text-blue-200"></i>
+                    <p class="font-bold">Search above to view available rental rooms.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= 2. AUTHENTICATION VIEW ================= -->
+    <div id="authView" class="hidden min-h-[calc(100vh-70px)] flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md border border-gray-100">
+            <div id="loginForm">
+                <h2 class="text-3xl font-black text-gray-800 mb-2">Welcome Back</h2>
+                <p class="text-sm text-gray-500 mb-6 font-medium">Login to view your room details & bills.</p>
+                <input type="email" id="loginEmail" placeholder="Email ID" class="w-full bg-gray-50 border border-gray-200 p-4 rounded-xl mb-4 outline-none focus:ring-2 focus:ring-blue-400 transition" required>
+                <input type="password" id="loginPassword" placeholder="Password" class="w-full bg-gray-50 border border-gray-200 p-4 rounded-xl mb-6 outline-none focus:ring-2 focus:ring-blue-400 transition" required>
+                <button id="loginBtn" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition shadow-lg text-lg flex justify-center items-center">Login to Portal</button>
+                <p class="text-center text-sm text-gray-500 mt-6 cursor-pointer hover:text-blue-600 font-semibold" onclick="toggleAuth('register')">New tenant? <span class="text-blue-600 font-bold">Create ID</span></p>
+            </div>
+
+            <div id="registerForm" class="hidden">
+                <h2 class="text-3xl font-black text-gray-800 mb-2">Create Tenant ID</h2>
+                <p class="text-sm text-gray-500 mb-6 font-medium">Register your profile to connect with room owners.</p>
+                <input type="text" id="regName" placeholder="Full Name (Mandatory)" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400" required>
+                <input type="email" id="regEmail" placeholder="Email ID (Mandatory)" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400" required>
+                <input type="tel" id="regMobile" placeholder="Mobile Number (Mandatory)" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400" required>
+                <input type="tel" id="regAltMobile" placeholder="Alternate Mobile (Optional)" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400">
+                <input type="password" id="regPassword" placeholder="Password (Mandatory)" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-6 outline-none focus:ring-2 focus:ring-blue-400" required>
+                <button id="registerBtn" class="w-full bg-gray-900 text-white font-bold py-4 rounded-xl hover:bg-black transition shadow-lg text-lg">Register Account</button>
+                <p class="text-center text-sm text-gray-500 mt-6 cursor-pointer hover:text-blue-600 font-semibold" onclick="toggleAuth('login')">Already have an ID? <span class="text-blue-600 font-bold">Login</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= 3. LINK ROOM VIEW (ENTER UNIT ID) ================= -->
+    <div id="linkRoomView" class="hidden min-h-[calc(100vh-70px)] flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md border-t-4 border-blue-500 text-center">
+            <i class="fas fa-link text-5xl text-blue-500 mb-4"></i>
+            <h2 class="text-2xl font-black text-gray-800 mb-2">Connect Your Room</h2>
+            <p class="text-sm text-gray-500 mb-6 font-medium">Please enter the <strong class="text-gray-800">Room Unit ID</strong> provided by your room owner to access your portal. (e.g., GH-GANE-123)</p>
+            <input type="text" id="roomUnitIdInput" placeholder="Enter Room Unit ID" class="w-full text-center font-mono font-bold text-lg bg-gray-50 border border-gray-200 p-4 rounded-xl mb-6 outline-none focus:ring-2 focus:ring-blue-400 tracking-widest uppercase">
+            <button onclick="linkRoom()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition shadow-lg text-lg flex justify-center items-center"><i class="fas fa-check-circle mr-2"></i> Verify & Connect</button>
+            <div id="linkErrorMsg" class="text-red-500 text-xs font-bold mt-4 hidden bg-red-50 p-2 rounded-lg border border-red-100">Access Denied! Make sure your owner has added your Email ID and the Room ID is correct.</div>
+        </div>
+    </div>
+
+    <!-- ================= 4. TENANT DASHBOARD (YOUR ROOM) ================= -->
+    <div id="dashboardView" class="hidden min-h-[calc(100vh-70px)] p-4 pb-10">
+        <div class="max-w-md mx-auto w-full space-y-5">
+            
+            <div class="bg-gradient-to-br from-gray-900 to-black text-white p-6 rounded-3xl shadow-xl relative overflow-hidden">
+                <div class="absolute -right-4 -top-4 opacity-10"><i class="fas fa-building text-9xl"></i></div>
+                <div class="relative z-10 flex justify-between items-start">
+                    <div>
+                        <p class="text-[10px] text-blue-300 font-bold uppercase tracking-widest mb-1">My Active Room</p>
+                        <h2 class="text-3xl font-black mb-1" id="dashRoomNo">Room --</h2>
+                        <p class="text-sm font-medium text-gray-400 flex items-center"><i class="fas fa-map-marker-alt text-red-400 mr-2"></i> <span id="dashHouseName" class="truncate max-w-[200px]">Loading...</span></p>
+                    </div>
+                    <span id="dashStatusBadge" class="bg-white text-gray-900 text-[10px] font-black px-3 py-1.5 rounded-lg uppercase tracking-wider shadow-sm">ACTIVE</span>
+                </div>
+            </div>
+
+            <!-- Bill Overview -->
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-5">
+                <div class="flex justify-between items-center mb-4 border-b pb-3">
+                    <h3 class="font-extrabold text-gray-800"><i class="fas fa-file-invoice-dollar text-blue-500 mr-2"></i> Current Month Bill</h3>
+                    <span id="dashPaymentStatus" class="text-xs font-bold px-2 py-1 rounded">--</span>
+                </div>
+                
+                <div class="space-y-3 text-sm font-medium text-gray-600">
+                    <div class="flex justify-between"><span class="text-gray-500">Base Rent</span><span class="font-bold text-gray-800" id="dashRent">₹0</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">Water Bill</span><span class="font-bold text-gray-800" id="dashWater">₹0</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500 flex items-center"><i class="fas fa-bolt text-yellow-500 mr-1.5"></i> Electricity</span><span class="font-bold text-gray-800" id="dashLight">₹0</span></div>
+                    
+                    <div id="meterDetails" class="bg-blue-50 p-2.5 rounded-xl border border-blue-100 text-xs flex justify-between text-blue-800 mt-1 mb-2 hidden">
+                        <span>Readings: <span id="dashMeterPrev" class="font-bold">0</span> to <span id="dashMeterCurr" class="font-bold">0</span></span>
+                        <span>Units: <span id="dashMeterUnits" class="font-bold">0</span></span>
+                    </div>
+
+                    <div class="flex justify-between text-red-500"><span class="flex items-center"><i class="fas fa-exclamation-circle mr-1.5"></i> Late Penalty</span><span class="font-bold" id="dashPenalty">₹0</span></div>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
+                    <span class="font-black text-gray-400 uppercase tracking-widest text-xs">Total Due</span>
+                    <span class="text-3xl font-black text-blue-600" id="dashTotalDue">₹0</span>
+                </div>
+            </div>
+
+            <!-- Warning Card -->
+            <div class="bg-yellow-50 border border-yellow-200 p-4 rounded-2xl flex items-start shadow-sm">
+                <i class="fas fa-info-circle text-yellow-500 text-xl mr-3 mt-0.5"></i>
+                <div>
+                    <h4 class="text-sm font-bold text-yellow-800">Important Note</h4>
+                    <p class="text-xs text-yellow-700 mt-1 font-medium">To pay your rent, please contact your room owner directly. Once paid, the owner will update your status to "Paid".</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Firebase Config (Owner app wali same config)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBkvhFwXcd-UOatoJDXqmXO7m7W85Ir1FI",
+            authDomain: "rent-easy-web.firebaseapp.com",
+            projectId: "rent-easy-web",
+            storageBucket: "rent-easy-web.firebasestorage.app",
+            messagingSenderId: "441449420109",
+            appId: "1:441449420109:web:81c8c5293c0e7fe8795304"
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let activeRoomUnsubscribe = null;
+
+        // UI HELPERS
+        const showLoader = () => document.getElementById('globalLoader').classList.remove('hidden');
+        const hideLoader = () => document.getElementById('globalLoader').classList.add('hidden');
+        
+        window.showHome = () => { hideAllViews(); document.getElementById('homeView').classList.remove('hidden'); };
+        window.showAuth = () => { hideAllViews(); document.getElementById('authView').classList.remove('hidden'); };
+        window.toggleAuth = (type) => {
+            if(type === 'login') { document.getElementById('registerForm').classList.add('hidden'); document.getElementById('loginForm').classList.remove('hidden'); }
+            else { document.getElementById('loginForm').classList.add('hidden'); document.getElementById('registerForm').classList.remove('hidden'); }
+        };
+        
+        function hideAllViews() {
+            ['homeView', 'authView', 'linkRoomView', 'dashboardView'].forEach(id => document.getElementById(id).classList.add('hidden'));
+        }
+
+        // ================= SEARCH VACANT ROOMS =================
+        window.searchRooms = async () => {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const resultsContainer = document.getElementById('searchResults');
+            if(!query) { resultsContainer.innerHTML = `<p class="text-center text-red-500 font-bold">Please enter a city, area, or pincode.</p>`; return; }
+            
+            showLoader();
+            try {
+                resultsContainer.innerHTML = '';
+                const hSnaps = await getDocs(collection(db, "houses"));
+                let foundAny = false;
+
+                for(const hDoc of hSnaps.docs) {
+                    const houseData = hDoc.data();
+                    const addr = houseData.address ? houseData.address.toLowerCase() : "";
+                    
+                    // Match address with search query
+                    if(addr.includes(query)) {
+                        // Get vacant rooms for this house
+                        const rSnaps = await getDocs(collection(db, `houses/${hDoc.id}/rooms`));
+                        let vacantRooms = [];
+                        rSnaps.forEach(r => { if(r.data().occupancyStatus === "Vacant") vacantRooms.push(r.data()); });
+
+                        if(vacantRooms.length > 0) {
+                            foundAny = true;
+                            resultsContainer.innerHTML += `
+                            <div class="glass-card p-5 rounded-2xl shadow-sm border-l-4 border-l-green-500 mb-4">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div>
+                                        <h3 class="font-extrabold text-lg text-gray-800">${houseData.houseName}</h3>
+                                        <p class="text-xs text-gray-500 mt-1"><i class="fas fa-map-marker-alt text-red-400 mr-1"></i> ${houseData.address}</p>
+                                    </div>
+                                    <span class="bg-green-100 text-green-700 text-[10px] font-black px-2 py-1 rounded uppercase">${vacantRooms.length} Available</span>
+                                </div>
+                                <div class="flex gap-2 overflow-x-auto pb-2">
+                                    ${vacantRooms.map(vr => `
+                                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 min-w-[120px] flex-shrink-0 text-center">
+                                            <p class="font-black text-blue-800 mb-1">Room ${vr.roomNumber}</p>
+                                            <p class="text-[10px] font-bold text-gray-500 uppercase">Rent: ₹${vr.rentAmount}</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>`;
+                        }
+                    }
+                }
+                
+                if(!foundAny) {
+                    resultsContainer.innerHTML = `<div class="glass-card p-6 rounded-2xl text-center text-gray-500 border border-gray-200"><i class="fas fa-search-minus text-4xl mb-2 text-gray-300"></i><p class="font-bold">No vacant rooms found in "${query}".</p></div>`;
+                }
+            } catch(e) { console.error(e); resultsContainer.innerHTML = `<p class="text-center text-red-500">Error fetching data.</p>`; }
+            hideLoader();
+        };
+
+          <!-- ================= 2. AUTHENTICATION VIEW ================= -->
+    <div id="authView" class="hidden min-h-[calc(100vh-70px)] flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md border border-gray-100">
+            <div id="loginForm">
+                <h2 class="text-3xl font-black text-gray-800 mb-2">Welcome Back</h2>
+                <p class="text-sm text-gray-500 mb-6 font-medium">Login to view your room details & bills.</p>
+                <input type="email" id="loginEmail" placeholder="Email ID" class="w-full bg-gray-50 border border-gray-200 p-4 rounded-xl mb-4 outline-none focus:ring-2 focus:ring-blue-400 transition" required>
+                <input type="password" id="loginPassword" placeholder="Password" class="w-full bg-gray-50 border border-gray-200 p-4 rounded-xl mb-6 outline-none focus:ring-2 focus:ring-blue-400 transition" required>
+                <button id="loginBtn" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition shadow-lg text-lg flex justify-center items-center">Login to Portal</button>
+                <p class="text-center text-sm text-gray-500 mt-6 cursor-pointer hover:text-blue-600 font-semibold" onclick="toggleAuth('register')">New tenant? <span class="text-blue-600 font-bold">Create ID</span></p>
+            </div>
+
+            <div id="registerForm" class="hidden">
+                <h2 class="text-3xl font-black text-gray-800 mb-2">Create Tenant ID</h2>
+                <p class="text-sm text-gray-500 mb-6 font-medium">Register your profile to connect with room owners.</p>
+                <input type="text" id="regName" placeholder="Full Name (Mandatory)" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400" required>
+                <input type="email" id="regEmail" placeholder="Email ID (Mandatory)" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400" required>
+                <input type="tel" id="regMobile" placeholder="Mobile Number (Mandatory)" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400" required>
+                <input type="tel" id="regAltMobile" placeholder="Alternate Mobile (Optional)" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400">
+                <input type="password" id="regPassword" placeholder="Password (Mandatory)" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-6 outline-none focus:ring-2 focus:ring-blue-400" required>
+                <button id="registerBtn" class="w-full bg-gray-900 text-white font-bold py-4 rounded-xl hover:bg-black transition shadow-lg text-lg">Register Account</button>
+                <p class="text-center text-sm text-gray-500 mt-6 cursor-pointer hover:text-blue-600 font-semibold" onclick="toggleAuth('login')">Already have an ID? <span class="text-blue-600 font-bold">Login</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= 3. LINK ROOM VIEW (ENTER UNIT ID) ================= -->
+    <div id="linkRoomView" class="hidden min-h-[calc(100vh-70px)] flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md border-t-4 border-blue-500 text-center">
+            <i class="fas fa-link text-5xl text-blue-500 mb-4"></i>
+            <h2 class="text-2xl font-black text-gray-800 mb-2">Connect Your Room</h2>
+            <p class="text-sm text-gray-500 mb-6 font-medium">Please enter the <strong class="text-gray-800">Room Unit ID</strong> provided by your room owner to access your portal. (e.g., GH-GANE-123)</p>
+            <input type="text" id="roomUnitIdInput" placeholder="Enter Room Unit ID" class="w-full text-center font-mono font-bold text-lg bg-gray-50 border border-gray-200 p-4 rounded-xl mb-6 outline-none focus:ring-2 focus:ring-blue-400 tracking-widest uppercase">
+            <button onclick="linkRoom()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition shadow-lg text-lg flex justify-center items-center"><i class="fas fa-check-circle mr-2"></i> Verify & Connect</button>
+            <div id="linkErrorMsg" class="text-red-500 text-xs font-bold mt-4 hidden bg-red-50 p-2 rounded-lg border border-red-100">Access Denied! Make sure your owner has added your Email ID and the Room ID is correct.</div>
+        </div>
+    </div>
+          <!-- ================= 4. TENANT DASHBOARD (YOUR ROOM) ================= -->
+    <div id="dashboardView" class="hidden min-h-[calc(100vh-70px)] p-4 pb-10">
+        <div class="max-w-md mx-auto w-full space-y-5">
+            
+            <div class="bg-gradient-to-br from-gray-900 to-black text-white p-6 rounded-3xl shadow-xl relative overflow-hidden">
+                <div class="absolute -right-4 -top-4 opacity-10"><i class="fas fa-building text-9xl"></i></div>
+                <div class="relative z-10 flex justify-between items-start">
+                    <div>
+                        <p class="text-[10px] text-blue-300 font-bold uppercase tracking-widest mb-1">My Active Room</p>
+                        <h2 class="text-3xl font-black mb-1" id="dashRoomNo">Room --</h2>
+                        <p class="text-sm font-medium text-gray-400 flex items-center"><i class="fas fa-map-marker-alt text-red-400 mr-2"></i> <span id="dashHouseName" class="truncate max-w-[200px]">Loading...</span></p>
+                    </div>
+                    <span id="dashStatusBadge" class="bg-white text-gray-900 text-[10px] font-black px-3 py-1.5 rounded-lg uppercase tracking-wider shadow-sm">ACTIVE</span>
+                </div>
+            </div>
+
+            <!-- Bill Overview -->
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-5">
+                <div class="flex justify-between items-center mb-4 border-b pb-3">
+                    <h3 class="font-extrabold text-gray-800"><i class="fas fa-file-invoice-dollar text-blue-500 mr-2"></i> Current Month Bill</h3>
+                    <span id="dashPaymentStatus" class="text-xs font-bold px-2 py-1 rounded">--</span>
+                </div>
+                
+                <div class="space-y-3 text-sm font-medium text-gray-600">
+                    <div class="flex justify-between"><span class="text-gray-500">Base Rent</span><span class="font-bold text-gray-800" id="dashRent">₹0</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">Water Bill</span><span class="font-bold text-gray-800" id="dashWater">₹0</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500 flex items-center"><i class="fas fa-bolt text-yellow-500 mr-1.5"></i> Electricity</span><span class="font-bold text-gray-800" id="dashLight">₹0</span></div>
+                    
+                    <div id="meterDetails" class="bg-blue-50 p-2.5 rounded-xl border border-blue-100 text-xs flex justify-between text-blue-800 mt-1 mb-2 hidden">
+                        <span>Readings: <span id="dashMeterPrev" class="font-bold">0</span> to <span id="dashMeterCurr" class="font-bold">0</span></span>
+                        <span>Units: <span id="dashMeterUnits" class="font-bold">0</span></span>
+                    </div>
+
+                    <div class="flex justify-between text-red-500"><span class="flex items-center"><i class="fas fa-exclamation-circle mr-1.5"></i> Late Penalty</span><span class="font-bold" id="dashPenalty">₹0</span></div>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
+                    <span class="font-black text-gray-400 uppercase tracking-widest text-xs">Total Due</span>
+                    <span class="text-3xl font-black text-blue-600" id="dashTotalDue">₹0</span>
+                </div>
+            </div>
+             <!-- Warning Card -->
+            <div class="bg-yellow-50 border border-yellow-200 p-4 rounded-2xl flex items-start shadow-sm">
+                <i class="fas fa-info-circle text-yellow-500 text-xl mr-3 mt-0.5"></i>
+                <div>
+                    <h4 class="text-sm font-bold text-yellow-800">Important Note</h4>
+                    <p class="text-xs text-yellow-700 mt-1 font-medium">To pay your rent, please contact your room owner directly. Once paid, the owner will update your status to "Paid".</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Firebase Config (Owner app wali same config)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBkvhFwXcd-UOatoJDXqmXO7m7W85Ir1FI",
+            authDomain: "rent-easy-web.firebaseapp.com",
+            projectId: "rent-easy-web",
+            storageBucket: "rent-easy-web.firebasestorage.app",
+            messagingSenderId: "441449420109",
+            appId: "1:441449420109:web:81c8c5293c0e7fe8795304"
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let activeRoomUnsubscribe = null;
+
+        // UI HELPERS
+        const showLoader = () => document.getElementById('globalLoader').classList.remove('hidden');
+        const hideLoader = () => document.getElementById('globalLoader').classList.add('hidden');
+          window.showHome = () => { hideAllViews(); document.getElementById('homeView').classList.remove('hidden'); };
+        window.showAuth = () => { hideAllViews(); document.getElementById('authView').classList.remove('hidden'); };
+        window.toggleAuth = (type) => {
+            if(type === 'login') { document.getElementById('registerForm').classList.add('hidden'); document.getElementById('loginForm').classList.remove('hidden'); }
+            else { document.getElementById('loginForm').classList.add('hidden'); document.getElementById('registerForm').classList.remove('hidden'); }
+        };
+        
+        function hideAllViews() {
+            ['homeView', 'authView', 'linkRoomView', 'dashboardView'].forEach(id => document.getElementById(id).classList.add('hidden'));
+        }
+
+        // ================= SEARCH VACANT ROOMS =================
+        window.searchRooms = async () => {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const resultsContainer = document.getElementById('searchResults');
+            if(!query) { resultsContainer.innerHTML = `<p class="text-center text-red-500 font-bold">Please enter a city, area, or pincode.</p>`; return; }
+            
+            showLoader();
+            try {
+                resultsContainer.innerHTML = '';
+                const hSnaps = await getDocs(collection(db, "houses"));
+                let foundAny = false;
+
+                for(const hDoc of hSnaps.docs) {
+                    const houseData = hDoc.data();
+                    const addr = houseData.address ? houseData.address.toLowerCase() : "";
+                    
+                    // Match address with search query
+                    if(addr.includes(query)) {
+                        // Get vacant rooms for this house
+                        const rSnaps = await getDocs(collection(db, `houses/${hDoc.id}/rooms`));
+                        let vacantRooms = [];
+                        rSnaps.forEach(r => { if(r.data().occupancyStatus === "Vacant") vacantRooms.push(r.data()); });
+
+                        if(vacantRooms.length > 0) {
+                            foundAny = true;
+                            resultsContainer.innerHTML += `
+                            <div class="glass-card p-5 rounded-2xl shadow-sm border-l-4 border-l-green-500 mb-4">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div>
+                                        <h3 class="font-extrabold text-lg text-gray-800">${houseData.houseName}</h3>
+                                        <p class="text-xs text-gray-500 mt-1"><i class="fas fa-map-marker-alt text-red-400 mr-1"></i> ${houseData.address}</p>
+                                    </div>
+                                    <span class="bg-green-100 text-green-700 text-[10px] font-black px-2 py-1 rounded uppercase">${vacantRooms.length} Available</span>
+                                </div>
+                                <div class="flex gap-2 overflow-x-auto pb-2">
+                                    ${vacantRooms.map(vr => `
+                                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 min-w-[120px] flex-shrink-0 text-center">
+                                            <p class="font-black text-blue-800 mb-1">Room ${vr.roomNumber}</p>
+                                            <p class="text-[10px] font-bold text-gray-500 uppercase">Rent: ₹${vr.rentAmount}</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>`;
+                        }
+                    }
+                }
+                
+                if(!foundAny) {
+                    resultsContainer.innerHTML = `<div class="glass-card p-6 rounded-2xl text-center text-gray-500 border border-gray-200"><i class="fas fa-search-minus text-4xl mb-2 text-gray-300"></i><p class="font-bold">No vacant rooms found in "${query}".</p></div>`;
+                }
+            } catch(e) { console.error(e); resultsContainer.innerHTML = `<p class="text-center text-red-500">Error fetching data.</p>`; }
+            hideLoader();
+        };
+              // ================= AUTHENTICATION =================
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('navLoginBtn').classList.add('hidden');
+                document.getElementById('navLogoutBtn').classList.remove('hidden');
+                checkTenantState();
+            } else {
+                currentUser = null;
+                if(activeRoomUnsubscribe) { activeRoomUnsubscribe(); activeRoomUnsubscribe = null; }
+                document.getElementById('navLoginBtn').classList.remove('hidden');
+                document.getElementById('navLogoutBtn').classList.add('hidden');
+                showHome();
+            }
+        });
+
+        document.getElementById('registerBtn').onclick = async () => {
+            const n = document.getElementById('regName').value, m = document.getElementById('regMobile').value, 
+                  am = document.getElementById('regAltMobile').value, e = document.getElementById('regEmail').value, 
+                  p = document.getElementById('regPassword').value;
+            
+            if(!n || !m || !e || p.length < 6) return alert("Fill all mandatory fields correctly. Password min 6 chars.");
+            
+            showLoader();
+            try {
+                const cred = await createUserWithEmailAndPassword(auth, e, p);
+                // Save tenant profile in separate 'tenants' collection
+                await setDoc(doc(db, "tenants", cred.user.uid), { 
+                    fullName: n, mobile: m, altMobile: am, email: e, linkedRoomPath: null 
+                });
+                // Check state will handle routing automatically
+            } catch(er) { alert(er.message); }
+            hideLoader();
+        };
+
+        document.getElementById('loginBtn').onclick = async () => {
+            showLoader();
+            try { await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPassword').value); } 
+            catch(e) { alert('Login Failed: Invalid Email or Password'); }
+            hideLoader();
+        };
+
+        window.logoutUser = () => signOut(auth);
+              // ================= AUTHENTICATION =================
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('navLoginBtn').classList.add('hidden');
+                document.getElementById('navLogoutBtn').classList.remove('hidden');
+                checkTenantState();
+            } else {
+                currentUser = null;
+                if(activeRoomUnsubscribe) { activeRoomUnsubscribe(); activeRoomUnsubscribe = null; }
+                document.getElementById('navLoginBtn').classList.remove('hidden');
+                document.getElementById('navLogoutBtn').classList.add('hidden');
+                showHome();
+            }
+        });
+
+        document.getElementById('registerBtn').onclick = async () => {
+            const n = document.getElementById('regName').value, m = document.getElementById('regMobile').value, 
+                  am = document.getElementById('regAltMobile').value, e = document.getElementById('regEmail').value, 
+                  p = document.getElementById('regPassword').value;
+            
+            if(!n || !m || !e || p.length < 6) return alert("Fill all mandatory fields correctly. Password min 6 chars.");
+            
+            showLoader();
+            try {
+                const cred = await createUserWithEmailAndPassword(auth, e, p);
+                // Save tenant profile in separate 'tenants' collection
+                await setDoc(doc(db, "tenants", cred.user.uid), { 
+                    fullName: n, mobile: m, altMobile: am, email: e, linkedRoomPath: null 
+                });
+                // Check state will handle routing automatically
+            } catch(er) { alert(er.message); }
+            hideLoader();
+        };
+
+        document.getElementById('loginBtn').onclick = async () => {
+            showLoader();
+            try { await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPassword').value); } 
+            catch(e) { alert('Login Failed: Invalid Email or Password'); }
+            hideLoader();
+        };
+
+        window.logoutUser = () => signOut(auth);
+              // ================= ROUTING & LINKING LOGIC =================
+        async function checkTenantState() {
+            showLoader();
+            try {
+                const docSnap = await getDoc(doc(db, "tenants", currentUser.uid));
+                if(docSnap.exists()) {
+                    const tData = docSnap.data();
+                    if(tData.linkedRoomPath) {
+                        // Has linked room, load dashboard and subscribe
+                        loadDashboard(tData.linkedRoomPath);
+                    } else {
+                        // Needs to link room
+                        hideAllViews(); document.getElementById('linkRoomView').classList.remove('hidden');
+                        document.getElementById('roomUnitIdInput').value = '';
+                        document.getElementById('linkErrorMsg').classList.add('hidden');
+                    }
+                } else {
+                    // Fallback for missing tenant doc
+                    await setDoc(doc(db, "tenants", currentUser.uid), { email: currentUser.email, linkedRoomPath: null });
+                    hideAllViews(); document.getElementById('linkRoomView').classList.remove('hidden');
+                }
+            } catch(e) { console.error(e); }
+            hideLoader();
+        }
+
+        window.linkRoom = async () => {
+            const unitId = document.getElementById('roomUnitIdInput').value.trim();
+            if(!unitId) return alert('Please enter the Room Unit ID.');
+            
+            showLoader();
+            const errorMsg = document.getElementById('linkErrorMsg');
+            errorMsg.classList.add('hidden');
+            let foundPath = null;
+
+            try {
+                // Brute force search (no index required) - suitable for SaaS copying without console setup.
+                const hSnaps = await getDocs(collection(db, "houses"));
+                for(const hDoc of hSnaps.docs) {
+                    const rSnaps = await getDocs(collection(db, `houses/${hDoc.id}/rooms`));
+                    for(const rDoc of rSnaps.docs) {
+                        const r = rDoc.data();
+                        // MUST MATCH BOTH Unit ID AND Email ID explicitly set by owner[span_3](start_span)[span_3](end_span)
+                        if(r.tenantUniqueId === unitId && r.accessEmail.toLowerCase() === currentUser.email.toLowerCase()) {
+                            foundPath = `houses/${hDoc.id}/rooms/${rDoc.id}`;
+                            break;
+                        }
+                    }
+                    if(foundPath) break;
+                }
+
+                if(foundPath) {
+                    // Link successful
+                    await updateDoc(doc(db, "tenants", currentUser.uid), { linkedRoomPath: foundPath });
+                    alert('Room Linked Successfully!');
+                    loadDashboard(foundPath);
+                } else {
+                    errorMsg.classList.remove('hidden');
+                }
+            } catch(e) { console.error(e); alert('Error finding room.'); }
+            hideLoader();
+        };
+
+        // ================= DASHBOARD & AUTO-KICK LOGIC =================
+        async function loadDashboard(roomPath) {
+            hideAllViews(); document.getElementById('dashboardView').classList.remove('hidden');
+            
+            const roomRef = doc(db, roomPath);
+            const houseRef = doc(db, roomPath.split('/rooms')[0]);
+            
+            // Get house details once
+            const hSnap = await getDoc(houseRef);
+            if(hSnap.exists()) { document.getElementById('dashHouseName').innerText = hSnap.data().houseName + " - " + hSnap.data().address; }
+
+            // Realtime Listener for the Room
+            if(activeRoomUnsubscribe) activeRoomUnsubscribe();
+            
+            activeRoomUnsubscribe = onSnapshot(roomRef, async (rSnap) => {
+                if(rSnap.exists()) {
+                    const r = rSnap.data();
+                    
+                    // --- AUTO-KICK LOGIC ---[span_4](start_span)[span_4](end_span)
+                    // If owner vacates the room or changes the access email, kick tenant out instantly
+                    if(r.occupancyStatus === 'Vacant' || r.accessEmail.toLowerCase() !== currentUser.email.toLowerCase()) {
+                        alert("Access Revoked! Your room owner has vacated your room or removed your access.");
+                        await updateDoc(doc(db, "tenants", currentUser.uid), { linkedRoomPath: null });
+                        if(activeRoomUnsubscribe) { activeRoomUnsubscribe(); activeRoomUnsubscribe = null; }
+                        checkTenantState(); // Will send back to link screen
+                        return;
+                    }
+                                      // Populate Data
+                    document.getElementById('dashRoomNo').innerText = "Room " + r.roomNumber;
+                    
+                    const rBase = r.rentAmount || 0;
+                    const wBase = r.waterBillFixed || 0;
+                    const lBill = r.currentLightBill || 0;
+                    const pen = r.penalty || 0;
+                    const tot = rBase + wBase + lBill + pen;
+
+                    document.getElementById('dashRent').innerText = "₹" + rBase;
+                    document.getElementById('dashWater').innerText = "₹" + wBase;
+                    document.getElementById('dashLight').innerText = "₹" + lBill;
+                    document.getElementById('dashPenalty').innerText = "₹" + pen;
+                    document.getElementById('dashTotalDue').innerText = "₹" + tot;
+
+                    // Meter Details Show/Hide
+                    const meterDiv = document.getElementById('meterDetails');
+                    if(lBill > 0 && r.unitRate > 0) {
+                        meterDiv.classList.remove('hidden');
+                        document.getElementById('dashMeterPrev').innerText = r.meterPrev || 0;
+                        document.getElementById('dashMeterCurr').innerText = r.meterCurr || 0;
+                        document.getElementById('dashMeterUnits').innerText = Math.max(0, (r.meterCurr || 0) - (r.meterPrev || 0));
+                    } else { meterDiv.classList.add('hidden'); }
+
+                    // Status Badge
+                    const sBadge = document.getElementById('dashPaymentStatus');
+                    if(r.paymentStatus === "Paid") {
+                        sBadge.innerText = "✅ BILL PAID";
+                        sBadge.className = "text-[10px] font-black px-2.5 py-1 rounded bg-green-100 text-green-700 uppercase tracking-widest border border-green-200";
+                    } else {
+                        sBadge.innerText = "❌ PENDING";
+                        sBadge.className = "text-[10px] font-black px-2.5 py-1 rounded bg-red-100 text-red-700 uppercase tracking-widest border border-red-200";
+                    }
+
+                } else {
+                    // Document deleted
+                    alert("Room no longer exists.");
+                    await updateDoc(doc(db, "tenants", currentUser.uid), { linkedRoomPath: null });
+                    checkTenantState();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
