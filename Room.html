@@ -5,164 +5,186 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rent Easy - Tenant App</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Enable Tailwind Dark Mode -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: {} }
+        }
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background-color: #f4f7fb; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; transition: background-color 0.3s, color 0.3s; }
         .hidden { display: none !important; }
-        .modal-overlay { background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 50; transition: all 0.3s ease-in-out; }
+        .modal-overlay { background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 50; transition: all 0.3s ease-in-out; }
         .modal-content { animation: modalPop 0.3s ease-out; }
         @keyframes modalPop { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-        .nav-item.active { color: #2563eb; }
-        .nav-indicator { width: 0; height: 3px; background: #2563eb; border-radius: 3px; transition: 0.3s; opacity: 0; margin-bottom: 4px; }
+        .nav-item.active { color: #3b82f6; }
+        .dark .nav-item.active { color: #60a5fa; }
+        .nav-indicator { width: 0; height: 3px; background: #3b82f6; border-radius: 3px; transition: 0.3s; opacity: 0; margin-bottom: 4px; }
+        .dark .nav-indicator { background: #60a5fa; }
         .nav-item.active .nav-indicator { width: 100%; opacity: 1; }
-        .tab-content { padding-bottom: 80px; }
+        .tab-content { padding-bottom: 85px; }
+        
+        /* Custom Scrollbar for Horizontal lists */
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="text-gray-800">
+<body class="bg-[#f4f7fb] dark:bg-gray-900 text-gray-800 dark:text-gray-100">
 
     <!-- GLOBAL LOADER -->
     <div id="globalLoader" class="fixed inset-0 modal-overlay hidden flex flex-col justify-center items-center px-4" style="z-index: 99999;">
-        <i class="fas fa-circle-notch fa-spin text-6xl text-blue-500 mb-4 drop-shadow-lg"></i>
-        <p class="text-white font-bold tracking-widest uppercase text-sm animate-pulse">Loading...</p>
+        <i class="fas fa-circle-notch fa-spin text-6xl text-blue-500 dark:text-blue-400 mb-4 drop-shadow-lg"></i>
+        <p class="text-white font-bold tracking-widest uppercase text-sm animate-pulse">Processing...</p>
     </div>
 
     <!-- HEADER -->
-    <header class="bg-white text-blue-600 p-4 sticky top-0 z-40 shadow-sm flex justify-between items-center border-b border-gray-100">
+    <header class="bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 p-4 sticky top-0 z-40 shadow-sm flex justify-between items-center border-b border-gray-100 dark:border-gray-700 transition-colors">
         <h1 class="text-xl font-black tracking-wide flex items-center"><i class="fas fa-house-user mr-2"></i> Rent Easy</h1>
-        <div>
-            <span id="headerUserName" class="hidden text-xs font-bold bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full border border-blue-100 mr-2"></span>
+        <div class="flex items-center gap-3">
+            <!-- Theme Toggle Button -->
+            <button onclick="toggleTheme()" class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-yellow-400 w-9 h-9 rounded-full flex items-center justify-center shadow-inner hover:scale-105 transition transform">
+                <i id="themeIcon" class="fas fa-moon"></i>
+            </button>
+            <span id="headerUserName" class="hidden text-xs font-bold bg-blue-50 dark:bg-gray-700 text-blue-700 dark:text-blue-300 px-3 py-1.5 rounded-full border border-blue-100 dark:border-gray-600"></span>
         </div>
     </header>
 
     <!-- ================= 1. HOME SCREEN (EXPLORE ROOMS) ================= -->
     <div id="homeView" class="min-h-screen tab-content">
-        <div class="bg-blue-600 text-white pt-8 pb-12 px-4 rounded-b-[40px] shadow-lg mb-6">
+        <!-- Dynamic Gradient Hero Section -->
+        <div class="bg-gradient-to-br from-blue-600 to-blue-800 dark:from-gray-800 dark:to-black text-white pt-10 pb-14 px-4 rounded-b-[40px] shadow-2xl mb-8 transition-colors">
             <div class="max-w-xl mx-auto text-center">
-                <h2 class="text-3xl font-black mb-2">Find a Room</h2>
-                <p class="text-blue-100 text-xs mb-5 font-medium">Search by Area Name or Pincode</p>
-                <div class="relative bg-white rounded-xl shadow-xl flex items-center p-1.5">
-                    <i class="fas fa-search text-gray-400 text-lg ml-3"></i>
-                    <input type="text" id="searchInput" placeholder="Search area..." class="w-full text-gray-800 p-2.5 outline-none font-medium bg-transparent text-sm">
-                    <button onclick="searchRooms()" class="bg-gray-900 text-white px-5 py-2.5 rounded-lg font-bold hover:bg-black transition text-sm">Search</button>
+                <h2 class="text-3xl sm:text-4xl font-black mb-3 drop-shadow-md">Find Your Room</h2>
+                <p class="text-blue-100 dark:text-gray-400 text-sm mb-6 font-medium">Search by exact address, area, or pincode</p>
+                
+                <!-- Advanced Search Box -->
+                <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl flex items-center p-2 border border-transparent dark:border-gray-700 transition-colors">
+                    <i class="fas fa-search text-gray-400 dark:text-gray-500 text-xl ml-3"></i>
+                    <input type="text" id="searchInput" placeholder="e.g. Gujarat Housing Board, Pandesara..." class="w-full text-gray-800 dark:text-white p-3 outline-none font-medium bg-transparent text-sm placeholder-gray-400 dark:placeholder-gray-500">
+                    <button onclick="searchRooms()" class="bg-blue-600 dark:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 dark:hover:bg-blue-600 transition shadow-md">Search</button>
                 </div>
             </div>
         </div>
         
         <div class="max-w-2xl mx-auto px-4">
-            <h3 class="font-extrabold text-gray-800 mb-4 text-lg"><i class="fas fa-fire text-red-500 mr-2"></i> Available Rooms</h3>
-            <div id="vacantRoomsList" class="space-y-4">
-                <!-- Data will be populated here via JS -->
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="font-extrabold text-gray-800 dark:text-gray-100 text-xl flex items-center"><i class="fas fa-fire text-red-500 mr-2"></i> Available Rooms</h3>
+                <span class="text-xs font-bold text-gray-500 dark:text-gray-400 bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded-md" id="resultCount">Showing All</span>
+            </div>
+            <div id="vacantRoomsList" class="space-y-5">
+                <!-- Data will be populated here -->
             </div>
         </div>
     </div>
 
     <!-- ================= 2. AUTHENTICATION VIEW ================= -->
     <div id="authView" class="hidden min-h-screen flex items-center justify-center p-4 tab-content">
-        <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md border border-gray-100">
+        <div class="bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-2xl w-full max-w-md border border-gray-100 dark:border-gray-700 transition-colors">
             <div id="loginForm">
-                <h2 class="text-3xl font-black text-gray-800 mb-2">Login</h2>
-                <p class="text-sm text-gray-500 mb-6 font-medium">Login to view owner details & connect room.</p>
-                <input type="email" id="loginEmail" placeholder="Email ID" class="w-full bg-gray-50 border border-gray-200 p-4 rounded-xl mb-4 outline-none focus:ring-2 focus:ring-blue-400 transition" required>
-                <input type="password" id="loginPassword" placeholder="Password" class="w-full bg-gray-50 border border-gray-200 p-4 rounded-xl mb-6 outline-none focus:ring-2 focus:ring-blue-400 transition" required>
-                <button id="loginBtn" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition shadow-lg text-lg">Login</button>
-                <p class="text-center text-sm text-gray-500 mt-6 cursor-pointer hover:text-blue-600 font-semibold" onclick="toggleAuth('register')">New tenant? <span class="text-blue-600 font-bold">Create ID</span></p>
+                <h2 class="text-3xl font-black text-gray-800 dark:text-white mb-2">Welcome Back</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-6 font-medium">Login to view owner details & connect room.</p>
+                <input type="email" id="loginEmail" placeholder="Email ID" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-white p-4 rounded-xl mb-4 outline-none focus:ring-2 focus:ring-blue-400 transition" required>
+                <input type="password" id="loginPassword" placeholder="Password" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-white p-4 rounded-xl mb-6 outline-none focus:ring-2 focus:ring-blue-400 transition" required>
+                <button id="loginBtn" class="w-full bg-blue-600 dark:bg-blue-500 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition shadow-lg text-lg">Login</button>
+                <p class="text-center text-sm text-gray-500 dark:text-gray-400 mt-6 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 font-semibold" onclick="toggleAuth('register')">New tenant? <span class="text-blue-600 dark:text-blue-400 font-bold">Create ID</span></p>
             </div>
 
             <div id="registerForm" class="hidden">
-                <h2 class="text-3xl font-black text-gray-800 mb-2">Create ID</h2>
-                <p class="text-sm text-gray-500 mb-6 font-medium">Register to connect with room owners.</p>
-                <input type="text" id="regName" placeholder="Full Name (Mandatory)" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400" required>
-                <input type="email" id="regEmail" placeholder="Email ID (Mandatory)" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400" required>
-                <input type="tel" id="regMobile" placeholder="Mobile Number (Mandatory)" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400" required>
-                <input type="tel" id="regAltMobile" placeholder="Alternate Mobile (Optional)" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400">
-                <input type="password" id="regPassword" placeholder="Password (Mandatory)" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-6 outline-none focus:ring-2 focus:ring-blue-400" required>
-                <button id="registerBtn" class="w-full bg-gray-900 text-white font-bold py-4 rounded-xl hover:bg-black transition shadow-lg text-lg">Register Account</button>
-                <p class="text-center text-sm text-gray-500 mt-6 cursor-pointer hover:text-blue-600 font-semibold" onclick="toggleAuth('login')">Already have an ID? <span class="text-blue-600 font-bold">Login</span></p>
+                <h2 class="text-3xl font-black text-gray-800 dark:text-white mb-2">Create ID</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-6 font-medium">Register to connect with room owners.</p>
+                <input type="text" id="regName" placeholder="Full Name" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-white p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400" required>
+                <input type="email" id="regEmail" placeholder="Email ID" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-white p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400" required>
+                <input type="tel" id="regMobile" placeholder="Mobile Number" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-white p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400" required>
+                <input type="password" id="regPassword" placeholder="Password" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-white p-3.5 rounded-xl mb-6 outline-none focus:ring-2 focus:ring-blue-400" required>
+                <button id="registerBtn" class="w-full bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 font-bold py-4 rounded-xl hover:bg-black dark:hover:bg-white transition shadow-lg text-lg">Register Account</button>
+                <p class="text-center text-sm text-gray-500 dark:text-gray-400 mt-6 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 font-semibold" onclick="toggleAuth('login')">Already have an ID? <span class="text-blue-600 dark:text-blue-400 font-bold">Login</span></p>
             </div>
         </div>
     </div>
 
     <!-- ================= 3. LINK ROOM VIEW ================= -->
     <div id="linkRoomView" class="hidden min-h-screen flex items-center justify-center p-4 tab-content">
-        <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md border-t-4 border-blue-500 text-center">
-            <i class="fas fa-link text-5xl text-blue-500 mb-4"></i>
-            <h2 class="text-2xl font-black text-gray-800 mb-2">Connect Your Room</h2>
-            <p class="text-sm text-gray-500 mb-6 font-medium">Enter the <strong class="text-gray-800">Room Unit ID</strong> provided by your owner. (e.g., RE-123)</p>
-            <input type="text" id="roomUnitIdInput" placeholder="Enter Room Unit ID" class="w-full text-center font-mono font-bold text-lg bg-gray-50 border border-gray-200 p-4 rounded-xl mb-6 outline-none focus:ring-2 focus:ring-blue-400 uppercase tracking-widest">
-            <button onclick="linkRoom()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition shadow-lg text-lg">Verify & Connect</button>
-            <button onclick="logoutUser()" class="w-full bg-red-50 text-red-500 font-bold py-3 rounded-xl mt-4 hover:bg-red-100 transition text-sm">Logout</button>
+        <div class="bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-2xl w-full max-w-md border-t-4 border-blue-500 text-center transition-colors">
+            <i class="fas fa-link text-5xl text-blue-500 dark:text-blue-400 mb-4 drop-shadow-md"></i>
+            <h2 class="text-2xl font-black text-gray-800 dark:text-white mb-2">Connect Your Room</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6 font-medium">Enter the <strong class="text-gray-800 dark:text-gray-200">Room Unit ID</strong> provided by your owner.</p>
+            <input type="text" id="roomUnitIdInput" placeholder="e.g. RE-OWN-XXXX" class="w-full text-center font-mono font-bold text-lg bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-white p-4 rounded-xl mb-6 outline-none focus:ring-2 focus:ring-blue-400 uppercase tracking-widest">
+            <button onclick="linkRoom()" class="w-full bg-blue-600 dark:bg-blue-500 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition shadow-lg text-lg">Verify & Connect</button>
+            <button onclick="logoutUser()" class="w-full bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 font-bold py-3 rounded-xl mt-4 hover:bg-red-100 dark:hover:bg-red-900/50 transition text-sm">Logout</button>
         </div>
     </div>
 
     <!-- ================= 4. DASHBOARD (MY ROOM) ================= -->
     <div id="dashboardView" class="hidden min-h-screen p-4 tab-content">
         <div class="max-w-md mx-auto w-full space-y-5">
-            <div class="bg-gradient-to-br from-gray-900 to-black text-white p-6 rounded-3xl shadow-xl relative overflow-hidden">
+            <div class="bg-gradient-to-br from-gray-900 to-black dark:from-black dark:to-gray-900 text-white p-6 rounded-3xl shadow-2xl relative overflow-hidden border border-gray-800">
                 <div class="absolute -right-4 -top-4 opacity-10"><i class="fas fa-building text-9xl"></i></div>
                 <div class="relative z-10 flex justify-between items-start">
                     <div>
-                        <p class="text-[10px] text-blue-300 font-bold uppercase tracking-widest mb-1">My Active Room</p>
+                        <p class="text-[10px] text-blue-400 font-bold uppercase tracking-widest mb-1">My Active Room</p>
                         <h2 class="text-3xl font-black mb-1" id="dashRoomNo">Room --</h2>
-                        <p class="text-sm font-medium text-gray-400 flex items-center"><i class="fas fa-map-marker-alt text-red-400 mr-2"></i> <span id="dashHouseName" class="truncate max-w-[200px]">Loading...</span></p>
+                        <p class="text-sm font-medium text-gray-300 flex items-center"><i class="fas fa-map-marker-alt text-red-400 mr-2"></i> <span id="dashHouseName" class="truncate max-w-[200px]">Loading...</span></p>
                     </div>
-                    <span class="bg-white text-gray-900 text-[10px] font-black px-3 py-1.5 rounded-lg uppercase tracking-wider">ACTIVE</span>
+                    <span class="bg-green-500 text-white text-[10px] font-black px-3 py-1.5 rounded-lg uppercase tracking-wider shadow-lg border border-green-400">ACTIVE</span>
                 </div>
             </div>
 
             <!-- Bill Card -->
-            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-5">
-                <div class="flex justify-between items-center mb-4 border-b pb-3">
-                    <h3 class="font-extrabold text-gray-800"><i class="fas fa-file-invoice-dollar text-blue-500 mr-2"></i> Monthly Bill</h3>
+            <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-lg border border-gray-100 dark:border-gray-700 p-5 transition-colors">
+                <div class="flex justify-between items-center mb-4 border-b border-gray-100 dark:border-gray-700 pb-3">
+                    <h3 class="font-extrabold text-gray-800 dark:text-white"><i class="fas fa-file-invoice-dollar text-blue-500 mr-2"></i> Monthly Bill</h3>
                     <span id="dashPaymentStatus" class="text-xs font-bold px-2 py-1 rounded">--</span>
                 </div>
-                <div class="space-y-3 text-sm font-medium text-gray-600">
-                    <div class="flex justify-between"><span class="text-gray-500">Base Rent</span><span class="font-bold text-gray-800" id="dashRent">₹0</span></div>
-                    <div class="flex justify-between"><span class="text-gray-500">Water Bill</span><span class="font-bold text-gray-800" id="dashWater">₹0</span></div>
-                    <div class="flex justify-between"><span class="text-gray-500"><i class="fas fa-bolt text-yellow-500 mr-1.5"></i> Electricity</span><span class="font-bold text-gray-800" id="dashLight">₹0</span></div>
-                    <div class="flex justify-between text-red-500"><span class="flex items-center"><i class="fas fa-exclamation-circle mr-1.5"></i> Penalty</span><span class="font-bold" id="dashPenalty">₹0</span></div>
+                <div class="space-y-3 text-sm font-medium text-gray-600 dark:text-gray-400">
+                    <div class="flex justify-between"><span>Base Rent</span><span class="font-bold text-gray-800 dark:text-white" id="dashRent">₹0</span></div>
+                    <div class="flex justify-between"><span>Water Bill</span><span class="font-bold text-gray-800 dark:text-white" id="dashWater">₹0</span></div>
+                    <div class="flex justify-between"><span><i class="fas fa-bolt text-yellow-500 mr-1.5"></i> Electricity</span><span class="font-bold text-gray-800 dark:text-white" id="dashLight">₹0</span></div>
+                    <div class="flex justify-between text-red-500 dark:text-red-400"><span class="flex items-center"><i class="fas fa-exclamation-circle mr-1.5"></i> Penalty</span><span class="font-bold" id="dashPenalty">₹0</span></div>
                 </div>
-                <div class="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
-                    <span class="font-black text-gray-400 uppercase tracking-widest text-xs">Total Due</span>
-                    <span class="text-3xl font-black text-blue-600" id="dashTotalDue">₹0</span>
+                <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                    <span class="font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest text-xs">Total Due</span>
+                    <span class="text-3xl font-black text-blue-600 dark:text-blue-400" id="dashTotalDue">₹0</span>
                 </div>
             </div>
             
-            <button onclick="logoutUser()" class="w-full bg-red-50 text-red-500 font-bold py-3 rounded-xl hover:bg-red-100 transition shadow-sm"><i class="fas fa-power-off mr-2"></i> Logout</button>
+            <button onclick="logoutUser()" class="w-full bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 font-bold py-3.5 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/50 transition shadow-sm border border-red-100 dark:border-red-800/50"><i class="fas fa-power-off mr-2"></i> Logout</button>
         </div>
     </div>
 
     <!-- ================= ROOM DETAILS MODAL (POPUP) ================= -->
     <div id="roomDetailsModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-end sm:items-center px-4 z-50">
-        <div class="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-md modal-content shadow-2xl relative mb-0 sm:mb-10">
-            <button onclick="document.getElementById('roomDetailsModal').classList.add('hidden')" class="absolute top-4 right-4 bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 transition"><i class="fas fa-times"></i></button>
+        <div class="bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-md modal-content shadow-2xl relative mb-0 sm:mb-10 transition-colors border-t-4 border-blue-500">
+            <button onclick="document.getElementById('roomDetailsModal').classList.add('hidden')" class="absolute top-4 right-4 bg-gray-100 dark:bg-gray-700 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 transition shadow-inner"><i class="fas fa-times"></i></button>
 
-            <div class="mb-5 border-b pb-4 pr-8 mt-2">
-                <h3 class="font-black text-2xl text-blue-600 mb-1" id="rdHouseName">House Name</h3>
-                <p class="text-sm font-medium text-gray-600 leading-snug" id="rdAddress">Full Address</p>
-                <a id="rdMapLink" href="#" target="_blank" class="mt-3 inline-flex items-center bg-blue-50 text-blue-600 px-4 py-2 rounded-xl text-xs font-bold hover:bg-blue-100 transition shadow-sm border border-blue-100"><i class="fas fa-map-marked-alt text-lg mr-2 text-blue-500"></i> Open Location in Map</a>
+            <div class="mb-5 border-b border-gray-200 dark:border-gray-700 pb-4 pr-8 mt-2">
+                <h3 class="font-black text-2xl text-blue-600 dark:text-blue-400 mb-1" id="rdHouseName">House Name</h3>
+                <p class="text-sm font-medium text-gray-600 dark:text-gray-300 leading-snug" id="rdAddress">Full Address</p>
+                <a id="rdMapLink" href="#" target="_blank" class="mt-4 inline-flex items-center bg-blue-50 dark:bg-gray-700 text-blue-600 dark:text-blue-300 px-4 py-2.5 rounded-xl text-xs font-bold hover:bg-blue-100 dark:hover:bg-gray-600 transition shadow-sm border border-blue-100 dark:border-gray-600"><i class="fas fa-map-marked-alt text-lg mr-2 text-blue-500 dark:text-blue-400"></i> View in Google Maps</a>
             </div>
 
             <div class="space-y-4">
-                <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Owner Contact Details</p>
-                    <p class="font-black text-gray-800 text-lg mb-2"><i class="fas fa-user-circle text-gray-400 mr-2"></i> <span id="rdOwnerName">Loading...</span></p>
-                    <div class="flex items-center justify-between mb-2">
-                        <p class="font-medium text-gray-600 text-sm"><i class="fas fa-phone-alt text-gray-400 mr-2"></i> <span id="rdOwnerMobile">---</span></p>
-                        <a id="rdMobileLink" href="#" class="bg-green-100 text-green-700 px-4 py-1.5 rounded-lg text-xs font-bold shadow-sm hover:bg-green-200 transition"><i class="fas fa-phone mr-1"></i> Call</a>
+                <div class="bg-gray-50 dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-inner">
+                    <p class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Owner Contact Details</p>
+                    <p class="font-black text-gray-800 dark:text-white text-lg mb-2 flex items-center"><i class="fas fa-user-circle text-gray-400 dark:text-gray-500 mr-2 text-xl"></i> <span id="rdOwnerName">Loading...</span></p>
+                    <div class="flex items-center justify-between mb-3 bg-white dark:bg-gray-800 p-2.5 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm">
+                        <p class="font-bold text-gray-700 dark:text-gray-200 text-sm"><i class="fas fa-phone-alt text-blue-500 mr-2"></i> <span id="rdOwnerMobile">---</span></p>
+                        <a id="rdMobileLink" href="#" class="bg-green-500 text-white px-4 py-1.5 rounded-lg text-xs font-bold shadow-md hover:bg-green-600 transition"><i class="fas fa-phone mr-1"></i> Call</a>
                     </div>
-                    <p class="font-medium text-gray-600 text-sm"><i class="fas fa-envelope text-gray-400 mr-2"></i> <span id="rdOwnerEmail">---</span></p>
+                    <p class="font-medium text-gray-600 dark:text-gray-300 text-sm ml-1"><i class="fas fa-envelope text-gray-400 dark:text-gray-500 mr-2"></i> <span id="rdOwnerEmail">---</span></p>
                 </div>
 
-                <div class="bg-gray-900 text-white p-4 rounded-xl flex justify-between items-center shadow-lg border border-gray-700">
+                <div class="bg-gray-900 dark:bg-black text-white p-5 rounded-xl flex justify-between items-center shadow-2xl border border-gray-700">
                     <span class="font-bold uppercase tracking-widest text-xs text-gray-400">Monthly Rent</span>
-                    <span class="text-3xl font-black text-green-400" id="rdRent">₹0</span>
+                    <span class="text-3xl font-black text-green-400 drop-shadow-md" id="rdRent">₹0</span>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- ================= BOTTOM NAVIGATION ================= -->
-    <nav class="fixed bottom-0 w-full bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.05)] border-t border-gray-100 flex justify-around items-center z-40 h-[70px] pb-2">
+    <nav class="fixed bottom-0 w-full bg-white dark:bg-gray-800 shadow-[0_-10px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_-5px_20px_rgba(0,0,0,0.3)] border-t border-gray-100 dark:border-gray-700 flex justify-around items-center z-40 h-[72px] pb-2 transition-colors">
         <button class="nav-item active flex flex-col items-center justify-center w-full h-full pt-1 text-gray-400 transition" onclick="switchTab('explore')">
             <div class="nav-indicator"></div><i class="fas fa-search text-xl mb-1"></i><span class="text-[10px] font-bold uppercase tracking-wider">Explore</span>
         </button>
@@ -193,10 +215,29 @@
         let activeRoomUnsubscribe = null;
         let currentTab = 'explore';
 
+        // ================= DARK/LIGHT MODE LOGIC =================
+        window.toggleTheme = () => {
+            const html = document.documentElement;
+            const icon = document.getElementById('themeIcon');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                icon.className = 'fas fa-moon';
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                icon.className = 'fas fa-sun';
+            }
+        };
+        // Auto-load theme
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            document.getElementById('themeIcon').className = 'fas fa-sun';
+        }
+
         const showLoader = () => document.getElementById('globalLoader').classList.remove('hidden');
         const hideLoader = () => document.getElementById('globalLoader').classList.add('hidden');
 
-        // ================= TAB NAVIGATION =================
         window.switchTab = (tab) => {
             currentTab = tab;
             document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
@@ -208,11 +249,8 @@
                 document.getElementById('homeView').classList.remove('hidden');
                 loadAllVacantRooms();
             } else if(tab === 'myroom') {
-                if(!currentUser) {
-                    document.getElementById('authView').classList.remove('hidden');
-                } else {
-                    checkTenantState(); // Automatically routes to Link Room or Dashboard
-                }
+                if(!currentUser) document.getElementById('authView').classList.remove('hidden');
+                else checkTenantState();
             }
         };
 
@@ -221,38 +259,47 @@
             else { document.getElementById('loginForm').classList.add('hidden'); document.getElementById('registerForm').classList.remove('hidden'); }
         };
 
-        // ================= FETCH AND DISPLAY ROOMS =================
+        // ================= ADVANCED SEARCH & DISPLAY =================
         window.loadAllVacantRooms = async (searchQuery = '') => {
             const list = document.getElementById('vacantRoomsList');
-            list.innerHTML = `<p class="text-center text-gray-400 py-10"><i class="fas fa-spinner fa-spin text-3xl mb-2"></i><br>Finding rooms...</p>`;
+            list.innerHTML = `<p class="text-center text-gray-400 dark:text-gray-500 py-10"><i class="fas fa-spinner fa-spin text-3xl mb-2"></i><br>Finding rooms...</p>`;
             
             try {
                 const hSnaps = await getDocs(collection(db, "houses"));
                 let html = ''; let count = 0;
+                
+                // Better search logic: Split query by spaces/commas and check if ANY part matches the address
+                const queryTerms = searchQuery.toLowerCase().split(/[\s,]+/).filter(t => t.length > 0);
 
                 for(const hDoc of hSnaps.docs) {
                     const house = hDoc.data();
                     const addr = house.address ? house.address.toLowerCase() : "";
                     
-                    if(searchQuery && !addr.includes(searchQuery.toLowerCase())) continue;
+                    // Match logic
+                    let isMatch = true;
+                    if(queryTerms.length > 0) {
+                        isMatch = queryTerms.some(term => addr.includes(term));
+                    }
+                    if(!isMatch) continue;
 
                     const rSnaps = await getDocs(collection(db, `houses/${hDoc.id}/rooms`));
                     let vacantRooms = [];
                     rSnaps.forEach(r => { if(r.data().occupancyStatus === "Vacant") vacantRooms.push({id: r.id, ...r.data()}); });
 
                     if(vacantRooms.length > 0) {
-                        html += `<div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-4 border-l-4 border-l-blue-500 hover:shadow-md transition">
-                                    <div class="flex justify-between items-start mb-3">
-                                        <div><h4 class="font-black text-gray-800 text-lg">${house.houseName}</h4><p class="text-xs text-gray-500 mt-1"><i class="fas fa-map-marker-alt text-red-400 mr-1"></i> ${house.address}</p></div>
+                        html += `<div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700 mb-5 border-l-4 border-l-blue-500 hover:shadow-lg transition-all">
+                                    <div class="mb-4">
+                                        <h4 class="font-black text-gray-800 dark:text-white text-lg">${house.houseName}</h4>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-start"><i class="fas fa-map-marker-alt text-red-400 mr-1.5 mt-0.5"></i> <span>${house.address}</span></p>
                                     </div>
-                                    <div class="flex gap-3 overflow-x-auto pb-2">`;
+                                    <div class="flex gap-3 overflow-x-auto hide-scroll pb-2">`;
                         
                         vacantRooms.forEach(vr => {
                             const encRoom = encodeURIComponent(JSON.stringify(vr));
-                            html += `<div onclick="openRoomDetails('${hDoc.id}', '${house.ownerId}', '${encRoom}')" class="bg-blue-50 border border-blue-100 rounded-xl p-3 min-w-[130px] flex-shrink-0 text-center cursor-pointer hover:bg-blue-100 transition shadow-sm">
-                                        <p class="font-black text-blue-900 mb-1">Room ${vr.roomNumber}</p>
-                                        <p class="text-[10px] font-bold text-gray-500 uppercase mb-2">Rent: ₹${vr.rentAmount}</p>
-                                        <button class="w-full bg-white border border-blue-200 text-blue-600 text-[10px] font-bold py-1.5 rounded-lg shadow-sm">View Details</button>
+                            html += `<div onclick="openRoomDetails('${hDoc.id}', '${house.ownerId}', '${encRoom}')" class="bg-blue-50 dark:bg-gray-900 border border-blue-100 dark:border-gray-700 rounded-xl p-3 min-w-[130px] flex-shrink-0 text-center cursor-pointer hover:bg-blue-100 dark:hover:bg-gray-700 transition shadow-sm">
+                                        <p class="font-black text-blue-900 dark:text-blue-400 mb-1 text-lg">Room ${vr.roomNumber}</p>
+                                        <p class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase mb-2">Rent: <span class="text-gray-800 dark:text-white">₹${vr.rentAmount}</span></p>
+                                        <button class="w-full bg-white dark:bg-gray-800 border border-blue-200 dark:border-gray-600 text-blue-600 dark:text-blue-400 text-[10px] font-bold py-1.5 rounded-lg shadow-sm">View Owner</button>
                                      </div>`;
                             count++;
                         });
@@ -260,9 +307,11 @@
                     }
                 }
                 
-                if(count === 0) list.innerHTML = `<div class="text-center text-gray-400 py-10 bg-white rounded-2xl border"><i class="fas fa-search-minus text-4xl mb-3 text-gray-300"></i><p class="font-bold">No vacant rooms found.</p></div>`;
+                document.getElementById('resultCount').innerText = searchQuery ? `Found ${count} Rooms` : 'Showing All';
+                
+                if(count === 0) list.innerHTML = `<div class="text-center text-gray-400 dark:text-gray-500 py-10 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm"><i class="fas fa-search-minus text-5xl mb-3 text-gray-300 dark:text-gray-600"></i><p class="font-bold">No vacant rooms found for "${searchQuery}".</p></div>`;
                 else list.innerHTML = html;
-            } catch(e) { list.innerHTML = `<p class="text-center text-red-500 py-5">Error loading rooms.</p>`; }
+            } catch(e) { console.error("Firebase Error:", e); list.innerHTML = `<div class="text-center text-red-500 py-5 bg-red-50 dark:bg-red-900/30 rounded-xl"><i class="fas fa-exclamation-triangle text-3xl mb-2"></i><p class="font-bold">Error loading rooms.</p><p class="text-xs mt-1">${e.message}</p></div>`; }
         };
 
         window.searchRooms = () => { loadAllVacantRooms(document.getElementById('searchInput').value); };
@@ -271,7 +320,7 @@
         window.openRoomDetails = async (houseId, ownerId, encodedRoom) => {
             if(!currentUser) {
                 alert("Please Login to see owner details and exact location.");
-                switchTab('myroom'); // Redirects to Login screen
+                switchTab('myroom');
                 return;
             }
             
@@ -291,8 +340,7 @@
                     document.getElementById('rdOwnerName').innerText = o.ownerName;
                     document.getElementById('rdOwnerMobile').innerText = o.mobileNumber;
                     document.getElementById('rdMobileLink').href = `tel:${o.mobileNumber}`;
-                    document.getElementById('rdOwnerEmail').innerText = o.emailId;
-                    
+                    document.getElementById('rdOwnerEmail').innerText = o.emailId || "Not Provided";
                     document.getElementById('rdRent').innerText = "₹" + r.rentAmount;
 
                     hideLoader();
@@ -307,8 +355,6 @@
                 currentUser = user;
                 document.getElementById('headerUserName').innerText = "Hi, " + (user.email.split('@')[0]);
                 document.getElementById('headerUserName').classList.remove('hidden');
-                
-                // If they are on Auth view, redirect them to Home to explore, or check state
                 if(currentTab === 'myroom') checkTenantState();
             } else {
                 currentUser = null;
@@ -324,7 +370,7 @@
 
         document.getElementById('registerBtn').onclick = async () => {
             const n = document.getElementById('regName').value, m = document.getElementById('regMobile').value, e = document.getElementById('regEmail').value, p = document.getElementById('regPassword').value;
-            if(!n || !m || !e || p.length < 6) return alert("Fill all mandatory fields correctly. Password min 6 chars.");
+            if(!n || !m || !e || p.length < 6) return alert("Fill all fields. Password min 6 chars.");
             showLoader();
             try {
                 const cred = await createUserWithEmailAndPassword(auth, e, p);
@@ -347,9 +393,8 @@
             showLoader();
             try {
                 const docSnap = await getDoc(doc(db, "tenants", currentUser.uid));
-                if(docSnap.exists() && docSnap.data().linkedRoomPath) {
-                    loadDashboard(docSnap.data().linkedRoomPath);
-                } else {
+                if(docSnap.exists() && docSnap.data().linkedRoomPath) loadDashboard(docSnap.data().linkedRoomPath);
+                else {
                     document.getElementById('authView').classList.add('hidden');
                     document.getElementById('dashboardView').classList.add('hidden');
                     document.getElementById('linkRoomView').classList.remove('hidden');
@@ -369,7 +414,7 @@
                     const rSnaps = await getDocs(collection(db, `houses/${hDoc.id}/rooms`));
                     for(const rDoc of rSnaps.docs) {
                         const r = rDoc.data();
-                        if(r.tenantUniqueId === unitId && r.accessEmail.toLowerCase() === currentUser.email.toLowerCase()) {
+                        if(r.tenantUniqueId === unitId && (r.accessEmail||'').toLowerCase() === currentUser.email.toLowerCase()) {
                             foundPath = `houses/${hDoc.id}/rooms/${rDoc.id}`; break;
                         }
                     }
@@ -394,7 +439,7 @@
             activeRoomUnsubscribe = onSnapshot(doc(db, roomPath), async (rSnap) => {
                 if(rSnap.exists()) {
                     const r = rSnap.data();
-                    if(r.occupancyStatus === 'Vacant' || r.accessEmail.toLowerCase() !== currentUser.email.toLowerCase()) {
+                    if(r.occupancyStatus === 'Vacant' || (r.accessEmail||'').toLowerCase() !== currentUser.email.toLowerCase()) {
                         alert("Access Revoked by Owner.");
                         await updateDoc(doc(db, "tenants", currentUser.uid), { linkedRoomPath: null });
                         if(activeRoomUnsubscribe) { activeRoomUnsubscribe(); activeRoomUnsubscribe = null; }
@@ -410,9 +455,9 @@
 
                     const sBadge = document.getElementById('dashPaymentStatus');
                     if(r.paymentStatus === "Paid") {
-                        sBadge.innerText = "✅ BILL PAID"; sBadge.className = "text-[10px] font-black px-2.5 py-1 rounded bg-green-100 text-green-700 uppercase";
+                        sBadge.innerText = "✅ BILL PAID"; sBadge.className = "text-[10px] font-black px-2.5 py-1 rounded bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 uppercase";
                     } else {
-                        sBadge.innerText = "❌ PENDING"; sBadge.className = "text-[10px] font-black px-2.5 py-1 rounded bg-red-100 text-red-700 uppercase";
+                        sBadge.innerText = "❌ PENDING"; sBadge.className = "text-[10px] font-black px-2.5 py-1 rounded bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400 uppercase";
                     }
                 }
             });
