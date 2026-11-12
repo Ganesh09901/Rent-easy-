@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- jsPDF Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body { background-color: #f4f7fb; font-family: 'Segoe UI', system-ui, sans-serif; }
@@ -70,17 +71,24 @@
 
     <!-- ================= MAIN APP DASHBOARD ================= -->
     <div id="appContainer" class="hidden min-h-screen">
-        <header class="bg-blue-600 text-white p-4 sticky top-0 z-40 shadow-md flex justify-between items-center">
-            <h1 class="text-xl font-black tracking-wide flex items-center"><i class="fas fa-building mr-2"></i> Rent Easy</h1>
+        <header class="bg-blue-600 text-white p-3 sm:p-4 sticky top-0 z-40 shadow-md flex justify-between items-center">
+            <h1 class="text-lg sm:text-xl font-black tracking-wide flex items-center"><i class="fas fa-building mr-2"></i> Rent Easy</h1>
             
+            <!-- NEW: PLAN & WALLET BADGES WITH VALIDITY -->
             <div class="flex items-center gap-2">
-                <div id="headerPlanBadge" onclick="openUpgradeModal()" class="hidden bg-yellow-400 text-yellow-900 text-[10px] font-black px-2 py-1 rounded shadow-sm cursor-pointer hover:scale-105 transition tracking-wider border border-yellow-500">FREE</div>
-                <div id="headerWalletBadge" onclick="openUpgradeModal('wallet')" class="hidden bg-green-500 text-white text-[10px] font-black px-2 py-1 rounded shadow-sm cursor-pointer hover:scale-105 transition border border-green-600">₹0</div>
+                <div class="flex flex-col items-end cursor-pointer hover:scale-105 transition" onclick="openUpgradeModal()">
+                    <div id="headerPlanBadge" class="hidden bg-yellow-400 text-yellow-900 text-[9px] font-black px-1.5 py-0.5 rounded shadow-sm tracking-wider border border-yellow-500">FREE</div>
+                    <div id="headerValidityBadge" class="hidden text-[9px] font-bold text-blue-200 mt-0.5 uppercase">No Plan</div>
+                </div>
+                <div id="headerWalletBadge" onclick="openUpgradeModal('wallet')" class="hidden bg-green-500 text-white text-[10px] font-black px-2 py-1.5 rounded shadow-sm cursor-pointer hover:scale-105 transition border border-green-600 flex items-center">
+                    <i class="fas fa-wallet mr-1"></i> <span id="walletAmtText">₹0</span>
+                </div>
                 <button id="logoutBtn" class="bg-blue-700 px-3 py-1.5 rounded-lg text-sm font-bold shadow hover:bg-red-500 transition ml-1"><i class="fas fa-power-off"></i></button>
             </div>
         </header>
 
         <main class="p-4 tab-content max-w-3xl mx-auto">
+            
             <!-- TAB 1: ANALYTICS (HOME) -->
             <div id="tabAnalytics">
                 <h2 class="text-2xl font-extrabold text-gray-800 mb-5">Dashboard Overview</h2>
@@ -175,25 +183,34 @@
             </div>
         </main>
 
+        <!-- BOTTOM NAVIGATION -->
         <nav class="fixed bottom-0 w-full bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.05)] border-t border-gray-100 flex justify-around items-center z-40 h-[72px] pb-2">
-            <button class="nav-btn active flex flex-col items-center justify-center w-full h-full pt-1" onclick="switchTab('Analytics')"><div class="nav-indicator"></div><i class="fas fa-home text-xl mb-1"></i><span class="text-[10px] font-bold uppercase tracking-wider">Home</span></button>
-            <button class="nav-btn flex flex-col items-center justify-center w-full h-full pt-1" onclick="switchTab('Properties')"><div class="nav-indicator"></div><i class="fas fa-building text-xl mb-1"></i><span class="text-[10px] font-bold uppercase tracking-wider">Rooms</span></button>
-            <button class="nav-btn flex flex-col items-center justify-center w-full h-full pt-1" onclick="switchTab('History')"><div class="nav-indicator"></div><i class="fas fa-history text-xl mb-1"></i><span class="text-[10px] font-bold uppercase tracking-wider">History</span></button>
-            <button class="nav-btn flex flex-col items-center justify-center w-full h-full pt-1" onclick="switchTab('Profile')"><div class="nav-indicator"></div><i class="fas fa-user-circle text-xl mb-1"></i><span class="text-[10px] font-bold uppercase tracking-wider">Profile</span></button>
+            <button class="nav-btn active flex flex-col items-center justify-center w-full h-full pt-1" onclick="switchTab('Analytics')">
+                <div class="nav-indicator"></div><i class="fas fa-home text-xl mb-1"></i><span class="text-[10px] font-bold uppercase tracking-wider">Home</span>
+            </button>
+            <button class="nav-btn flex flex-col items-center justify-center w-full h-full pt-1" onclick="switchTab('Properties')">
+                <div class="nav-indicator"></div><i class="fas fa-building text-xl mb-1"></i><span class="text-[10px] font-bold uppercase tracking-wider">Rooms</span>
+            </button>
+            <button class="nav-btn flex flex-col items-center justify-center w-full h-full pt-1" onclick="switchTab('History')">
+                <div class="nav-indicator"></div><i class="fas fa-history text-xl mb-1"></i><span class="text-[10px] font-bold uppercase tracking-wider">History</span>
+            </button>
+            <button class="nav-btn flex flex-col items-center justify-center w-full h-full pt-1" onclick="switchTab('Profile')">
+                <div class="nav-indicator"></div><i class="fas fa-user-circle text-xl mb-1"></i><span class="text-[10px] font-bold uppercase tracking-wider">Profile</span>
+            </button>
         </nav>
     </div>
 
     <!-- ================= MODALS ================= -->
     
-    <!-- UPGRADE & RECHARGE MODAL WITH DYNAMIC BUTTONS -->
+    <!-- UPGRADE & RECHARGE MODAL (WITH 3 BUTTONS & WALLET LOGIC) -->
     <div id="upgradeModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-end sm:items-center px-4 z-[90]">
         <div class="bg-white rounded-t-3xl sm:rounded-2xl p-6 w-full max-w-md modal-content shadow-2xl mb-0 sm:mb-10">
             <div class="flex justify-between items-center mb-5 border-b pb-3">
-                <h3 class="font-black text-xl text-gray-800"><i class="fas fa-crown text-yellow-500 mr-2"></i>Upgrade & Recharge</h3>
+                <h3 class="font-black text-xl text-gray-800"><i class="fas fa-crown text-yellow-500 mr-2"></i>Buy Subscription</h3>
                 <button onclick="document.getElementById('upgradeModal').classList.add('hidden')" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 hover:bg-red-50 transition"><i class="fas fa-times"></i></button>
             </div>
             
-            <p class="text-xs text-gray-500 mb-4 font-bold tracking-wide uppercase">Select Subscription Plan</p>
+            <p class="text-xs text-gray-500 mb-3 font-bold tracking-wide uppercase">Select Plan Duration</p>
             <div class="grid grid-cols-3 gap-2 mb-4">
                 <div onclick="selectPlan(99, 'Monthly Plan', 'planMonthly')" id="planMonthly" class="plan-card active border-2 border-gray-200 rounded-xl p-3 text-center bg-gray-50">
                     <p class="text-sm font-black text-gray-800">1 Mo</p>
@@ -209,9 +226,9 @@
                 </div>
             </div>
 
-            <!-- Custom Calculator -->
+            <!-- Custom Plan Calculator -->
             <p class="text-xs text-gray-500 mb-2 font-bold tracking-wide uppercase">Or Custom Duration (+/-)</p>
-            <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-200 mb-5">
+            <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-200 mb-6">
                 <div class="flex items-center gap-4">
                     <button onclick="updateCustomPlan(-1)" class="bg-white border shadow-sm w-8 h-8 rounded-lg font-black text-lg hover:bg-gray-100">-</button>
                     <span id="customMonthCount" class="font-black text-lg text-gray-800">1</span> <span class="text-xs font-bold text-gray-500">Mo</span>
@@ -220,48 +237,71 @@
                 <span id="customMonthTotal" class="text-xl font-black text-blue-600">₹99</span>
             </div>
 
-            <!-- PAYMENT OPTIONS -->
-            <div class="space-y-3 border-t border-gray-200 pt-5">
-                <!-- 1. Direct UPI App Button -->
-                <button onclick="payViaUPIApp()" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-md hover:bg-blue-700 transition flex justify-center items-center">
-                    <i class="fas fa-mobile-alt mr-2"></i> Pay ₹<span id="payBtnAmount">99</span> via UPI App
-                </button>
+            <!-- 3 PAYMENT BUTTONS -->
+            <div class="space-y-3 mb-2" id="paymentOptionsGroup">
                 
-                <!-- 2. Pay via Wallet -->
-                <button onclick="payViaWallet()" class="w-full bg-green-500 text-white font-bold py-3.5 rounded-xl shadow-md hover:bg-green-600 transition flex justify-between items-center px-4">
-                    <span><i class="fas fa-wallet mr-2"></i> Pay via Wallet</span>
-                    <span class="bg-green-600 px-2 py-0.5 rounded text-xs">Bal: ₹<span id="upgradeWalletBal">0</span></span>
-                </button>
-
-                <!-- 3. Show QR Code Button -->
-                <button onclick="showQRCode()" class="w-full bg-gray-100 text-gray-700 font-bold py-3.5 rounded-xl border border-gray-300 shadow-sm hover:bg-gray-200 transition flex justify-center items-center">
-                    <i class="fas fa-qrcode mr-2"></i> Scan QR Code to Pay
+                <!-- Button 1: Show QR -->
+                <button onclick="showQRCode()" class="w-full bg-white border-2 border-gray-200 text-gray-800 font-bold py-3.5 rounded-xl shadow-sm hover:border-gray-400 transition flex justify-center items-center"><i class="fas fa-qrcode text-gray-500 mr-2 text-xl"></i> Show QR & Details</button>
+                
+                <!-- Button 2: Direct UPI App -->
+                <button onclick="payViaUPIApp()" class="w-full bg-gray-900 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-black transition flex justify-center items-center text-lg"><i class="fas fa-mobile-alt text-yellow-400 mr-2"></i> Pay <span id="payBtnAmount" class="ml-1 font-black mr-1">₹99</span> via UPI App</button>
+                
+                <!-- Button 3: Pay via Wallet -->
+                <button onclick="payViaWallet()" class="w-full bg-green-500 text-white font-bold py-3.5 rounded-xl shadow-lg hover:bg-green-600 transition flex justify-between items-center px-4">
+                    <span class="flex items-center"><i class="fas fa-wallet mr-2"></i> Pay from Wallet</span>
+                    <span class="bg-green-700 px-2 py-0.5 rounded text-xs" id="upgradeWalletBal">Bal: ₹0</span>
                 </button>
             </div>
-            <p class="text-[10px] text-center text-gray-400 mt-4 font-medium">Auto-renew supported via Wallet.</p>
+
+            <!-- HIDDEN: QR CODE DISPLAY -->
+            <div id="qrCodeContainer" class="hidden flex flex-col items-center justify-center mb-5 border-t border-gray-200 pt-5">
+                <p class="text-[10px] font-bold text-gray-500 mb-2 tracking-widest uppercase">Scan to Pay via any App</p>
+                <img id="upiQrImage" src="" alt="UPI QR" class="rounded-xl border border-gray-200 p-2 shadow-sm w-36 h-36 mb-3">
+                <div class="bg-blue-50 border border-blue-100 w-full p-3 rounded-lg text-center">
+                    <p class="text-xs text-gray-500 font-bold uppercase mb-1">UPI ID</p>
+                    <p class="text-sm font-black text-blue-800 tracking-wider">8866653002@Kotakbank</p>
+                    <p class="text-xs text-gray-600 font-medium mt-1">Name: RentEasy Admin</p>
+                </div>
+            </div>
+
+            <!-- Notify Admin Button (Shows only when QR or Direct App is used) -->
+            <button id="notifyPaymentBtn" onclick="notifyAdminPayment()" class="hidden w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl mt-3 shadow-lg hover:bg-blue-700 transition flex justify-center items-center"><i class="fas fa-check-circle text-lg mr-2 text-blue-200"></i> I have made the payment</button>
+            
+            <p class="text-[10px] text-center text-gray-400 mt-4 font-medium uppercase tracking-wide">Supports Google Pay, PhonePe, Paytm</p>
         </div>
     </div>
 
-    <!-- QR CODE POPUP -->
-    <div id="qrModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[95]">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-sm modal-content shadow-2xl text-center">
-            <div class="flex justify-between items-center mb-3">
-                <h3 class="font-bold text-gray-800 text-lg">Scan to Pay</h3>
-                <button onclick="document.getElementById('qrModal').classList.add('hidden')" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 transition"><i class="fas fa-times"></i></button>
+    <!-- TENANT ACCESS MODAL -->
+    <div id="tenantAccessModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[80]">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md modal-content shadow-2xl border-t-4 border-blue-500">
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                <h3 class="font-extrabold text-blue-600 text-xl"><i class="fas fa-users-cog mr-2"></i> Tenant Access</h3>
+                <button onclick="document.getElementById('tenantAccessModal').classList.add('hidden')" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 transition"><i class="fas fa-times"></i></button>
             </div>
-            <p class="text-xs text-gray-500 mb-4">RentEasy Admin<br><span class="font-mono text-blue-600 font-bold">8866653002@Kotakbank</span></p>
-            
-            <div class="flex justify-center mb-4">
-                <img id="upiQrImage" src="" alt="UPI QR Code" class="rounded-xl border border-gray-200 p-2 shadow-sm w-48 h-48">
+            <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-5">
+                <h4 class="text-xs font-bold text-gray-500 mb-2 uppercase tracking-widest">Grant / Update Access</h4>
+                <select id="taRoomSelect" class="w-full bg-white border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400 text-sm font-bold text-gray-700"><option value="">Loading Rooms...</option></select>
+                <input type="email" id="taEmailInput" placeholder="Tenant Email ID" class="w-full bg-white border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400 text-sm font-medium">
+                <button onclick="grantTenantAccess()" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-md hover:bg-blue-700 transition flex items-center justify-center"><i class="fas fa-plus-circle mr-2"></i> Add / Update Access</button>
             </div>
-            
-            <p class="text-lg font-black text-gray-800 mb-4">Amount: ₹<span id="qrAmount">99</span></p>
-            
-            <button onclick="notifyAdminPayment()" class="w-full bg-green-500 text-white font-bold py-3.5 rounded-xl shadow-lg hover:bg-green-600 transition text-sm flex justify-center items-center"><i class="fas fa-check-circle mr-2"></i> I have made the payment</button>
+            <h4 class="text-xs font-bold text-gray-500 mb-3 uppercase tracking-widest border-t pt-4">Active Access</h4>
+            <div id="taAccessList" class="space-y-3"><p class="text-xs text-gray-400 text-center py-2"><i class="fas fa-spinner fa-spin mr-2"></i>Loading data...</p></div>
         </div>
     </div>
 
-    <!-- OTHER MODALS (House, Details, Manager, History, Add) ... (Keeping same as Previous Step for space, but logic connected) -->
+    <!-- FORGOT PASSWORD MODAL -->
+    <div id="forgotModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[80]">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm modal-content shadow-2xl">
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                <h3 class="font-bold text-xl text-gray-800">Reset Password</h3>
+                <button id="closeForgotModal" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 hover:bg-red-50 transition"><i class="fas fa-times"></i></button>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Enter your registered email ID. We will send you a secure reset link.</p>
+            <input type="email" id="resetEmailInput" placeholder="Enter Email ID" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-4 outline-none focus:ring-2 focus:ring-blue-400" required>
+            <button id="sendResetBtn" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-lg hover:bg-blue-700 transition">Send Reset Link</button>
+        </div>
+    </div>
+
     <!-- ADD HOUSE MODAL -->
     <div id="addHouseModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-md modal-content shadow-2xl">
@@ -277,15 +317,30 @@
         </div>
     </div>
 
+    <!-- VACANT EXPLORER MODAL -->
+    <div id="vacantExplorerModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[55]">
+        <div class="bg-white rounded-2xl p-5 w-full max-w-md modal-content shadow-2xl">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <h3 class="text-lg font-bold text-gray-800 flex items-center" id="veTitle">Vacant Properties</h3>
+                <button onclick="closeVacantExplorer()" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 transition"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="veBody" class="space-y-3"></div>
+        </div>
+    </div>
+
     <!-- HOUSE DETAILS MODAL -->
     <div id="houseDetailsModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-md modal-content shadow-2xl">
             <div class="flex justify-between border-b pb-4 mb-5 items-start">
                 <div>
                     <h3 class="font-extrabold text-blue-600 text-2xl" id="hdHouseName">House</h3>
-                    <p class="text-sm text-gray-500 flex items-center mt-1.5 bg-gray-50 p-1.5 rounded-lg border border-gray-100"><i class="fas fa-map-marker-alt text-red-500 mr-2 ml-1"></i><span id="hdHouseAddress" class="truncate max-w-[200px]">Address</span><a id="hdMapLink" href="#" target="_blank" class="ml-2 bg-blue-100 text-blue-600 p-1 rounded hover:bg-blue-200 transition flex items-center justify-center"><i class="fas fa-external-link-alt text-[10px]"></i></a></p>
+                    <p class="text-sm text-gray-500 flex items-center mt-1.5 bg-gray-50 p-1.5 rounded-lg border border-gray-100">
+                        <i class="fas fa-map-marker-alt text-red-500 mr-2 ml-1"></i>
+                        <span id="hdHouseAddress" class="truncate max-w-[200px]">Address</span>
+                        <a id="hdMapLink" href="#" target="_blank" class="ml-2 bg-blue-100 text-blue-600 p-1 rounded hover:bg-blue-200 transition flex items-center justify-center" title="View on Map"><i class="fas fa-external-link-alt text-[10px]"></i></a>
+                    </p>
                 </div>
-                <button id="closeHouseDetailsModal" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 transition"><i class="fas fa-times"></i></button>
+                <button id="closeHouseDetailsModal" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 hover:bg-red-50 transition"><i class="fas fa-times"></i></button>
             </div>
             <div id="hdRoomsList" class="space-y-3"></div>
         </div>
@@ -305,6 +360,31 @@
             <input type="hidden" id="rmHouseId">
             <input type="hidden" id="rmRoomIdVal">
             <div id="roomManagerBody"></div>
+        </div>
+    </div>
+
+    <!-- TRANSACTION DETAILS MODAL -->
+    <div id="transactionDetailsModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[70]">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm modal-content shadow-2xl border-t-4 border-blue-500">
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                <h3 class="font-bold text-gray-800 text-lg">Transaction Details</h3>
+                <button onclick="document.getElementById('transactionDetailsModal').classList.add('hidden')" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 transition"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="space-y-3" id="tdBody"></div>
+        </div>
+    </div>
+
+    <!-- DELETE TRANSACTION MODAL -->
+    <div id="deleteTransactionModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[80]">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm modal-content shadow-2xl border-t-4 border-red-500">
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                <h3 class="font-extrabold text-red-600 text-xl"><i class="fas fa-trash-alt mr-2"></i> Delete Entry</h3>
+                <button onclick="document.getElementById('deleteTransactionModal').classList.add('hidden')" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 transition"><i class="fas fa-times"></i></button>
+            </div>
+            <p class="text-sm text-gray-600 mb-4 font-medium">Please provide a reason. This entry will be voided and saved as a note in your history.</p>
+            <input type="hidden" id="delTxId">
+            <input type="text" id="delTxReason" placeholder="Reason (e.g. Wrong amount entered)" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-5 outline-none focus:ring-2 focus:ring-red-400 font-medium" required>
+            <button id="confirmDeleteTxBtn" class="w-full bg-red-500 text-white font-bold py-3.5 rounded-xl shadow-lg hover:bg-red-600 transition text-lg"><i class="fas fa-times-circle mr-2"></i> Confirm Delete</button>
         </div>
     </div>
 
@@ -346,10 +426,6 @@
                 icon.innerHTML = '✅'; titleEl.className = 'text-2xl font-extrabold mb-2 text-gray-800';
                 box.className = 'bg-white rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl transform transition-all scale-100 border-t-4 border-green-500';
                 btn.className = 'w-full bg-green-500 text-white font-bold py-3.5 rounded-xl hover:bg-green-600 shadow-lg transition text-lg';
-            } else if(type === 'warning') {
-                icon.innerHTML = '⚠️'; titleEl.className = 'text-2xl font-extrabold mb-2 text-yellow-600';
-                box.className = 'bg-white rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl transform transition-all scale-100 border-t-4 border-yellow-500';
-                btn.className = 'w-full bg-yellow-500 text-white font-bold py-3.5 rounded-xl hover:bg-yellow-600 shadow-lg transition text-lg';
             } else {
                 icon.innerHTML = '❌'; titleEl.className = 'text-2xl font-extrabold mb-2 text-gray-800';
                 box.className = 'bg-white rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl transform transition-all scale-100 border-t-4 border-red-500';
@@ -370,7 +446,7 @@
         };
 
         window.closeAllModals = () => {
-            ['addHouseModal', 'vacantExplorerModal', 'houseDetailsModal', 'roomManagerModal', 'transactionDetailsModal', 'forgotModal', 'deleteTransactionModal', 'tenantAccessModal', 'upgradeModal', 'qrModal'].forEach(m => {
+            ['addHouseModal', 'vacantExplorerModal', 'houseDetailsModal', 'roomManagerModal', 'transactionDetailsModal', 'forgotModal', 'deleteTransactionModal', 'tenantAccessModal', 'upgradeModal'].forEach(m => {
                 document.getElementById(m).classList.add('hidden');
             });
         };
@@ -395,6 +471,24 @@
             }
         });
 
+        document.getElementById('registerBtn').onclick = async () => {
+            const n = document.getElementById('regName').value, m = document.getElementById('regMobile').value, e = document.getElementById('regEmail').value, p = document.getElementById('regPassword').value;
+            if(!n || !m || !e || p.length < 6) return showAlert('error', 'Error', 'Fill all fields correctly. Password min 6 chars.');
+            const btn = document.getElementById('registerBtn'); btn.innerText = "Processing...";
+            try {
+                const cred = await createUserWithEmailAndPassword(auth, e, p);
+                await setDoc(doc(db, "users", cred.user.uid), { 
+                    ownerName: n, mobileNumber: m, emailId: e,
+                    planType: "free", walletBalance: 0, planExpiry: null
+                });
+                document.getElementById('authContainer').classList.add('hidden');
+                document.getElementById('appContainer').classList.remove('hidden');
+                await loadProfileData(); await loadDashboardData();
+                showAlert('success', 'Welcome!', 'Your account has been created.');
+            } catch(er) { showAlert('error', 'Failed', er.message); }
+            btn.innerText = "Create Account";
+        };
+
         document.getElementById('loginBtn').onclick = async () => {
             const btnText = document.getElementById('loginBtnText'); btnText.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Checking...';
             try { await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPassword').value); } 
@@ -403,33 +497,62 @@
         };
         document.getElementById('logoutBtn').onclick = () => signOut(auth);
 
+        document.getElementById('openForgotModal').onclick = () => document.getElementById('forgotModal').classList.remove('hidden');
+        document.getElementById('closeForgotModal').onclick = () => document.getElementById('forgotModal').classList.add('hidden');
+        document.getElementById('sendResetBtn').onclick = async () => {
+            const email = document.getElementById('resetEmailInput').value;
+            if(!email) return showAlert('error', 'Required', 'Please enter your registered Email ID.');
+            try {
+                await sendPasswordResetEmail(auth, email);
+                document.getElementById('forgotModal').classList.add('hidden');
+                document.getElementById('resetEmailInput').value = '';
+                showAlert('success', 'Email Sent!', 'Please check your inbox (or spam folder) for the reset link.');
+            } catch(error) { showAlert('error', 'Error', error.message); }
+        };
+        
         // ================= UPGRADE & WALLET LOGIC =================
         window.customMonths = 1;
         window.selectedPlanAmount = 99;
         window.selectedPlanDesc = "1 Month Premium";
 
         window.openUpgradeModal = (msg) => {
-            if(msg && typeof msg === 'string' && msg !== 'wallet') alert(msg);
+            document.getElementById('qrCodeContainer').classList.add('hidden');
+            document.getElementById('notifyPaymentBtn').classList.add('hidden');
+            document.getElementById('paymentOptionsGroup').classList.remove('hidden');
+            
+            document.getElementById('upgradeWalletBal').innerText = `Bal: ₹${window.currentUserWallet}`;
+            if(window.currentUserWallet < 10) document.getElementById('upgradeWalletBal').classList.replace('bg-green-700', 'bg-red-600');
+
+            if(typeof msg === 'string') alert(msg);
             document.querySelectorAll('.plan-card').forEach(el => el.classList.remove('active'));
             document.getElementById('planMonthly').classList.add('active');
+            
             window.customMonths = 1;
-            window.selectedPlanAmount = 99; window.selectedPlanDesc = "1 Month Premium";
-            document.getElementById('customMonthCount').innerText = window.customMonths;
+            document.getElementById('customMonthCount').innerText = 1;
             document.getElementById('customMonthTotal').innerText = '₹99';
-            document.getElementById('payBtnAmount').innerText = '99';
-            document.getElementById('upgradeWalletBal').innerText = window.currentUserWallet;
+
+            window.selectedPlanAmount = 99; window.selectedPlanDesc = "1 Month Premium";
+            document.getElementById('payBtnAmount').innerText = '₹99';
             document.getElementById('upgradeModal').classList.remove('hidden');
         };
 
         window.selectPlan = (amt, desc, id) => {
+            document.getElementById('qrCodeContainer').classList.add('hidden');
+            document.getElementById('notifyPaymentBtn').classList.add('hidden');
+            document.getElementById('paymentOptionsGroup').classList.remove('hidden');
+
             document.querySelectorAll('.plan-card').forEach(el => el.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             window.selectedPlanAmount = amt;
             window.selectedPlanDesc = desc;
-            document.getElementById('payBtnAmount').innerText = amt;
+            document.getElementById('payBtnAmount').innerText = '₹' + amt;
         };
 
         window.updateCustomPlan = (delta) => {
+            document.getElementById('qrCodeContainer').classList.add('hidden');
+            document.getElementById('notifyPaymentBtn').classList.add('hidden');
+            document.getElementById('paymentOptionsGroup').classList.remove('hidden');
+
             window.customMonths += delta;
             if(window.customMonths < 1) window.customMonths = 1;
             document.getElementById('customMonthCount').innerText = window.customMonths;
@@ -439,29 +562,34 @@
             document.querySelectorAll('.plan-card').forEach(el => el.classList.remove('active'));
             window.selectedPlanAmount = amt;
             window.selectedPlanDesc = `Custom ${window.customMonths} Months Plan`;
-            document.getElementById('payBtnAmount').innerText = amt;
+            document.getElementById('payBtnAmount').innerText = '₹' + amt;
         };
 
-        // 1. Direct UPI App (PhonePe/Gpay)
-        window.payViaUPIApp = () => {
-            const upiId = "8866653002@Kotakbank"; 
-            const upiUrl = `upi://pay?pa=${upiId}&pn=RentEasy%20Admin&am=${window.selectedPlanAmount}&cu=INR&tn=${encodeURIComponent(window.selectedPlanDesc)}`;
-            
-            window.showQRCode(); // Also show QR in background in case app doesn't open
-            setTimeout(() => { window.location.href = upiUrl; }, 600);
-        };
-
-        // 2. Show QR Code
+        // BUTTON 1: Show QR
         window.showQRCode = () => {
             const upiId = "8866653002@Kotakbank"; 
             const upiUrl = `upi://pay?pa=${upiId}&pn=RentEasy%20Admin&am=${window.selectedPlanAmount}&cu=INR&tn=${encodeURIComponent(window.selectedPlanDesc)}`;
             
-            document.getElementById('upgradeModal').classList.add('hidden');
-            document.getElementById('qrAmount').innerText = window.selectedPlanAmount;
-            document.getElementById('upiQrImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiUrl)}`;
-            document.getElementById('qrModal').classList.remove('hidden');
+            document.getElementById('upiQrImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiUrl)}`;
+            document.getElementById('qrCodeContainer').classList.remove('hidden');
+            document.getElementById('notifyPaymentBtn').classList.remove('hidden');
+            document.getElementById('paymentOptionsGroup').classList.add('hidden');
         };
 
+        // BUTTON 2: Direct UPI App
+        window.payViaUPIApp = () => {
+            const upiId = "8866653002@Kotakbank"; 
+            const upiUrl = `upi://pay?pa=${upiId}&pn=RentEasy%20Admin&am=${window.selectedPlanAmount}&cu=INR&tn=${encodeURIComponent(window.selectedPlanDesc)}`;
+            
+            document.getElementById('upiQrImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiUrl)}`;
+            document.getElementById('qrCodeContainer').classList.remove('hidden');
+            document.getElementById('notifyPaymentBtn').classList.remove('hidden');
+            document.getElementById('paymentOptionsGroup').classList.add('hidden');
+            
+            setTimeout(() => { window.location.href = upiUrl; }, 400);
+        };
+
+        // NOTIFY ADMIN
         window.notifyAdminPayment = async () => {
             showLoader();
             try {
@@ -469,88 +597,96 @@
                     ownerId: currentUserId, amount: window.selectedPlanAmount, plan: window.selectedPlanDesc, status: "Pending Verification", date: new Date().toISOString()
                 });
                 hideLoader(); closeAllModals();
-                showAlert('success', 'Payment Reported', 'We have received your payment notification. Your account will be upgraded within 24 hours after verification.');
+                showAlert('success', 'Payment Reported', 'We have received your payment request. Your account will be upgraded within 24 hours after verification.');
             } catch(e) { hideLoader(); showAlert('error', 'Error', e.message); }
         };
 
-        // 3. Pay via Wallet (Instant Upgrade minus balance)
+        // BUTTON 3: PAY VIA WALLET (Realtime Deduction & Plan Extension)
         window.payViaWallet = async () => {
             if(window.currentUserWallet < window.selectedPlanAmount) {
-                return showAlert('warning', 'Low Balance', `You need ₹${window.selectedPlanAmount} but you only have ₹${window.currentUserWallet} in your wallet. Please scan QR or use UPI to pay.`);
+                return showAlert('error', 'Low Balance', `Your wallet balance is ₹${window.currentUserWallet}. You need ₹${window.selectedPlanAmount}. Please use UPI to recharge.`);
             }
+
+            if(!confirm(`Deduct ₹${window.selectedPlanAmount} from your wallet to buy ${window.selectedPlanDesc}?`)) return;
 
             showLoader();
             try {
-                // Calculate New Expiry
-                let newExpiry = new Date();
-                if(window.planExpiryDate && window.planExpiryDate > new Date()) newExpiry = new Date(window.planExpiryDate); // Extend existing
+                const newBal = window.currentUserWallet - window.selectedPlanAmount; // 0 tak ja sakta hai par minus nahi kyuki if condition bacha legi
                 
-                let addMonths = 1;
-                if(window.selectedPlanAmount === 600) addMonths = 3; // Quarter
-                else if(window.selectedPlanAmount === 1100) addMonths = 12; // Yearly
-                else addMonths = window.customMonths;
+                // Calculate new expiry date based on plan
+                let monthsToAdd = 1;
+                if(window.selectedPlanAmount === 600) monthsToAdd = 3;
+                else if(window.selectedPlanAmount === 1100) monthsToAdd = 12;
+                else if(window.selectedPlanDesc.includes('Custom')) monthsToAdd = window.customMonths;
 
-                newExpiry.setMonth(newExpiry.getMonth() + addMonths);
+                // Extend from today or from existing expiry if active
+                let newExpiry = new Date();
+                if (window.planExpiryDate && new Date(window.planExpiryDate) > new Date()) {
+                    newExpiry = new Date(window.planExpiryDate);
+                }
+                newExpiry.setMonth(newExpiry.getMonth() + monthsToAdd);
 
-                const newWalletBal = window.currentUserWallet - window.selectedPlanAmount;
-
-                // Update Firestore
-                await updateDoc(doc(db, "users", currentUserId), { 
-                    planType: "pro", 
-                    walletBalance: newWalletBal,
+                await updateDoc(doc(db, "users", currentUserId), {
+                    walletBalance: newBal,
+                    planType: "pro",
                     planExpiry: newExpiry.toISOString()
                 });
-                
-                // Add transaction for internal history
+
+                // Log wallet transaction
                 await addDoc(collection(db, "transactions"), { 
-                    ownerId: currentUserId, roomName: "Subscription", tenantName: "Admin", amount: window.selectedPlanAmount, mode: "Wallet", type: "Plan Purchase", date: new Date().toISOString() 
+                    ownerId: currentUserId, houseName: "N/A", roomName: "Wallet", tenantName: "Admin", amount: window.selectedPlanAmount, mode: "Wallet", type: "Subscription Purchased", status: 'Active', date: new Date().toISOString() 
                 });
 
                 await loadProfileData();
                 hideLoader(); closeAllModals();
-                showAlert('success', 'Plan Upgraded!', `Your wallet was debited ₹${window.selectedPlanAmount}. Your Pro plan is now active till ${newExpiry.toLocaleDateString('en-GB')}.`);
-            } catch (e) {
-                hideLoader(); showAlert('error', 'Error', e.message);
-            }
+                showAlert('success', 'Plan Activated!', `Your plan has been upgraded successfully until ${newExpiry.toLocaleDateString('en-GB')}. Remaining Wallet: ₹${newBal}`);
+
+            } catch(e) { hideLoader(); showAlert('error', 'Error', e.message); }
         };
 
-
-        // PROFILE & PLAN BADGES
+        // ================= PROFILE & BADGES =================
         async function loadProfileData() {
             const dSnap = await getDoc(doc(db, "users", currentUserId));
             if (dSnap.exists()) {
                 const d = dSnap.data();
+                
                 window.currentUserPlan = d.planType || 'free';
                 window.currentUserWallet = d.walletBalance || 0;
-                window.planExpiryDate = d.planExpiry ? new Date(d.planExpiry) : null;
+                window.planExpiryDate = d.planExpiry || null;
                 
-                // Expiry Text Logic
-                let planText = window.currentUserPlan.toUpperCase();
-                if(window.currentUserPlan === 'pro' && window.planExpiryDate) {
-                    const dStr = window.planExpiryDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
-                    planText = `PRO (Till ${dStr})`;
-                    // Auto downgrade if expired
-                    if(new Date() > window.planExpiryDate) {
-                        window.currentUserPlan = 'free'; planText = 'FREE (EXPIRED)';
-                        await updateDoc(doc(db, "users", currentUserId), { planType: "free" });
-                    }
-                }
-
-                // Top Header Badges
                 const pb = document.getElementById('headerPlanBadge');
-                pb.innerText = planText;
-                pb.classList.remove('hidden');
+                const vb = document.getElementById('headerValidityBadge');
+                const wb = document.getElementById('headerWalletBadge');
                 
-                if(window.currentUserPlan !== 'free') {
+                pb.innerText = window.currentUserPlan.toUpperCase();
+                pb.classList.remove('hidden');
+                vb.classList.remove('hidden');
+                
+                // Plan Display Logic
+                if(window.currentUserPlan === 'pro' && window.planExpiryDate) {
                     pb.classList.remove('bg-yellow-400', 'text-yellow-900', 'border-yellow-500');
                     pb.classList.add('bg-gradient-to-r', 'from-blue-500', 'to-blue-700', 'text-white', 'border-blue-700', 'shadow-md');
+                    
+                    const exp = new Date(window.planExpiryDate);
+                    const diffTime = Math.abs(exp - new Date());
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    
+                    if(exp > new Date()) vb.innerText = `${diffDays} Days Left`;
+                    else { vb.innerText = "EXPIRED"; vb.classList.add('text-red-400'); window.currentUserPlan = 'free'; }
                 } else {
-                    pb.classList.add('bg-yellow-400', 'text-yellow-900', 'border-yellow-500');
-                    pb.classList.remove('bg-gradient-to-r', 'from-blue-500', 'to-blue-700', 'text-white', 'border-blue-700', 'shadow-md');
+                    pb.className = 'bg-yellow-400 text-yellow-900 text-[9px] font-black px-1.5 py-0.5 rounded shadow-sm tracking-wider border border-yellow-500 cursor-pointer';
+                    vb.innerText = "No Plan";
                 }
                 
-                const wb = document.getElementById('headerWalletBadge');
-                wb.innerText = 'Wallet: ₹' + window.currentUserWallet;
+                // Wallet Display Logic
+                document.getElementById('walletAmtText').innerText = '₹' + window.currentUserWallet;
+                if(window.currentUserWallet < 10) {
+                    wb.classList.replace('bg-green-500', 'bg-red-500');
+                    wb.classList.replace('border-green-600', 'border-red-600');
+                } else {
+                    wb.classList.replace('bg-red-500', 'bg-green-500');
+                    wb.classList.replace('border-red-600', 'border-green-600');
+                }
                 wb.classList.remove('hidden');
 
                 document.getElementById('profileName').innerText = d.ownerName;
@@ -564,9 +700,275 @@
                 if(d.ifsc) document.getElementById('ifscInput').value = d.ifsc;
             }
         }
+        
+        document.getElementById('saveProfileBtn').onclick = async () => {
+            showLoader();
+            await updateDoc(doc(db, "users", currentUserId), { upiId: document.getElementById('upiIdInput').value, bankAcc: document.getElementById('bankAccInput').value, ifsc: document.getElementById('ifscInput').value }); 
+            hideLoader();
+            showAlert('success', 'Updated Successfully', 'Profile payment details saved in real-time.'); 
+        };
 
-        // ================= ROOM MANAGER (PDF LOGIC) =================
-        // Keeping PDF sending function active for PRO owners
+        // TENANT PORTAL ACCESS
+        window.openTenantAccessModal = () => {
+            const select = document.getElementById('taRoomSelect'); const list = document.getElementById('taAccessList');
+            select.innerHTML = '<option value="">Select House - Room</option>'; list.innerHTML = ''; let hasAccess = false;
+            Object.keys(window.houseDataCache || {}).forEach(hId => {
+                const h = window.houseDataCache[hId];
+                h.rooms.forEach(r => {
+                    select.innerHTML += `<option value="${hId}|${r.id}">Room ${r.roomNumber} (${h.name})</option>`;
+                    if(r.accessEmail) {
+                        hasAccess = true;
+                        list.innerHTML += `
+                        <div class="bg-white border rounded-xl p-3.5 flex justify-between items-center shadow-sm hover:shadow-md transition mb-3">
+                            <div><p class="font-bold text-gray-800 text-sm">Room ${r.roomNumber} <span class="text-[10px] font-normal text-gray-500">(${h.name})</span></p><p class="text-xs text-blue-600 font-medium mt-1 tracking-wide"><i class="fas fa-envelope mr-1"></i> ${r.accessEmail}</p></div>
+                            <button onclick="removeTenantAccess('${hId}', '${r.id}')" class="bg-red-50 text-red-500 h-9 w-9 rounded-full flex justify-center items-center hover:bg-red-100 transition border border-red-100 shadow-sm"><i class="fas fa-trash-alt text-xs"></i></button>
+                        </div>`;
+                    }
+                });
+            });
+            if(!hasAccess) list.innerHTML = '<p class="text-xs text-gray-500 text-center py-4 bg-gray-50 rounded-xl border border-dashed">No tenant access granted yet.</p>';
+            document.getElementById('tenantAccessModal').classList.remove('hidden');
+        };
+
+        window.grantTenantAccess = async () => {
+            const val = document.getElementById('taRoomSelect').value; const email = document.getElementById('taEmailInput').value;
+            if(!val || !email) return showAlert('error', 'Required', 'Please select a room and enter an Email ID.');
+            showLoader(); const [hId, rId] = val.split('|');
+            try {
+                await updateDoc(doc(db, "houses", hId, "rooms", rId), { accessEmail: email });
+                await loadDashboardData(); document.getElementById('taEmailInput').value = ''; document.getElementById('taRoomSelect').value = '';
+                openTenantAccessModal(); hideLoader(); showAlert('success', 'Access Granted', 'Tenant can now view their details using this email.');
+            } catch (e) { hideLoader(); showAlert('error', 'Error', e.message); }
+        };
+
+        window.removeTenantAccess = async (hId, rId) => {
+            if(!confirm('Are you sure you want to revoke access?')) return;
+            showLoader();
+            try {
+                await updateDoc(doc(db, "houses", hId, "rooms", rId), { accessEmail: "" });
+                await loadDashboardData(); openTenantAccessModal(); hideLoader(); showAlert('success', 'Access Removed', 'Tenant access has been successfully revoked.');
+            } catch (e) { hideLoader(); showAlert('error', 'Error', e.message); }
+        };
+
+        // ADD PROPERTY
+        document.getElementById('openAddHouseModal').onclick = () => document.getElementById('addHouseModal').classList.remove('hidden');
+        document.getElementById('closeAddHouseModal').onclick = () => document.getElementById('addHouseModal').classList.add('hidden');
+        document.getElementById('roomCount').oninput = (e) => {
+            let html = ''; for(let i=1; i<=e.target.value; i++) html += `<div class="bg-gray-50 border p-3 rounded-xl mb-2"><input type="text" id="rNo_${i}" placeholder="Room No (eg 101)" class="w-full bg-white border p-2 mb-2 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"><div class="flex gap-2"><input type="number" id="rAmt_${i}" placeholder="Base Rent ₹" class="w-full bg-white border p-2 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"><input type="number" id="wAmt_${i}" placeholder="Water Bill ₹" class="w-full bg-white border p-2 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"></div></div>`;
+            document.getElementById('dynamicRoomsContainer').innerHTML = html;
+        };
+        
+        document.getElementById('savePropertyBtn').onclick = async () => {
+            const c = parseInt(document.getElementById('roomCount').value);
+            if(c>0) {
+                showLoader();
+                const hRef = await addDoc(collection(db, "houses"), { ownerId: currentUserId, houseName: document.getElementById('houseName').value, address: document.getElementById('houseAddress').value });
+                for(let i=1; i<=c; i++) {
+                    if(document.getElementById(`rNo_${i}`).value) {
+                        await addDoc(collection(db, "houses", hRef.id, "rooms"), {
+                            roomNumber: document.getElementById(`rNo_${i}`).value, tenantUniqueId: 'Unassigned', accessEmail: "",
+                            rentAmount: Number(document.getElementById(`rAmt_${i}`).value), waterBillFixed: Number(document.getElementById(`wAmt_${i}`).value),
+                            meterPrev: 0, meterCurr: 0, unitRate: 0, occupancyStatus: "Vacant", paymentStatus: "Pending", currentLightBill: 0, penalty: 0
+                        });
+                    }
+                }
+                await loadDashboardData(); hideLoader(); closeAllModals(); 
+                document.getElementById('houseName').value = ''; document.getElementById('houseAddress').value = ''; document.getElementById('roomCount').value = ''; document.getElementById('dynamicRoomsContainer').innerHTML = '';
+                showAlert('success', 'Updated Successfully', 'Property and rooms saved in real-time.'); 
+            }
+        };
+
+        // DASHBOARD DATA
+        window.houseDataCache = {}; window.vacantDataCache = {}; 
+        
+        async function loadDashboardData() {
+            if(!currentUserId) return;
+            const hList = document.getElementById('housesList'); const pList = document.getElementById('pendingRoomsList');
+            if(hList.innerHTML === '') { hList.innerHTML=`<div class="flex flex-col items-center justify-center py-10 text-blue-500"><i class="fas fa-circle-notch fa-spin text-4xl mb-3"></i><p class="text-sm font-bold text-gray-500">Syncing properties...</p></div>`; }
+            
+            let tExp=0, tRec=0, tPen=0, vCount=0;
+            let tempHouseCache = {}; let tempVacantCache = {};
+            let htmlBufferHouses = ''; let htmlBufferPending = '';
+
+            const q = query(collection(db, "houses"), where("ownerId", "==", currentUserId));
+            const hSnaps = await getDocs(q);
+
+            if(hSnaps.empty) {
+                hList.innerHTML = `<div class="text-center text-gray-400 mt-10"><p>No properties found.</p></div>`;
+                pList.innerHTML = `<p class="text-gray-400">No collections pending.</p>`;
+                return;
+            }
+
+            for (const hDoc of hSnaps.docs) {
+                const hd = hDoc.data(); const rSnaps = await getDocs(collection(db, "houses", hDoc.id, "rooms"));
+                let roomsData = [];
+                rSnaps.forEach(rDoc => {
+                    const r = rDoc.data(); roomsData.push({ id: rDoc.id, ...r });
+                    const encRoom = encodeURIComponent(JSON.stringify({id: rDoc.id, ...r}));
+                    if(r.occupancyStatus === "Occupied") {
+                        const amt = r.rentAmount + r.waterBillFixed + (r.currentLightBill||0) + (r.penalty||0);
+                        tExp += amt;
+                        if(r.paymentStatus === "Paid") { tRec += amt; } 
+                        else { 
+                            tPen += amt; 
+                            htmlBufferPending += `<div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-red-500 cursor-pointer hover:shadow-md transition mb-3" onclick="openRoomManager('${hDoc.id}', '${encRoom}')"><div><p class="font-bold text-gray-800">${hd.houseName} - Room ${r.roomNumber}</p><p class="text-xs text-gray-500 font-medium">${r.tenantName}</p></div><div class="font-black text-red-600 text-lg">₹${amt}</div></div>`;
+                        }
+                    } else if(r.occupancyStatus === "Vacant") {
+                        vCount++;
+                        if(!tempVacantCache[hDoc.id]) tempVacantCache[hDoc.id] = { name: hd.houseName, address: hd.address, rooms: [] };
+                        tempVacantCache[hDoc.id].rooms.push({ id: rDoc.id, ...r });
+                    }
+                });
+                tempHouseCache[hDoc.id] = { name: hd.houseName, address: hd.address, rooms: roomsData };
+                const encodedAddress = encodeURIComponent(hd.address);
+                htmlBufferHouses += `<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex justify-between items-center cursor-pointer border-l-4 border-l-blue-500 mb-4 hover:shadow-md transition" onclick="openHouseDetailsModal('${hDoc.id}')"><div><h3 class="font-extrabold text-gray-800 text-lg">${hd.houseName}</h3><div class="text-xs text-gray-500 mt-1.5 flex items-center bg-gray-50 px-2 py-1 rounded inline-flex border border-gray-100"><i class="fas fa-map-marker-alt text-red-400 mr-1.5"></i> <span class="truncate max-w-[150px]">${hd.address}</span><a href="https://www.google.com/maps/search/?api=1&query=${encodedAddress}" target="_blank" onclick="event.stopPropagation()" class="text-blue-500 hover:text-blue-700 ml-2 bg-blue-100 p-1 rounded transition" title="View on Map"><i class="fas fa-external-link-alt text-[10px]"></i></a></div></div><div class="bg-gray-50 h-10 w-10 rounded-full flex items-center justify-center border border-gray-200"><i class="fas fa-chevron-right text-gray-400"></i></div></div>`;
+            }
+            window.houseDataCache = tempHouseCache; window.vacantDataCache = tempVacantCache;
+            hList.innerHTML = htmlBufferHouses; pList.innerHTML = htmlBufferPending;
+            document.getElementById('statExpected').innerText = "₹" + tExp; document.getElementById('statReceived').innerText = "₹" + tRec; document.getElementById('statPending').innerText = "₹" + tPen;
+            document.getElementById('vacantCountBadge').innerText = vCount;
+            if(tPen === 0 && tExp > 0) pList.innerHTML = `<p class="text-green-600 font-bold bg-green-50 p-4 rounded-xl border border-green-200 shadow-sm flex items-center"><i class="fas fa-check-circle text-xl mr-2"></i> All collections complete!</p>`;
+        }
+
+        // VACANT EXPLORER
+        window.openVacantHousesModal = () => {
+            document.getElementById('veTitle').innerHTML = "Vacant Properties"; const body = document.getElementById('veBody'); body.innerHTML = '';
+            const houseIds = Object.keys(window.vacantDataCache);
+            if(houseIds.length === 0) { body.innerHTML = `<p class="text-center text-gray-500 mt-5"><i class="fas fa-home text-5xl mb-3 text-gray-300"></i><br>All rooms are currently occupied.</p>`; } 
+            else {
+                houseIds.forEach(hId => {
+                    const h = window.vacantDataCache[hId]; const encodedAddress = encodeURIComponent(h.address);
+                    body.innerHTML += `<div class="bg-white border rounded-xl p-4 flex justify-between items-center shadow-sm cursor-pointer hover:border-blue-400 transition mb-3" onclick="openVacantRoomsView('${hId}')"><div><h4 class="font-extrabold text-blue-700 text-lg">${h.name}</h4><p class="text-xs text-gray-500 mt-1 flex items-center bg-gray-50 px-1 rounded inline-flex"><span class="truncate max-w-[120px]">${h.address}</span><a href="https://www.google.com/maps/search/?api=1&query=${encodedAddress}" target="_blank" onclick="event.stopPropagation()" class="text-blue-500 ml-2"><i class="fas fa-external-link-alt text-[10px]"></i></a></p></div><div class="bg-blue-100 text-blue-800 font-black px-3 py-1.5 rounded-lg text-xs shadow-sm">${h.rooms.length} Khali</div></div>`;
+                });
+            }
+            document.getElementById('vacantExplorerModal').classList.remove('hidden');
+        };
+
+        window.openVacantRoomsView = (hId) => {
+            const h = window.vacantDataCache[hId]; document.getElementById('veTitle').innerHTML = `<button onclick="openVacantHousesModal()" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-600 mr-2 hover:bg-gray-200"><i class="fas fa-arrow-left"></i></button> ${h.name}`;
+            const body = document.getElementById('veBody'); body.innerHTML = '';
+            h.rooms.forEach(r => {
+                const encRoom = encodeURIComponent(JSON.stringify(r));
+                body.innerHTML += `<div class="bg-gray-50 border rounded-xl p-4 flex justify-between items-center shadow-sm cursor-pointer hover:bg-blue-50 transition border-l-4 border-l-gray-400 mb-3" onclick="openRoomManager('${hId}', '${encRoom}')"><div><h4 class="font-extrabold text-gray-800 text-lg">Room ${r.roomNumber}</h4><p class="text-xs text-gray-500 font-bold mt-1 bg-white px-2 py-1 rounded inline-block border">Rent: ₹${r.rentAmount} | Water: ₹${r.waterBillFixed}</p></div><button class="bg-blue-600 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition tracking-wide">ASSIGN</button></div>`;
+            });
+        };
+        window.closeVacantExplorer = () => document.getElementById('vacantExplorerModal').classList.add('hidden');
+
+        // HOUSE DETAILS
+        window.openHouseDetailsModal = (hId) => {
+            const d = window.houseDataCache[hId]; document.getElementById('hdHouseName').innerText = d.name; document.getElementById('hdHouseAddress').innerText = d.address;
+            document.getElementById('hdMapLink').href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.address)}`;
+            const rList = document.getElementById('hdRoomsList'); rList.innerHTML = '';
+            d.rooms.forEach(r => {
+                let sClass = r.occupancyStatus === "Vacant" ? "bg-gray-50 border-gray-200 border-l-gray-400" : (r.paymentStatus === "Paid" ? "bg-green-50 border-green-200 border-l-green-400" : "bg-red-50 border-red-200 border-l-red-400");
+                let sText = r.occupancyStatus === "Vacant" ? "VACANT" : (r.paymentStatus === "Paid" ? "PAID" : "PENDING");
+                let sBadge = r.occupancyStatus === "Vacant" ? "bg-white text-gray-600" : (r.paymentStatus === "Paid" ? "bg-green-500 text-white" : "bg-red-500 text-white");
+                rList.innerHTML += `<div class="border border-l-4 rounded-xl p-4 ${sClass} cursor-pointer shadow-sm hover:shadow-md transition mb-3" onclick="openRoomManager('${hId}', '${encodeURIComponent(JSON.stringify(r))}')"><div class="flex justify-between items-center mb-1.5"><span class="font-extrabold text-lg text-gray-800">Room ${r.roomNumber}</span><span class="text-[10px] px-2.5 py-1 rounded-full font-bold shadow-sm tracking-wider ${sBadge}">${sText}</span></div><p class="text-sm font-medium ${r.occupancyStatus==="Occupied" ? 'text-gray-700' : 'text-gray-400'}">${r.occupancyStatus==="Occupied" ? r.tenantName : "Ready to assign"}</p></div>`;
+            });
+            document.getElementById('houseDetailsModal').classList.remove('hidden');
+        };
+        document.getElementById('closeHouseDetailsModal').onclick = () => document.getElementById('houseDetailsModal').classList.add('hidden');
+
+        // ROOM MANAGER MODAL
+        window.openRoomManager = (hId, rStringEnc) => {
+            const r = JSON.parse(decodeURIComponent(rStringEnc));
+            document.getElementById('rmHouseId').value = hId; document.getElementById('rmRoomIdVal').value = r.id;
+            document.getElementById('rmRoomName').innerText = "Room " + r.roomNumber; 
+            document.getElementById('rmRoomId').innerText = r.occupancyStatus === "Occupied" ? "ID: " + r.tenantUniqueId : "Unassigned";
+            
+            const body = document.getElementById('roomManagerBody');
+            
+            if(r.occupancyStatus === "Vacant") {
+                body.innerHTML = `
+                    <div class="bg-gray-100 p-2.5 rounded-lg mb-4 text-center border border-gray-200"><span class="text-gray-600 text-[10px] font-black uppercase tracking-widest">Status: Vacant</span></div>
+                    <h4 class="font-bold text-gray-800 mb-3 text-sm uppercase tracking-wide">Assign New Tenant</h4>
+                    <input type="text" id="tName" placeholder="Tenant Full Name" class="w-full bg-gray-50 border p-3.5 mb-3 rounded-xl focus:ring-2 focus:ring-blue-400 outline-none transition">
+                    <div class="flex gap-3 mb-3">
+                        <input type="tel" id="tMob" placeholder="Mobile" class="w-1/2 bg-gray-50 border p-3.5 rounded-xl focus:ring-2 focus:ring-blue-400 outline-none transition">
+                        <input type="tel" id="tAlt" placeholder="Alt. Mobile" class="w-1/2 bg-gray-50 border p-3.5 rounded-xl focus:ring-2 focus:ring-blue-400 outline-none transition">
+                    </div>
+                    <div class="flex gap-3 mb-3">
+                        <input type="number" id="tDep" placeholder="Deposit (₹)" class="w-1/2 border-2 border-blue-400 p-3.5 rounded-xl focus:ring-2 outline-none font-bold text-blue-700 bg-blue-50">
+                        <select id="tDepMode" class="w-1/2 border p-3.5 rounded-xl font-bold bg-gray-50 outline-none text-gray-700"><option>Cash</option><option>UPI</option><option>Debit Card</option><option>Bank Transfer</option></select>
+                    </div>
+                    <h4 class="font-bold text-gray-800 mb-3 mt-4 border-t pt-4 text-sm uppercase tracking-wide">Initial Room Setup</h4>
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        <div><label class="text-[10px] font-bold text-gray-500 uppercase">Base Rent (₹)</label><input type="number" id="rBase" value="${r.rentAmount}" class="w-full border p-3.5 rounded-xl font-bold bg-gray-50 outline-none"></div>
+                        <div><label class="text-[10px] font-bold text-gray-500 uppercase">Water Bill (₹)</label><input type="number" id="wBase" value="${r.waterBillFixed}" class="w-full border p-3.5 rounded-xl font-bold bg-gray-50 outline-none"></div>
+                        <div><label class="text-[10px] font-bold text-gray-500 uppercase">Start Meter Read</label><input type="number" id="tMeterPrev" placeholder="0" value="${r.meterCurr||r.meterPrev||''}" class="w-full border p-3.5 rounded-xl font-bold bg-blue-50 border-blue-200 outline-none"></div>
+                        <div><label class="text-[10px] font-bold text-gray-500 uppercase">Per Unit Rate (₹)</label><input type="number" id="tUnitRate" placeholder="e.g. 8" value="${r.unitRate||''}" class="w-full border p-3.5 rounded-xl font-bold bg-blue-50 border-blue-200 outline-none"></div>
+                    </div>
+                    <button id="assignBtn" onclick="assignTenant('${r.roomNumber}')" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl mt-4 shadow-lg hover:bg-blue-700 transition text-lg tracking-wide">Assign Tenant & Save</button>
+                `;
+            } else {
+                const totalDue = r.rentAmount + r.waterBillFixed + (r.currentLightBill||0) + (r.penalty||0);
+                
+                body.innerHTML = `
+                    <div class="bg-green-50 p-3 rounded-xl mb-4 flex justify-between items-center border border-green-200"><span class="font-black text-green-800 text-lg">${r.tenantName}</span><button onclick="vacateRoom('${r.tenantName}', ${r.deposit})" class="bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow hover:bg-red-600 transition">Vacate Room</button></div>
+                    
+                    <div class="grid grid-cols-3 gap-2 mb-3 bg-gray-50 p-3 border rounded-xl">
+                        <div><label class="text-[10px] text-gray-500 font-bold uppercase tracking-wider block mb-1">Rent (₹)</label><input type="number" id="editRent" value="${r.rentAmount}" class="w-full border rounded-lg p-2.5 font-bold bg-white outline-none focus:ring-1 focus:ring-blue-400 transition"></div>
+                        <div><label class="text-[10px] text-gray-500 font-bold uppercase tracking-wider block mb-1">Water (₹)</label><input type="number" id="editWater" value="${r.waterBillFixed}" class="w-full border rounded-lg p-2.5 font-bold bg-white outline-none focus:ring-1 focus:ring-blue-400 transition"></div>
+                        <div><label class="text-[10px] text-red-500 font-bold uppercase tracking-wider block mb-1">Penalty (₹)</label><input type="number" id="editPen" value="${r.penalty||''}" placeholder="0" class="w-full border rounded-lg p-2.5 border-red-300 outline-none bg-white focus:ring-1 focus:ring-red-400 transition"></div>
+                    </div>
+                    
+                    <div class="bg-blue-50 p-3 rounded-xl mb-4 border border-blue-200 shadow-inner">
+                        <div class="flex justify-between items-center mb-2"><h5 class="text-[10px] font-black text-blue-800 uppercase tracking-widest"><i class="fas fa-bolt text-yellow-500 mr-1"></i> Electricity Bill</h5><span class="text-[10px] font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded border border-blue-200">Units: <span id="displayUnits">0</span></span></div>
+                        <div class="flex gap-2 mb-2">
+                            <div class="w-1/3"><label class="text-[9px] text-gray-500 font-bold uppercase tracking-wider block mb-1">Prev Read</label><input type="number" id="editMeterPrev" value="${r.meterPrev||0}" class="w-full border border-blue-200 rounded p-2 text-xs font-bold outline-none bg-gray-100"></div>
+                            <div class="w-1/3"><label class="text-[9px] text-blue-600 font-bold uppercase tracking-wider block mb-1">Curr Read</label><input type="number" id="editMeterCurr" value="${r.meterCurr||r.meterPrev||0}" placeholder="Current" class="w-full border border-blue-400 rounded p-2 text-xs font-bold outline-none bg-white focus:ring-2 focus:ring-blue-400"></div>
+                            <div class="w-1/3"><label class="text-[9px] text-gray-500 font-bold uppercase tracking-wider block mb-1">Rate (₹)</label><input type="number" id="editUnitRate" value="${r.unitRate||''}" placeholder="Per Unit" class="w-full border border-blue-200 rounded p-2 text-xs font-bold outline-none bg-white"></div>
+                        </div>
+                        <div class="flex justify-between items-center bg-white p-2.5 rounded-lg border border-blue-100 shadow-sm"><span class="text-[10px] font-bold text-gray-500 uppercase">Calculated Light Bill:</span><span class="text-sm font-black text-blue-700">₹<span id="displayLightBill">0</span></span><input type="hidden" id="editLight" value="${r.currentLightBill||0}"></div>
+                    </div>
+                    
+                    <div class="bg-gray-900 text-white p-4 rounded-xl flex justify-between items-center mb-5 shadow-lg border border-gray-700">
+                        <span class="font-bold text-gray-300 uppercase text-xs tracking-widest">Total Due:</span><span class="text-3xl font-black text-white" id="displayTotalDue">₹${totalDue}</span>
+                    </div>
+
+                    <div class="flex gap-3 mb-5">
+                        <select id="payMode" class="w-1/2 border p-3.5 rounded-xl font-bold bg-gray-50 outline-none text-gray-700"><option>Cash</option><option>UPI</option><option>Debit Card</option><option>Bank Transfer</option></select>
+                        <select id="payStatus" class="w-1/2 border p-3.5 rounded-xl font-bold outline-none ${r.paymentStatus==='Paid'?'bg-green-50 text-green-700 border-green-300':'bg-red-50 text-red-700 border-red-300'} transition"><option value="Pending" ${r.paymentStatus==='Pending'?'selected':''}>❌ Pending</option><option value="Paid" ${r.paymentStatus==='Paid'?'selected':''}>✅ Paid</option></select>
+                    </div>
+                    
+                    <button id="updateRoomBtn" onclick="saveRoomUpdates('${r.tenantName}')" class="w-full bg-green-500 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-green-600 transition mb-4 text-lg"><i class="fas fa-save mr-2"></i> Save Changes</button>
+                    
+                    <div class="flex gap-3 border-t pt-4">
+                        <button onclick="downloadInvoiceAndSend('whatsapp', '${r.tenantMobile}', '${r.tenantEmail}', '${r.tenantName}', '${r.roomNumber}', document.getElementById('editRent').value, document.getElementById('editWater').value, document.getElementById('editLight').value, document.getElementById('editPen').value, '${r.tenantUniqueId}', document.getElementById('editMeterPrev').value, document.getElementById('editMeterCurr').value, document.getElementById('editUnitRate').value)" class="w-1/2 bg-gray-100 text-gray-800 font-bold py-3 rounded-xl shadow-sm hover:bg-green-50 hover:text-green-600 border border-gray-200 transition flex items-center justify-center text-xs tracking-wide uppercase"><i class="fab fa-whatsapp text-lg mr-2 text-green-500"></i> + PDF</button>
+                        <button onclick="downloadInvoiceAndSend('email', '${r.tenantMobile}', '${r.tenantEmail}', '${r.tenantName}', '${r.roomNumber}', document.getElementById('editRent').value, document.getElementById('editWater').value, document.getElementById('editLight').value, document.getElementById('editPen').value, '${r.tenantUniqueId}', document.getElementById('editMeterPrev').value, document.getElementById('editMeterCurr').value, document.getElementById('editUnitRate').value)" class="w-1/2 bg-gray-100 text-gray-800 font-bold py-3 rounded-xl shadow-sm hover:bg-blue-50 hover:text-blue-600 border border-gray-200 transition flex items-center justify-center text-xs tracking-wide uppercase"><i class="fas fa-envelope text-lg mr-2 text-blue-500"></i> + PDF</button>
+                    </div>
+                `;
+            }
+            document.getElementById('roomManagerModal').classList.remove('hidden');
+
+            setTimeout(() => {
+                if(document.getElementById('editMeterCurr')) {
+                    const calcLight = () => {
+                        const prev = parseFloat(document.getElementById('editMeterPrev').value) || 0;
+                        const curr = parseFloat(document.getElementById('editMeterCurr').value) || 0;
+                        const rate = parseFloat(document.getElementById('editUnitRate').value) || 0;
+                        let units = curr - prev; if(units < 0) units = 0;
+                        const bill = Math.round(units * rate);
+                        
+                        document.getElementById('displayUnits').innerText = units;
+                        document.getElementById('displayLightBill').innerText = bill;
+                        document.getElementById('editLight').value = bill;
+                        
+                        const rBase = parseFloat(document.getElementById('editRent').value) || 0;
+                        const wBase = parseFloat(document.getElementById('editWater').value) || 0;
+                        const pen = parseFloat(document.getElementById('editPen').value) || 0;
+                        document.getElementById('displayTotalDue').innerText = "₹" + (rBase + wBase + bill + pen);
+                    };
+                    ['editMeterCurr','editMeterPrev','editUnitRate','editRent','editWater','editPen'].forEach(id => {
+                        document.getElementById(id).addEventListener('input', calcLight);
+                    });
+                    calcLight();
+                }
+            }, 50);
+        };
+        document.getElementById('closeRoomManagerModal').onclick = () => document.getElementById('roomManagerModal').classList.add('hidden');
+
+        // INVOICE SENDER
         window.downloadInvoiceAndSend = (type, mob, email, name, rNo, rent, water, light, pen, tId, prevStr, currStr, rateStr) => {
             if (type === 'whatsapp' && (!mob || mob === 'undefined')) return showAlert('error', 'Missing Data', 'No WhatsApp number saved.');
             if (type === 'email' && (!email || email === 'undefined')) return showAlert('error', 'Missing Data', 'No Email ID saved.');
@@ -574,7 +976,6 @@
             const r = parseFloat(rent)||0; const w = parseFloat(water)||0; const l = parseFloat(light)||0; const p = parseFloat(pen)||0;
             const prev = parseFloat(prevStr)||0; const curr = parseFloat(currStr)||0; const rate = parseFloat(rateStr)||0;
             const units = Math.max(0, curr - prev);
-            
             const tot = r + w + l + p;
             const dateStr = new Date().toLocaleDateString('en-GB');
 
@@ -621,126 +1022,7 @@
             }, 800);
         };
 
-        // BACKGROUND LOGIC & DASHBOARD LOAD (Keeping same standard as previous steps for Room/House flow)
-        window.openRoomManager = (hId, rStringEnc) => {
-            const r = JSON.parse(decodeURIComponent(rStringEnc));
-            document.getElementById('rmHouseId').value = hId; document.getElementById('rmRoomIdVal').value = r.id;
-            document.getElementById('rmRoomName').innerText = "Room " + r.roomNumber; 
-            document.getElementById('rmRoomId').innerText = r.occupancyStatus === "Occupied" ? "ID: " + r.tenantUniqueId : "Unassigned";
-            
-            const body = document.getElementById('roomManagerBody');
-            
-            if(r.occupancyStatus === "Vacant") {
-                body.innerHTML = `
-                    <div class="bg-gray-100 p-2.5 rounded-lg mb-4 text-center border border-gray-200"><span class="text-gray-600 text-[10px] font-black uppercase tracking-widest">Status: Vacant</span></div>
-                    <h4 class="font-bold text-gray-800 mb-3 text-sm uppercase tracking-wide">Assign New Tenant</h4>
-                    <input type="text" id="tName" placeholder="Tenant Full Name" class="w-full bg-gray-50 border p-3.5 mb-3 rounded-xl focus:ring-2 focus:ring-blue-400 outline-none transition">
-                    <div class="flex gap-3 mb-3">
-                        <input type="tel" id="tMob" placeholder="Mobile" class="w-1/2 bg-gray-50 border p-3.5 rounded-xl focus:ring-2 focus:ring-blue-400 outline-none transition">
-                        <input type="tel" id="tAlt" placeholder="Alt. Mobile" class="w-1/2 bg-gray-50 border p-3.5 rounded-xl focus:ring-2 focus:ring-blue-400 outline-none transition">
-                    </div>
-                    
-                    <div class="flex gap-3 mb-3">
-                        <input type="number" id="tDep" placeholder="Deposit (₹)" class="w-1/2 border-2 border-blue-400 p-3.5 rounded-xl focus:ring-2 outline-none font-bold text-blue-700 bg-blue-50">
-                        <select id="tDepMode" class="w-1/2 border p-3.5 rounded-xl font-bold bg-gray-50 outline-none text-gray-700">
-                            <option>Cash</option><option>UPI</option><option>Debit Card</option><option>Bank Transfer</option>
-                        </select>
-                    </div>
-                    
-                    <h4 class="font-bold text-gray-800 mb-3 mt-4 border-t pt-4 text-sm uppercase tracking-wide">Initial Room Setup</h4>
-                    <div class="grid grid-cols-2 gap-3 mb-3">
-                        <div><label class="text-[10px] font-bold text-gray-500 uppercase">Base Rent (₹)</label><input type="number" id="rBase" value="${r.rentAmount}" class="w-full border p-3.5 rounded-xl font-bold bg-gray-50 outline-none"></div>
-                        <div><label class="text-[10px] font-bold text-gray-500 uppercase">Water Bill (₹)</label><input type="number" id="wBase" value="${r.waterBillFixed}" class="w-full border p-3.5 rounded-xl font-bold bg-gray-50 outline-none"></div>
-                        <div><label class="text-[10px] font-bold text-gray-500 uppercase">Start Meter Read</label><input type="number" id="tMeterPrev" placeholder="0" value="${r.meterCurr||r.meterPrev||''}" class="w-full border p-3.5 rounded-xl font-bold bg-blue-50 border-blue-200 outline-none"></div>
-                        <div><label class="text-[10px] font-bold text-gray-500 uppercase">Per Unit Rate (₹)</label><input type="number" id="tUnitRate" placeholder="e.g. 8" value="${r.unitRate||''}" class="w-full border p-3.5 rounded-xl font-bold bg-blue-50 border-blue-200 outline-none"></div>
-                    </div>
-                    <button id="assignBtn" onclick="assignTenant('${r.roomNumber}')" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl mt-4 shadow-lg hover:bg-blue-700 transition text-lg tracking-wide">Assign Tenant & Save</button>
-                `;
-            } else {
-                const totalDue = r.rentAmount + r.waterBillFixed + (r.currentLightBill||0) + (r.penalty||0);
-                
-                // Paywall Logic for PDF Buttons
-                const isFree = window.currentUserPlan === 'free';
-                const lockIconHtml = isFree ? ' <i class="fas fa-lock text-red-500 ml-1"></i>' : '';
-                const btnOpacity = isFree ? 'opacity-80 bg-gray-200 text-gray-600 border-gray-300' : 'bg-gray-50 text-gray-800 hover:border-gray-400 hover:shadow-md';
-                const whatsappAction = isFree ? `openUpgradeModal('🔒 Premium Feature. Please upgrade to send Invoice PDF.')` : `downloadInvoiceAndSend('whatsapp', '${r.tenantMobile}', '${r.tenantEmail}', '${r.tenantName}', '${r.roomNumber}', ${r.rentAmount}, ${r.waterBillFixed}, document.getElementById('editLight').value, document.getElementById('editPen').value, '${r.tenantUniqueId}', document.getElementById('editMeterPrev').value, document.getElementById('editMeterCurr').value, document.getElementById('editUnitRate').value)`;
-                const emailAction = isFree ? `openUpgradeModal('🔒 Premium Feature. Please upgrade to send Invoice PDF.')` : `downloadInvoiceAndSend('email', '${r.tenantMobile}', '${r.tenantEmail}', '${r.tenantName}', '${r.roomNumber}', ${r.rentAmount}, ${r.waterBillFixed}, document.getElementById('editLight').value, document.getElementById('editPen').value, '${r.tenantUniqueId}', document.getElementById('editMeterPrev').value, document.getElementById('editMeterCurr').value, document.getElementById('editUnitRate').value)`;
-
-                body.innerHTML = `
-                    <div class="bg-green-50 p-3 rounded-xl mb-4 flex justify-between items-center border border-green-200"><span class="font-black text-green-800 text-lg">${r.tenantName}</span><button onclick="vacateRoom('${r.tenantName}', ${r.deposit})" class="bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow hover:bg-red-600 transition">Vacate Room</button></div>
-                    
-                    <div class="grid grid-cols-3 gap-2 mb-3 bg-gray-50 p-3 border rounded-xl">
-                        <div><label class="text-[10px] text-gray-500 font-bold uppercase tracking-wider block mb-1">Rent (₹)</label><input type="number" id="editRent" value="${r.rentAmount}" class="w-full border rounded-lg p-2.5 font-bold bg-white outline-none focus:ring-1 focus:ring-blue-400 transition"></div>
-                        <div><label class="text-[10px] text-gray-500 font-bold uppercase tracking-wider block mb-1">Water (₹)</label><input type="number" id="editWater" value="${r.waterBillFixed}" class="w-full border rounded-lg p-2.5 font-bold bg-white outline-none focus:ring-1 focus:ring-blue-400 transition"></div>
-                        <div><label class="text-[10px] text-red-500 font-bold uppercase tracking-wider block mb-1">Penalty (₹)</label><input type="number" id="editPen" value="${r.penalty||''}" placeholder="0" class="w-full border rounded-lg p-2.5 border-red-300 outline-none bg-white focus:ring-1 focus:ring-red-400 transition"></div>
-                    </div>
-                    
-                    <div class="bg-blue-50 p-3 rounded-xl mb-4 border border-blue-200 shadow-inner">
-                        <div class="flex justify-between items-center mb-2">
-                            <h5 class="text-[10px] font-black text-blue-800 uppercase tracking-widest"><i class="fas fa-bolt text-yellow-500 mr-1"></i> Electricity Bill</h5>
-                            <span class="text-[10px] font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded border border-blue-200">Units: <span id="displayUnits">0</span></span>
-                        </div>
-                        <div class="flex gap-2 mb-2">
-                            <div class="w-1/3"><label class="text-[9px] text-gray-500 font-bold uppercase tracking-wider block mb-1">Prev Read</label><input type="number" id="editMeterPrev" value="${r.meterPrev||0}" class="w-full border border-blue-200 rounded p-2 text-xs font-bold outline-none bg-gray-100"></div>
-                            <div class="w-1/3"><label class="text-[9px] text-blue-600 font-bold uppercase tracking-wider block mb-1">Curr Read</label><input type="number" id="editMeterCurr" value="${r.meterCurr||r.meterPrev||0}" placeholder="Current" class="w-full border border-blue-400 rounded p-2 text-xs font-bold outline-none bg-white focus:ring-2 focus:ring-blue-400"></div>
-                            <div class="w-1/3"><label class="text-[9px] text-gray-500 font-bold uppercase tracking-wider block mb-1">Rate (₹)</label><input type="number" id="editUnitRate" value="${r.unitRate||''}" placeholder="Per Unit" class="w-full border border-blue-200 rounded p-2 text-xs font-bold outline-none bg-white"></div>
-                        </div>
-                        <div class="flex justify-between items-center bg-white p-2.5 rounded-lg border border-blue-100 shadow-sm">
-                            <span class="text-[10px] font-bold text-gray-500 uppercase">Calculated Light Bill:</span>
-                            <span class="text-sm font-black text-blue-700">₹<span id="displayLightBill">0</span></span>
-                            <input type="hidden" id="editLight" value="${r.currentLightBill||0}">
-                        </div>
-                    </div>
-                    
-                    <div class="bg-gray-900 text-white p-4 rounded-xl flex justify-between items-center mb-5 shadow-lg border border-gray-700">
-                        <span class="font-bold text-gray-300 uppercase text-xs tracking-widest">Total Due:</span><span class="text-3xl font-black text-white" id="displayTotalDue">₹${totalDue}</span>
-                    </div>
-
-                    <div class="flex gap-3 mb-5">
-                        <select id="payMode" class="w-1/2 border p-3.5 rounded-xl font-bold bg-gray-50 outline-none text-gray-700">
-                            <option>Cash</option><option>UPI</option><option>Debit Card</option><option>Bank Transfer</option>
-                        </select>
-                        <select id="payStatus" class="w-1/2 border p-3.5 rounded-xl font-bold outline-none ${r.paymentStatus==='Paid'?'bg-green-50 text-green-700 border-green-300':'bg-red-50 text-red-700 border-red-300'} transition">
-                            <option value="Pending" ${r.paymentStatus==='Pending'?'selected':''}>❌ Pending</option><option value="Paid" ${r.paymentStatus==='Paid'?'selected':''}>✅ Paid</option>
-                        </select>
-                    </div>
-                    
-                    <button id="updateRoomBtn" onclick="saveRoomUpdates('${r.tenantName}')" class="w-full bg-green-500 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-green-600 transition mb-4 text-lg"><i class="fas fa-save mr-2"></i> Save Changes</button>
-                    
-                    <div class="flex gap-3 border-t pt-4">
-                        <button onclick="${whatsappAction}" class="w-1/2 ${btnOpacity} border border-gray-200 font-bold py-3 rounded-xl transition flex items-center justify-center text-xs tracking-wide uppercase"><i class="fab fa-whatsapp text-lg mr-2 ${isFree?'text-gray-500':'text-green-500'}"></i> PDF ${lockIconHtml}</button>
-                        <button onclick="${emailAction}" class="w-1/2 ${btnOpacity} border border-gray-200 font-bold py-3 rounded-xl transition flex items-center justify-center text-xs tracking-wide uppercase"><i class="fas fa-envelope text-lg mr-2 ${isFree?'text-gray-500':'text-blue-500'}"></i> PDF ${lockIconHtml}</button>
-                    </div>
-                `;
-            }
-            document.getElementById('roomManagerModal').classList.remove('hidden');
-
-            setTimeout(() => {
-                if(document.getElementById('editMeterCurr')) {
-                    const calcLight = () => {
-                        const prev = parseFloat(document.getElementById('editMeterPrev').value) || 0;
-                        const curr = parseFloat(document.getElementById('editMeterCurr').value) || 0;
-                        const rate = parseFloat(document.getElementById('editUnitRate').value) || 0;
-                        let units = curr - prev; if(units < 0) units = 0;
-                        const bill = Math.round(units * rate);
-                        
-                        document.getElementById('displayUnits').innerText = units;
-                        document.getElementById('displayLightBill').innerText = bill;
-                        document.getElementById('editLight').value = bill;
-                        
-                        const rBase = parseFloat(document.getElementById('editRent').value) || 0;
-                        const wBase = parseFloat(document.getElementById('editWater').value) || 0;
-                        const pen = parseFloat(document.getElementById('editPen').value) || 0;
-                        document.getElementById('displayTotalDue').innerText = "₹" + (rBase + wBase + bill + pen);
-                    };
-                    ['editMeterCurr','editMeterPrev','editUnitRate','editRent','editWater','editPen'].forEach(id => {
-                        document.getElementById(id).addEventListener('input', calcLight);
-                    });
-                    calcLight();
-                }
-            }, 50);
-        };
-        
+        // BACKGROUND SYNC LOGIC
         async function logTransaction(houseName, rName, tName, amt, mode, type) {
             if(amt > 0) {
                 await addDoc(collection(db, "transactions"), { 
@@ -748,13 +1030,14 @@
                 });
             }
         }
-        
+
         window.assignTenant = async (rNo) => {
             const name = document.getElementById('tName').value, mob = document.getElementById('tMob').value;
             const dep = Number(document.getElementById('tDep').value)||0, depMode = document.getElementById('tDepMode').value;
             const mPrev = Number(document.getElementById('tMeterPrev').value)||0; const uRate = Number(document.getElementById('tUnitRate').value)||0;
             
             if(!name || !mob) return showAlert('error', 'Incomplete', 'Name and Mobile are mandatory.');
+            
             showLoader();
             const hId = document.getElementById('rmHouseId').value, rId = document.getElementById('rmRoomIdVal').value;
             const hName = window.houseDataCache[hId].name;
@@ -768,7 +1051,9 @@
                 meterPrev: mPrev, meterCurr: mPrev, unitRate: uRate
             });
             if(dep > 0) await logTransaction(hName, rNo, name, dep, depMode, "Deposit Received");
-            await loadDashboardData(); hideLoader(); closeAllModals(); showAlert('success', 'Tenant Assigned!', 'Room details saved in real-time.');
+            
+            await loadDashboardData(); hideLoader(); closeAllModals(); 
+            showAlert('success', 'Tenant Assigned!', 'Room details saved in real-time.');
         };
 
         window.saveRoomUpdates = async (tName) => {
@@ -778,23 +1063,23 @@
             
             const rBase = Number(document.getElementById('editRent').value)||0, wBase = Number(document.getElementById('editWater').value)||0;
             const light = Number(document.getElementById('editLight').value)||0, pen = Number(document.getElementById('editPen').value)||0;
-            
-            const mPrev = Number(document.getElementById('editMeterPrev').value)||0; 
-            const mCurr = Number(document.getElementById('editMeterCurr').value)||0; 
-            const uRate = Number(document.getElementById('editUnitRate').value)||0;
-            
+            const mPrev = Number(document.getElementById('editMeterPrev').value)||0; const mCurr = Number(document.getElementById('editMeterCurr').value)||0; const uRate = Number(document.getElementById('editUnitRate').value)||0;
             const status = document.getElementById('payStatus').value, mode = document.getElementById('payMode').value;
             
             await updateDoc(doc(db, "houses", hId, "rooms", rId), { 
-                rentAmount: rBase, waterBillFixed: wBase, currentLightBill: light, penalty: pen, paymentStatus: status, meterPrev: mPrev, meterCurr: mCurr, unitRate: uRate
+                rentAmount: rBase, waterBillFixed: wBase, currentLightBill: light, penalty: pen, paymentStatus: status,
+                meterPrev: mPrev, meterCurr: mCurr, unitRate: uRate
             });
             if(status === "Paid") await logTransaction(hName, rNo, tName, (rBase + wBase + light + pen), mode, "Rent Received");
-            await loadDashboardData(); hideLoader(); closeAllModals(); showAlert('success', 'Updated Successfully', 'Room details saved in real-time.');
+            
+            await loadDashboardData(); hideLoader(); closeAllModals(); 
+            showAlert('success', 'Updated Successfully', 'Room details saved in real-time.');
         };
 
         window.vacateRoom = async (tName, dep) => {
             const refund = prompt(`Security Deposit was ₹${dep}.\nHow much are you refunding? (Enter amount):`, dep);
             if(refund === null) return;
+            
             showLoader();
             const hId = document.getElementById('rmHouseId').value, rId = document.getElementById('rmRoomIdVal').value, rNo = document.getElementById('rmRoomName').innerText;
             const hName = window.houseDataCache[hId].name;
@@ -807,57 +1092,112 @@
             });
             
             await logTransaction(hName, rNo, tName, Number(refund), "Cash", "Deposit Refunded");
-            await loadDashboardData(); hideLoader(); closeAllModals(); showAlert('success', 'Room Vacated', 'Details updated in real-time.');
+            await loadDashboardData(); hideLoader(); closeAllModals(); 
+            showAlert('success', 'Room Vacated', 'Details updated in real-time.');
         };
 
-        // REMAINDER DATA & HELPERS
-        window.loadDashboardData = async () => {
-            if(!currentUserId) return;
-            const hList = document.getElementById('housesList'); const pList = document.getElementById('pendingRoomsList');
-            if(hList.innerHTML === '') { hList.innerHTML=`<div class="flex flex-col items-center justify-center py-10 text-blue-500"><i class="fas fa-circle-notch fa-spin text-4xl mb-3"></i><p class="text-sm font-bold text-gray-500">Syncing properties...</p></div>`; }
-            
-            let tExp=0, tRec=0, tPen=0, vCount=0;
-            let tempHouseCache = {}; let tempVacantCache = {};
-            let htmlBufferHouses = ''; let htmlBufferPending = '';
-
-            const q = query(collection(db, "houses"), where("ownerId", "==", currentUserId));
-            const hSnaps = await getDocs(q);
-            if(hSnaps.empty) { hList.innerHTML = `<div class="text-center text-gray-400 mt-10"><p>No properties found.</p></div>`; pList.innerHTML = `<p class="text-gray-400">No collections pending.</p>`; return; }
-
+        document.getElementById('startNewMonthBtn').onclick = async () => {
+            if(!confirm("Start New Month? This forwards meter readings, resets bills to 0, and status to 'Pending'.")) return;
+            showLoader();
+            const hSnaps = await getDocs(query(collection(db, "houses"), where("ownerId", "==", currentUserId)));
             for (const hDoc of hSnaps.docs) {
-                const hd = hDoc.data(); const rSnaps = await getDocs(collection(db, "houses", hDoc.id, "rooms"));
-                let roomsData = [];
-                
-                rSnaps.forEach(rDoc => {
-                    const r = rDoc.data(); roomsData.push({ id: rDoc.id, ...r });
-                    const encRoom = encodeURIComponent(JSON.stringify({id: rDoc.id, ...r}));
-                    if(r.occupancyStatus === "Occupied") {
-                        const amt = r.rentAmount + r.waterBillFixed + (r.currentLightBill||0) + (r.penalty||0);
-                        tExp += amt;
-                        if(r.paymentStatus === "Paid") { tRec += amt; } 
-                        else { 
-                            tPen += amt; 
-                            htmlBufferPending += `<div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-red-500 cursor-pointer hover:shadow-md transition mb-3" onclick="openRoomManager('${hDoc.id}', '${encRoom}')"><div><p class="font-bold text-gray-800">${hd.houseName} - Room ${r.roomNumber}</p><p class="text-xs text-gray-500 font-medium">${r.tenantName}</p></div><div class="font-black text-red-600 text-lg">₹${amt}</div></div>`;
-                        }
-                    } else if(r.occupancyStatus === "Vacant") {
-                        vCount++;
-                        if(!tempVacantCache[hDoc.id]) tempVacantCache[hDoc.id] = { name: hd.houseName, address: hd.address, rooms: [] };
-                        tempVacantCache[hDoc.id].rooms.push({ id: rDoc.id, ...r });
+                const rSnaps = await getDocs(collection(db, "houses", hDoc.id, "rooms"));
+                for (const rDoc of rSnaps.docs) {
+                    const d = rDoc.data();
+                    if(d.occupancyStatus === "Occupied") {
+                        const nextPrev = d.meterCurr !== undefined ? d.meterCurr : (d.meterPrev || 0);
+                        await updateDoc(doc(db, "houses", hDoc.id, "rooms", rDoc.id), { paymentStatus: "Pending", currentLightBill: 0, penalty: 0, meterPrev: nextPrev, meterCurr: nextPrev });
                     }
-                });
-                tempHouseCache[hDoc.id] = { name: hd.houseName, address: hd.address, rooms: roomsData };
-                const encodedAddress = encodeURIComponent(hd.address);
-                htmlBufferHouses += `
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex justify-between items-center cursor-pointer border-l-4 border-l-blue-500 mb-4 hover:shadow-md transition" onclick="openHouseDetailsModal('${hDoc.id}')">
-                        <div><h3 class="font-extrabold text-gray-800 text-lg">${hd.houseName}</h3><div class="text-xs text-gray-500 mt-1.5 flex items-center bg-gray-50 px-2 py-1 rounded inline-flex border border-gray-100"><i class="fas fa-map-marker-alt text-red-400 mr-1.5"></i><span class="truncate max-w-[150px]">${hd.address}</span><a href="https://www.google.com/maps/search/?api=1&query=${encodedAddress}" target="_blank" onclick="event.stopPropagation()" class="text-blue-500 hover:text-blue-700 ml-2 bg-blue-100 p-1 rounded transition" title="View on Map"><i class="fas fa-external-link-alt text-[10px]"></i></a></div></div>
-                        <div class="bg-gray-50 h-10 w-10 rounded-full flex items-center justify-center border border-gray-200"><i class="fas fa-chevron-right text-gray-400"></i></div>
-                    </div>`;
+                }
             }
-            window.houseDataCache = tempHouseCache; window.vacantDataCache = tempVacantCache;
-            hList.innerHTML = htmlBufferHouses; pList.innerHTML = htmlBufferPending;
-            document.getElementById('statExpected').innerText = "₹" + tExp; document.getElementById('statReceived').innerText = "₹" + tRec; document.getElementById('statPending').innerText = "₹" + tPen; document.getElementById('vacantCountBadge').innerText = vCount;
-            if(tPen === 0 && tExp > 0) pList.innerHTML = `<p class="text-green-600 font-bold bg-green-50 p-4 rounded-xl border border-green-200 shadow-sm flex items-center"><i class="fas fa-check-circle text-xl mr-2"></i> All collections complete!</p>`;
-        }
+            await loadDashboardData(); hideLoader();
+            showAlert('success', 'New Month Started', 'Meter readings auto-forwarded. Ready for new billing.');
+        };
+
+        // ================= TRANSACTION HISTORY WITH SOFT DELETE =================
+        window.loadHistoryData = async () => {
+            try {
+                const hList = document.getElementById('historyList'); 
+                hList.innerHTML = `<div class="flex flex-col items-center justify-center py-20 text-gray-400"><i class="fas fa-circle-notch fa-spin text-5xl mb-4 text-blue-500"></i><p class="font-bold tracking-wider text-sm uppercase">Loading History...</p></div>`;
+                
+                const snaps = await getDocs(query(collection(db, "transactions"), where("ownerId", "==", currentUserId)));
+                if(snaps.empty) { hList.innerHTML = `<div class="text-center text-gray-400 mt-10"><i class="fas fa-file-invoice-dollar text-5xl mb-3 text-gray-200"></i><p>No successful transactions yet.</p></div>`; return; }
+                
+                let transactions = []; snaps.forEach(d => transactions.push({ id: d.id, ...d.data() }));
+                transactions.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+                
+                hList.innerHTML = '';
+                transactions.forEach(t => {
+                    const safeRoom = t.roomName ? String(t.roomName).replace('Room ','') : 'N/A';
+                    const dObj = new Date(t.date || 0); 
+                    const dateStr = dObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+                    const timeStr = dObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    
+                    const isDeleted = t.status === 'Deleted';
+                    let c = (t.type && t.type.includes("Refund")) ? "text-red-500" : "text-green-500";
+                    if(isDeleted) c = "text-gray-400 line-through";
+
+                    const delBtn = isDeleted ? '' : `<button onclick="event.stopPropagation(); openDeleteTxModal('${t.id}')" class="bg-red-50 text-red-500 h-8 w-8 rounded-full flex items-center justify-center hover:bg-red-100 hover:text-red-600 transition border border-red-100 shadow-sm ml-3"><i class="fas fa-trash-alt text-xs"></i></button>`;
+                    const noteHtml = isDeleted ? `<div class="w-full mt-3 bg-red-50 border border-red-100 p-2 rounded-lg text-xs text-red-600 font-semibold flex items-start"><i class="fas fa-info-circle mt-0.5 mr-1.5"></i> <span>Void Note: ${t.deleteReason}</span></div>` : '';
+
+                    const encData = encodeURIComponent(JSON.stringify({...t, roomName: safeRoom, tenantName: (t.tenantName||'Unknown'), houseName: (t.houseName||'-'), type: (t.type||'Transaction'), mode: (t.mode||'N/A'), dateStr, timeStr}));
+
+                    hList.innerHTML += `
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-3 hover:shadow-md transition cursor-pointer flex flex-col" onclick="${isDeleted ? '' : `openTransactionDetails('${encData}')`}">
+                        <div class="flex justify-between items-center w-full">
+                            <div><p class="font-extrabold text-gray-800 text-lg ${isDeleted ? 'text-gray-400' : ''}">Room ${safeRoom}</p><p class="text-xs text-gray-500 mt-1"><i class="far fa-calendar-alt mr-1"></i> ${dateStr}</p></div>
+                            <div class="text-right flex items-center">
+                                <div class="flex flex-col items-end mr-1"><p class="font-black text-xl ${c}">₹${t.amount || 0}</p>${isDeleted ? `<span class="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-0.5 rounded mt-1">DELETED</span>` : `<div class="flex items-center mt-1 text-blue-500 text-[10px] font-bold uppercase tracking-wide bg-blue-50 px-2 py-0.5 rounded">View <i class="fas fa-chevron-right ml-1"></i></div>`}</div>
+                                ${delBtn}
+                            </div>
+                        </div>
+                        ${noteHtml}
+                    </div>`;
+                });
+            } catch(e) { document.getElementById('historyList').innerHTML = `<div class="text-center text-red-500 mt-10"><p>Error: ${e.message}</p></div>`; }
+        };
+
+        window.openTransactionDetails = (encData) => {
+            const t = JSON.parse(decodeURIComponent(encData));
+            const body = document.getElementById('tdBody');
+            let c = (t.type && t.type.includes("Refund")) ? "text-red-500" : "text-green-500";
+            let bgType = (t.type && t.type.includes("Refund")) ? "bg-red-50 text-red-700 border-red-200" : "bg-green-50 text-green-700 border-green-200";
+            
+            body.innerHTML = `
+                <div class="text-center mb-6 mt-2">
+                    <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Amount ${t.type && t.type.includes("Refund") ? "Refunded" : "Received"}</p>
+                    <p class="text-5xl font-black ${c} tracking-tight">₹${t.amount}</p>
+                    <p class="text-[10px] mt-3 font-bold inline-block px-3 py-1 rounded-full border uppercase tracking-wider ${bgType}">${t.type}</p>
+                </div>
+                <div class="bg-gray-50 p-5 rounded-xl border border-gray-100 space-y-4 text-sm shadow-inner">
+                    <div class="flex justify-between items-center border-b border-gray-200 pb-3"><span class="text-gray-500 font-bold text-xs uppercase tracking-wide">Status</span><span class="font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded"><i class="fas fa-check-circle mr-1"></i> Success</span></div>
+                    <div class="flex justify-between items-center"><span class="text-gray-500 font-bold text-xs uppercase tracking-wide">Date & Time</span><span class="font-bold text-gray-800 text-right">${t.dateStr}<br><span class="text-xs text-gray-500">${t.timeStr}</span></span></div>
+                    <div class="flex justify-between items-center"><span class="text-gray-500 font-bold text-xs uppercase tracking-wide">House</span><span class="font-bold text-gray-800 text-right max-w-[150px] truncate">${t.houseName}</span></div>
+                    <div class="flex justify-between items-center"><span class="text-gray-500 font-bold text-xs uppercase tracking-wide">Room No.</span><span class="font-black text-blue-600 text-lg">${t.roomName}</span></div>
+                    <div class="flex justify-between items-center"><span class="text-gray-500 font-bold text-xs uppercase tracking-wide">Tenant</span><span class="font-bold text-gray-800">${t.tenantName}</span></div>
+                    <div class="flex justify-between items-center pt-3 border-t border-gray-200"><span class="text-gray-500 font-bold text-xs uppercase tracking-wide">Payment Mode</span><span class="font-black text-gray-800 uppercase bg-white border border-gray-200 px-2 py-1 rounded shadow-sm text-xs">${t.mode}</span></div>
+                </div>
+            `;
+            document.getElementById('transactionDetailsModal').classList.remove('hidden');
+        };
+
+        window.openDeleteTxModal = (txId) => {
+            document.getElementById('delTxId').value = txId; document.getElementById('delTxReason').value = '';
+            document.getElementById('deleteTransactionModal').classList.remove('hidden');
+        };
+
+        document.getElementById('confirmDeleteTxBtn').onclick = async () => {
+            const txId = document.getElementById('delTxId').value;
+            const reason = document.getElementById('delTxReason').value;
+            if(!reason) return showAlert('error', 'Required', 'Please write a reason before deleting.');
+
+            showLoader();
+            try {
+                await updateDoc(doc(db, "transactions", txId), { status: 'Deleted', deleteReason: reason, deletedAt: new Date().toISOString() });
+                closeAllModals(); await window.loadHistoryData(); hideLoader();
+                showAlert('success', 'Entry Voided', 'The transaction has been marked as deleted.');
+            } catch(e) { hideLoader(); showAlert('error', 'Error', e.message); }
+        };
     </script>
 </body>
 </html>
