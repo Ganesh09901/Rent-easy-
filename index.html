@@ -8,13 +8,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- jsPDF Library -->
+    <!-- jsPDF Library for PDF Generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body { background-color: #f4f7fb; font-family: 'Segoe UI', system-ui, sans-serif; }
         .hidden { display: none !important; }
         .tab-content { padding-bottom: 85px; }
-        .modal-overlay { background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 50; transition: all 0.3s ease-in-out; }
+        .modal-overlay { background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 50; transition: all 0.3s ease-in-out; }
         .modal-content { max-height: 90vh; overflow-y: auto; animation: modalPop 0.3s ease-out; }
         .nav-btn.active { color: #3b82f6; }
         .nav-btn.active .nav-indicator { width: 100%; opacity: 1; }
@@ -22,7 +22,8 @@
         .nav-btn { color: #9ca3af; transition: all 0.3s; }
         .fab { box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); transition: transform 0.2s; }
         .fab:active { transform: scale(0.95); }
-        .locked-btn { opacity: 0.6; cursor: not-allowed !important; filter: grayscale(100%); }
+        .plan-card { cursor: pointer; transition: all 0.2s; }
+        .plan-card.active { border-color: #3b82f6; background-color: #eff6ff; }
         @keyframes modalPop { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     </style>
 </head>
@@ -70,16 +71,14 @@
 
     <!-- ================= MAIN APP DASHBOARD ================= -->
     <div id="appContainer" class="hidden min-h-screen">
-        
-        <!-- HEADER WITH PLAN & WALLET BADGES -->
-        <header class="bg-blue-600 text-white p-3 sticky top-0 z-40 shadow-md flex justify-between items-center">
-            <h1 class="text-lg font-black tracking-wide"><i class="fas fa-building mr-1"></i> Rent Easy</h1>
+        <header class="bg-blue-600 text-white p-4 sticky top-0 z-40 shadow-md flex justify-between items-center">
+            <h1 class="text-xl font-black tracking-wide flex items-center"><i class="fas fa-building mr-2"></i> Rent Easy</h1>
+            
+            <!-- PLAN & WALLET BADGES -->
             <div class="flex items-center gap-2">
-                <!-- Badges -->
-                <button onclick="openUpgradeModal()" id="headerPlanBadge" class="bg-gray-800 text-yellow-400 text-[10px] font-bold px-2 py-1.5 rounded-lg shadow-sm border border-gray-700 hover:bg-black transition">FREE 🔒</button>
-                <button onclick="openUpgradeModal('wallet')" id="headerWalletBadge" class="bg-green-500 text-white text-[10px] font-bold px-2 py-1.5 rounded-lg shadow-sm border border-green-400 hover:bg-green-600 transition"><i class="fas fa-wallet mr-1"></i>₹0</button>
-                
-                <button id="logoutBtn" class="bg-blue-700 px-2.5 py-1.5 rounded-lg text-sm font-bold shadow hover:bg-red-500 transition ml-1"><i class="fas fa-power-off"></i></button>
+                <div id="headerPlanBadge" onclick="openUpgradeModal()" class="hidden bg-yellow-400 text-yellow-900 text-[10px] font-black px-2 py-1 rounded shadow-sm cursor-pointer hover:scale-105 transition tracking-wider border border-yellow-500">FREE</div>
+                <div id="headerWalletBadge" onclick="openUpgradeModal('wallet')" class="hidden bg-green-500 text-white text-[10px] font-black px-2 py-1 rounded shadow-sm cursor-pointer hover:scale-105 transition border border-green-600">₹0</div>
+                <button id="logoutBtn" class="bg-blue-700 px-3 py-1.5 rounded-lg text-sm font-bold shadow hover:bg-red-500 transition ml-1"><i class="fas fa-power-off"></i></button>
             </div>
         </header>
 
@@ -154,7 +153,7 @@
                                 <p class="text-xs text-blue-400 font-bold tracking-widest uppercase mb-1">Owner Asset ID</p>
                                 <p class="text-lg font-mono font-bold bg-gray-800 px-3 py-1 rounded-lg border border-gray-600 inline-block shadow-inner" id="ownerAssetId">RE-OWN-XXXX</p>
                             </div>
-                            <i class="fas fa-shield-alt text-2xl text-green-400"></i>
+                            <button onclick="openUpgradeModal()" class="bg-yellow-500 hover:bg-yellow-400 text-yellow-900 font-black px-3 py-1 rounded-lg text-xs tracking-wider transition shadow"><i class="fas fa-crown mr-1"></i> UPGRADE</button>
                         </div>
                         <h3 class="text-3xl font-black uppercase tracking-wide mb-4" id="profileName">Loading...</h3>
                         <div class="space-y-2">
@@ -164,19 +163,11 @@
                     </div>
                 </div>
 
-                <!-- Upgrade Banner (Shown if Free) -->
-                <div id="profileUpgradeBanner" class="bg-yellow-50 border border-yellow-200 p-5 rounded-3xl mb-6 hidden items-center justify-between shadow-sm cursor-pointer hover:shadow-md transition" onclick="openUpgradeModal()">
-                    <div>
-                        <h3 class="font-bold text-yellow-800"><i class="fas fa-crown text-yellow-500 mr-2"></i>Upgrade to Pro</h3>
-                        <p class="text-xs text-yellow-700 mt-1 font-medium">Unlock WhatsApp Invoices & Premium Features.</p>
-                    </div>
-                    <i class="fas fa-chevron-right text-yellow-500"></i>
-                </div>
-
                 <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
                     <h3 class="font-bold text-gray-800 mb-2"><i class="fas fa-users-cog mr-2 text-blue-500"></i> Tenant Portal Access</h3>
                     <p class="text-xs text-gray-500 mb-4 font-medium">Grant your tenants access to view their bills & payment history via Email ID.</p>
-                    <button onclick="openTenantAccessModal()" class="w-full bg-blue-50 text-blue-600 font-bold py-3.5 rounded-xl border border-blue-200 shadow-sm hover:bg-blue-100 transition mb-6 flex items-center justify-center text-sm"><i class="fas fa-envelope-open-text mr-2"></i> Manage Tenant Access</button>
+                    <!-- FEATURE LOCK IMPLEMENTED -->
+                    <button id="tenantAccessBtn" onclick="openTenantAccessModal()" class="w-full bg-blue-50 text-blue-600 font-bold py-3.5 rounded-xl border border-blue-200 shadow-sm hover:bg-blue-100 transition mb-6 flex items-center justify-center text-sm"><i id="tenantAccessIcon" class="fas fa-envelope-open-text mr-2"></i> Manage Tenant Access</button>
 
                     <h3 class="font-bold text-gray-800 mb-4 border-t pt-5"><i class="fas fa-university mr-2 text-green-500"></i> Receiving Payment Details</h3>
                     <input type="text" id="upiIdInput" placeholder="UPI ID (e.g. 9876543210@ybl)" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400 transition font-medium">
@@ -207,57 +198,43 @@
 
     <!-- ================= MODALS ================= -->
     
-    <!-- UPGRADE / RECHARGE SAAS MODAL (NEW) -->
+    <!-- UPGRADE & RECHARGE MODAL (NEW) -->
     <div id="upgradeModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-end sm:items-center px-4 z-[90]">
-        <div class="bg-white rounded-t-3xl sm:rounded-2xl p-6 w-full max-w-md modal-content shadow-2xl pb-10 sm:pb-6">
+        <div class="bg-white rounded-t-3xl sm:rounded-2xl p-6 w-full max-w-md modal-content shadow-2xl mb-0 sm:mb-10">
             <div class="flex justify-between items-center mb-5 border-b pb-3">
-                <h3 class="font-extrabold text-blue-600 text-xl"><i class="fas fa-crown text-yellow-500 mr-2"></i> Rent Easy Pro</h3>
-                <button onclick="document.getElementById('upgradeModal').classList.add('hidden')" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 transition"><i class="fas fa-times"></i></button>
+                <h3 class="font-black text-xl text-gray-800"><i class="fas fa-crown text-yellow-500 mr-2"></i>Upgrade & Recharge</h3>
+                <button onclick="document.getElementById('upgradeModal').classList.add('hidden')" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 hover:bg-red-50 transition"><i class="fas fa-times"></i></button>
             </div>
             
-            <!-- Custom Calculator Tab -->
-            <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 mb-5 text-center">
-                <p class="text-xs text-gray-500 font-bold uppercase tracking-widest mb-3">Customise Plan Duration</p>
-                <div class="flex items-center justify-center gap-4 mb-3">
-                    <button onclick="calcPlan(-1)" class="bg-white border border-gray-300 h-10 w-10 rounded-full text-xl font-bold text-blue-600 shadow-sm hover:bg-gray-100 transition"><i class="fas fa-minus"></i></button>
-                    <div class="w-24 text-center">
-                        <span id="planMonthsCounter" class="text-3xl font-black text-gray-800">1</span>
-                        <p class="text-[10px] text-gray-500 font-bold uppercase">Months</p>
-                    </div>
-                    <button onclick="calcPlan(1)" class="bg-blue-600 border border-blue-600 h-10 w-10 rounded-full text-xl font-bold text-white shadow-sm hover:bg-blue-700 transition"><i class="fas fa-plus"></i></button>
+            <p class="text-xs text-gray-500 mb-4 font-bold tracking-wide uppercase">Select Subscription Plan</p>
+            <div class="grid grid-cols-3 gap-2 mb-4">
+                <div onclick="selectPlan(99, 'Monthly Plan', 'planMonthly')" id="planMonthly" class="plan-card border-2 border-gray-200 rounded-xl p-3 text-center bg-gray-50">
+                    <p class="text-sm font-black text-gray-800">1 Mo</p>
+                    <p class="text-xs font-bold text-blue-600 mt-1">₹99</p>
                 </div>
-                
-                <!-- Quick Selection Tags -->
-                <div class="flex justify-center gap-2 mb-4">
-                    <span onclick="setPlan(1)" class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-1 rounded cursor-pointer hover:bg-blue-200">1 Mo (₹99)</span>
-                    <span onclick="setPlan(6)" class="bg-purple-100 text-purple-800 text-[10px] font-bold px-2 py-1 rounded cursor-pointer hover:bg-purple-200">Quarter/6 Mo (₹600)</span>
-                    <span onclick="setPlan(12)" class="bg-green-100 text-green-800 text-[10px] font-bold px-2 py-1 rounded cursor-pointer hover:bg-green-200">1 Year (₹1100)</span>
+                <div onclick="selectPlan(600, 'Quarterly Plan', 'planQuarter')" id="planQuarter" class="plan-card border-2 border-gray-200 rounded-xl p-3 text-center bg-gray-50">
+                    <p class="text-sm font-black text-gray-800">Quarter</p>
+                    <p class="text-xs font-bold text-blue-600 mt-1">₹600</p>
                 </div>
-
-                <div class="bg-gray-900 text-white p-3 rounded-lg flex justify-between items-center shadow-inner">
-                    <span class="font-bold text-sm uppercase text-gray-300">Total Payable:</span>
-                    <span class="text-2xl font-black text-yellow-400">₹<span id="planTotalCalc">99</span></span>
+                <div onclick="selectPlan(1100, 'Yearly Plan', 'planYearly')" id="planYearly" class="plan-card border-2 border-gray-200 rounded-xl p-3 text-center bg-gray-50">
+                    <p class="text-sm font-black text-gray-800">1 Year</p>
+                    <p class="text-xs font-bold text-blue-600 mt-1">₹1100</p>
                 </div>
             </div>
 
-            <!-- Add Wallet Balance alternative -->
-            <div class="mb-5 px-1">
-                <p class="text-xs text-gray-500 font-bold uppercase mb-2">Or Add Custom Wallet Balance</p>
-                <input type="number" id="customWalletAmt" placeholder="Enter amount to recharge (₹)" class="w-full bg-white border border-gray-200 p-3 rounded-xl outline-none focus:ring-2 focus:ring-green-400 text-sm font-bold">
+            <!-- Custom Calculator -->
+            <p class="text-xs text-gray-500 mb-2 font-bold tracking-wide uppercase">Or Custom Duration (+/-)</p>
+            <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-200 mb-6">
+                <div class="flex items-center gap-4">
+                    <button onclick="updateCustomPlan(-1)" class="bg-white border shadow-sm w-8 h-8 rounded-lg font-black text-lg hover:bg-gray-100">-</button>
+                    <span id="customMonthCount" class="font-black text-lg text-gray-800">1</span> <span class="text-xs font-bold text-gray-500">Mo</span>
+                    <button onclick="updateCustomPlan(1)" class="bg-white border shadow-sm w-8 h-8 rounded-lg font-black text-lg hover:bg-gray-100">+</button>
+                </div>
+                <span id="customMonthTotal" class="text-xl font-black text-blue-600">₹99</span>
             </div>
 
-            <p class="text-xs text-center text-gray-400 mb-4 font-medium"><i class="fas fa-shield-alt mr-1"></i> Automatic App Detect & Secure UPI Routing.</p>
-
-            <div class="flex gap-2">
-                <button onclick="payViaUPI('plan')" class="w-1/2 bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 transition flex flex-col items-center justify-center leading-tight">
-                    <span>Pay Plan</span>
-                    <span class="text-[10px] font-normal font-mono opacity-80">(UPI Deep Link)</span>
-                </button>
-                <button onclick="mockPaymentSuccess()" class="w-1/2 bg-green-500 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-green-600 transition flex flex-col items-center justify-center leading-tight">
-                    <span>Verify / Mock</span>
-                    <span class="text-[10px] font-normal font-mono opacity-80">(Direct Upgrade)</span>
-                </button>
-            </div>
+            <button onclick="payViaUPI()" class="w-full bg-gray-900 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-black transition text-lg flex justify-center items-center"><i class="fas fa-lock text-yellow-400 mr-2"></i> Pay <span id="payBtnAmount" class="ml-1 font-black">₹99</span> Securely</button>
+            <p class="text-[10px] text-center text-gray-400 mt-3 font-medium">Direct UPI payment via PhonePe, GPay, Paytm etc.</p>
         </div>
     </div>
 
@@ -336,7 +313,7 @@
         </div>
     </div>
 
-    <!-- ROOM MANAGER MODAL (WITH PAYWALLS) -->
+    <!-- ROOM MANAGER MODAL -->
     <div id="roomManagerModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[60]">
         <div class="bg-white rounded-2xl p-6 w-full max-w-md modal-content border-t-4 border-blue-500 shadow-2xl">
             <div class="flex justify-between items-center mb-4 border-b pb-3">
@@ -397,13 +374,10 @@
         const db = getFirestore(app);
         
         let currentUserId = null;
-        
-        // SaaS Variables Global Scope
-        window.currentUserPlan = 'free';
+        window.currentUserPlan = 'free'; // Default state
         window.currentUserWallet = 0;
-        window.adminUpi = "8866653002@Kotakbank"; // App Admin UPI for Subscriptions
 
-        // ================= SAAS & UI HELPERS =================
+        // UI HELPERS
         window.showLoader = () => document.getElementById('globalLoader').classList.remove('hidden');
         window.hideLoader = () => document.getElementById('globalLoader').classList.add('hidden');
 
@@ -428,10 +402,6 @@
             ab.classList.remove('hidden'); document.getElementById('closeAlertBtn').onclick = () => { ab.classList.add('hidden'); if(cb) cb(); };
         };
 
-        window.showUpgradeAlert = (featureName) => {
-            showAlert('error', 'Pro Feature Locked', `${featureName} is a premium feature. Please upgrade to Pro to unlock.`);
-        };
-
         window.switchTab = (t) => {
             ['Analytics', 'Properties', 'History', 'Profile'].forEach(x => document.getElementById('tab'+x).classList.add('hidden'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -447,7 +417,7 @@
             });
         };
 
-        // ================= AUTHENTICATION (WITH SAAS INIT) =================
+        // AUTHENTICATION
         document.getElementById('showRegisterBtn').onclick = () => { document.getElementById('loginForm').classList.add('hidden'); document.getElementById('registerForm').classList.remove('hidden'); };
         document.getElementById('showLoginBtn').onclick = () => { document.getElementById('registerForm').classList.add('hidden'); document.getElementById('loginForm').classList.remove('hidden'); };
 
@@ -468,20 +438,22 @@
         });
 
         document.getElementById('registerBtn').onclick = async () => {
-            const btn = document.getElementById('registerBtn'); btn.innerText = "Creating Account..."; btn.disabled = true;
+            const n = document.getElementById('regName').value, m = document.getElementById('regMobile').value, e = document.getElementById('regEmail').value, p = document.getElementById('regPassword').value;
+            if(!n || !m || !e || p.length < 6) return showAlert('error', 'Error', 'Fill all fields correctly. Password min 6 chars.');
+            const btn = document.getElementById('registerBtn'); btn.innerText = "Processing...";
             try {
-                const cred = await createUserWithEmailAndPassword(auth, document.getElementById('regEmail').value, document.getElementById('regPassword').value);
-                // Initialize SaaS Document Defaults
-                await setDoc(doc(db, "users", cred.user.uid), {
-                    ownerName: document.getElementById('regName').value,
-                    mobileNumber: document.getElementById('regMobile').value,
-                    emailId: document.getElementById('regEmail').value,
-                    planType: "free",
-                    walletBalance: 0
+                const cred = await createUserWithEmailAndPassword(auth, e, p);
+                // SETTING DEFAULT PLAN & WALLET FOR NEW USERS
+                await setDoc(doc(db, "users", cred.user.uid), { 
+                    ownerName: n, mobileNumber: m, emailId: e,
+                    planType: "free", walletBalance: 0
                 });
-                showAlert('success', 'Account Created!', 'Welcome to Rent Easy SaaS.');
-            } catch(e) { showAlert('error', 'Error', e.message); }
-            btn.innerText = "Create Account"; btn.disabled = false;
+                document.getElementById('authContainer').classList.add('hidden');
+                document.getElementById('appContainer').classList.remove('hidden');
+                await loadProfileData(); await loadDashboardData();
+                showAlert('success', 'Welcome!', 'Your account has been created.');
+            } catch(er) { showAlert('error', 'Failed', er.message); }
+            btn.innerText = "Create Account";
         };
 
         document.getElementById('loginBtn').onclick = async () => {
@@ -506,120 +478,112 @@
             } catch(error) { showAlert('error', 'Error', error.message); }
         };
         
-        // ================= PROFILE & SAAS HEADER UPDATE =================
+        // ================= UPGRADE & WALLET (NEW PAYWALL) =================
+        window.customMonths = 1;
+        window.selectedPlanAmount = 99;
+        window.selectedPlanDesc = "1 Month Premium";
+
+        window.openUpgradeModal = (msg) => {
+            if(msg) alert(msg); // Small browser alert to tell user it's locked
+            document.querySelectorAll('.plan-card').forEach(el => el.classList.remove('active'));
+            document.getElementById('planMonthly').classList.add('active');
+            window.selectedPlanAmount = 99; window.selectedPlanDesc = "1 Month Premium";
+            document.getElementById('payBtnAmount').innerText = '₹99';
+            document.getElementById('upgradeModal').classList.remove('hidden');
+        };
+
+        window.selectPlan = (amt, desc, id) => {
+            document.querySelectorAll('.plan-card').forEach(el => el.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            window.selectedPlanAmount = amt;
+            window.selectedPlanDesc = desc;
+            document.getElementById('payBtnAmount').innerText = '₹' + amt;
+        };
+
+        window.updateCustomPlan = (delta) => {
+            window.customMonths += delta;
+            if(window.customMonths < 1) window.customMonths = 1;
+            document.getElementById('customMonthCount').innerText = window.customMonths;
+            const amt = window.customMonths * 99;
+            document.getElementById('customMonthTotal').innerText = '₹' + amt;
+            
+            document.querySelectorAll('.plan-card').forEach(el => el.classList.remove('active'));
+            window.selectedPlanAmount = amt;
+            window.selectedPlanDesc = `Custom ${window.customMonths} Months Plan`;
+            document.getElementById('payBtnAmount').innerText = '₹' + amt;
+        };
+
+        window.payViaUPI = () => {
+            const upiId = "8866653002@Kotakbank"; // Direct from User's memory context[span_0](start_span)[span_0](end_span)[span_1](start_span)[span_1](end_span)
+            const url = `upi://pay?pa=${upiId}&pn=RentEasy Admin&am=${window.selectedPlanAmount}&cu=INR&tn=${encodeURIComponent(window.selectedPlanDesc)}`;
+            
+            closeAllModals();
+            showAlert('success', 'Redirecting...', 'Opening your UPI App to complete payment. Contact admin after successful transfer.');
+            setTimeout(() => { window.location.href = url; }, 1500);
+        };
+
+        // PROFILE & PLAN BADGES
         async function loadProfileData() {
             const dSnap = await getDoc(doc(db, "users", currentUserId));
             if (dSnap.exists()) {
                 const d = dSnap.data();
                 
-                // Read SaaS Data (Fallback to free/0 if old account)
+                // Read and set plan details safely for older accounts
                 window.currentUserPlan = d.planType || 'free';
                 window.currentUserWallet = d.walletBalance || 0;
-
-                // Update UI Badges
-                const pBadge = document.getElementById('headerPlanBadge');
-                if(window.currentUserPlan === 'pro' || window.currentUserPlan === 'paid') {
-                    pBadge.className = 'bg-yellow-400 text-yellow-900 text-[10px] font-black px-2 py-1.5 rounded-lg shadow-sm border border-yellow-500 uppercase tracking-widest';
-                    pBadge.innerHTML = 'PRO 🌟';
-                    document.getElementById('profileUpgradeBanner').classList.add('hidden');
-                } else {
-                    pBadge.className = 'bg-gray-800 text-yellow-400 text-[10px] font-bold px-2 py-1.5 rounded-lg shadow-sm border border-gray-700 uppercase tracking-widest hover:bg-black transition';
-                    pBadge.innerHTML = 'FREE 🔒';
-                    document.getElementById('profileUpgradeBanner').classList.remove('hidden');
-                    document.getElementById('profileUpgradeBanner').classList.add('flex');
+                
+                // Top Header Badges
+                const pb = document.getElementById('headerPlanBadge');
+                pb.innerText = window.currentUserPlan.toUpperCase();
+                pb.classList.remove('hidden');
+                
+                if(window.currentUserPlan !== 'free') {
+                    pb.classList.remove('bg-yellow-400', 'text-yellow-900', 'border-yellow-500');
+                    pb.classList.add('bg-gradient-to-r', 'from-blue-500', 'to-blue-700', 'text-white', 'border-blue-700', 'shadow-md');
                 }
-                document.getElementById('headerWalletBadge').innerHTML = `<i class="fas fa-wallet mr-1"></i>₹${window.currentUserWallet}`;
+                
+                const wb = document.getElementById('headerWalletBadge');
+                wb.innerText = 'Wallet: ₹' + window.currentUserWallet;
+                wb.classList.remove('hidden');
 
-                // Populate Profile Tab
                 document.getElementById('profileName').innerText = d.ownerName;
                 document.getElementById('profileMobile').innerText = d.mobileNumber;
                 document.getElementById('profileEmail').innerText = d.emailId;
-                document.getElementById('ownerAssetId').innerText = "RE-OWN-" + currentUserId.substring(0, 6).toUpperCase();
+                const assetId = "RE-OWN-" + currentUserId.substring(0, 6).toUpperCase();
+                document.getElementById('ownerAssetId').innerText = assetId;
                 
                 if(d.upiId) document.getElementById('upiIdInput').value = d.upiId;
                 if(d.bankAcc) document.getElementById('bankAccInput').value = d.bankAcc;
                 if(d.ifsc) document.getElementById('ifscInput').value = d.ifsc;
-                if(d.contactEmail) document.getElementById('contactEmailInput').value = d.contactEmail;
+
+                // Feature Lock on Profile Tab
+                const isFree = window.currentUserPlan === 'free';
+                if(isFree) {
+                    document.getElementById('tenantAccessIcon').className = "fas fa-lock text-red-500 mr-2";
+                    document.getElementById('tenantAccessBtn').classList.add('opacity-80', 'bg-gray-200');
+                }
             }
         }
         
-        document.getElementById('clearEmailBtn').onclick = () => document.getElementById('contactEmailInput').value = '';
         document.getElementById('saveProfileBtn').onclick = async () => {
             showLoader();
             await updateDoc(doc(db, "users", currentUserId), { 
-                upiId: document.getElementById('upiIdInput').value, bankAcc: document.getElementById('bankAccInput').value, 
-                ifsc: document.getElementById('ifscInput').value, contactEmail: document.getElementById('contactEmailInput').value
+                upiId: document.getElementById('upiIdInput').value, 
+                bankAcc: document.getElementById('bankAccInput').value, 
+                ifsc: document.getElementById('ifscInput').value
             }); 
-            hideLoader(); showAlert('success', 'Updated Successfully', 'Profile payment details saved in real-time.'); 
-        };
-
-        // ================= SAAS UPGRADE & DEEP LINK CALCULATOR =================
-        let planMonths = 1;
-        window.openUpgradeModal = (mode = 'plan') => {
-            document.getElementById('upgradeModal').classList.remove('hidden');
-            setPlan(1); // Default
-            document.getElementById('customWalletAmt').value = '';
-        };
-
-        window.calcPlan = (val) => {
-            planMonths += val;
-            if(planMonths < 1) planMonths = 1;
-            updatePlanUI();
-        };
-
-        window.setPlan = (val) => {
-            planMonths = val;
-            updatePlanUI();
-        };
-
-        function updatePlanUI() {
-            document.getElementById('planMonthsCounter').innerText = planMonths;
-            let total = 0;
-            // Custom Pricing Logic requested by user (1=99, 6=600, 12=1100)
-            if(planMonths === 1) total = 99;
-            else if(planMonths === 6) total = 600;
-            else if(planMonths === 12) total = 1100;
-            else total = planMonths * 99; // Default fallback
-            
-            document.getElementById('planTotalCalc').innerText = total;
-        }
-
-        window.payViaUPI = (type) => {
-            let amount = 0;
-            if(type === 'plan') {
-                amount = document.getElementById('planTotalCalc').innerText;
-            } else {
-                amount = document.getElementById('customWalletAmt').value;
-                if(!amount || amount <= 0) return showAlert('error', 'Error', 'Enter valid wallet amount.');
-            }
-            // Trigger PhonePe/Gpay using intent URL
-            const upiLink = `upi://pay?pa=${window.adminUpi}&pn=RentEasySaaS&am=${amount}&cu=INR&tn=Pro_Upgrade`;
-            window.location.href = upiLink;
-            // Note: In real app, webhook needed to verify. We provide mock button for testing.
-        };
-
-        window.mockPaymentSuccess = async () => {
-            showLoader();
-            const amt = document.getElementById('customWalletAmt').value;
-            if(amt && amt > 0) {
-                // Add to wallet
-                const newWal = Number(window.currentUserWallet) + Number(amt);
-                await updateDoc(doc(db, "users", currentUserId), { walletBalance: newWal });
-            } else {
-                // Upgrade Plan
-                await updateDoc(doc(db, "users", currentUserId), { planType: "pro" });
-            }
-            await loadProfileData();
             hideLoader();
-            closeAllModals();
-            showAlert('success', 'Verified (Mock)', 'Your account status has been updated successfully!');
+            showAlert('success', 'Updated Successfully', 'Profile payment details saved in real-time.'); 
         };
 
-
-        // ================= TENANT PORTAL ACCESS =================
+        // TENANT PORTAL ACCESS
         window.openTenantAccessModal = () => {
-            const select = document.getElementById('taRoomSelect'); const list = document.getElementById('taAccessList');
-            select.innerHTML = '<option value="">Select House - Room</option>'; list.innerHTML = '';
+            if(window.currentUserPlan === 'free') return openUpgradeModal("🔒 Tenant Access is a Premium Feature. Upgrade to unlock.");
+
+            const select = document.getElementById('taRoomSelect');
+            const list = document.getElementById('taAccessList');
+            select.innerHTML = '<option value="">Select House - Room</option>';
+            list.innerHTML = '';
             let hasAccess = false;
 
             Object.keys(window.houseDataCache || {}).forEach(hId => {
@@ -628,7 +592,11 @@
                     select.innerHTML += `<option value="${hId}|${r.id}">Room ${r.roomNumber} (${h.name})</option>`;
                     if(r.accessEmail) {
                         hasAccess = true;
-                        list.innerHTML += `<div class="bg-white border rounded-xl p-3.5 flex justify-between items-center shadow-sm hover:shadow-md transition mb-3"><div><p class="font-bold text-gray-800 text-sm">Room ${r.roomNumber} <span class="text-[10px] font-normal text-gray-500">(${h.name})</span></p><p class="text-xs text-blue-600 font-medium mt-1 tracking-wide"><i class="fas fa-envelope mr-1"></i> ${r.accessEmail}</p></div><button onclick="removeTenantAccess('${hId}', '${r.id}')" class="bg-red-50 text-red-500 h-9 w-9 rounded-full flex justify-center items-center hover:bg-red-100 transition border border-red-100 shadow-sm"><i class="fas fa-trash-alt text-xs"></i></button></div>`;
+                        list.innerHTML += `
+                        <div class="bg-white border rounded-xl p-3.5 flex justify-between items-center shadow-sm hover:shadow-md transition mb-3">
+                            <div><p class="font-bold text-gray-800 text-sm">Room ${r.roomNumber} <span class="text-[10px] font-normal text-gray-500">(${h.name})</span></p><p class="text-xs text-blue-600 font-medium mt-1 tracking-wide"><i class="fas fa-envelope mr-1"></i> ${r.accessEmail}</p></div>
+                            <button onclick="removeTenantAccess('${hId}', '${r.id}')" class="bg-red-50 text-red-500 h-9 w-9 rounded-full flex justify-center items-center hover:bg-red-100 transition border border-red-100 shadow-sm"><i class="fas fa-trash-alt text-xs"></i></button>
+                        </div>`;
                     }
                 });
             });
@@ -656,7 +624,7 @@
             } catch (e) { hideLoader(); showAlert('error', 'Error', e.message); }
         };
 
-        // ================= ADD PROPERTY =================
+        // ADD PROPERTY
         document.getElementById('openAddHouseModal').onclick = () => document.getElementById('addHouseModal').classList.remove('hidden');
         document.getElementById('closeAddHouseModal').onclick = () => document.getElementById('addHouseModal').classList.add('hidden');
         document.getElementById('roomCount').oninput = (e) => {
@@ -674,19 +642,21 @@
                         await addDoc(collection(db, "houses", hRef.id, "rooms"), {
                             roomNumber: document.getElementById(`rNo_${i}`).value, tenantUniqueId: 'Unassigned', accessEmail: "",
                             rentAmount: Number(document.getElementById(`rAmt_${i}`).value), waterBillFixed: Number(document.getElementById(`wAmt_${i}`).value),
-                            meterPrev: 0, meterCurr: 0, unitRate: 0,
+                            meterPrev: 0, meterCurr: 0, unitRate: 0, 
                             occupancyStatus: "Vacant", paymentStatus: "Pending", currentLightBill: 0, penalty: 0
                         });
                     }
                 }
-                await loadDashboardData(); hideLoader(); closeAllModals(); 
+                await loadDashboardData();
+                hideLoader();
+                closeAllModals(); 
                 document.getElementById('houseName').value = ''; document.getElementById('houseAddress').value = ''; document.getElementById('roomCount').value = '';
                 document.getElementById('dynamicRoomsContainer').innerHTML = '';
                 showAlert('success', 'Updated Successfully', 'Property and rooms saved in real-time.'); 
             }
         };
 
-        // ================= DASHBOARD DATA =================
+        // DASHBOARD DATA
         window.houseDataCache = {};
         window.vacantDataCache = {}; 
         
@@ -695,7 +665,9 @@
             const hList = document.getElementById('housesList'); 
             const pList = document.getElementById('pendingRoomsList');
             
-            if(hList.innerHTML === '') { hList.innerHTML=`<div class="flex flex-col items-center justify-center py-10 text-blue-500"><i class="fas fa-circle-notch fa-spin text-4xl mb-3"></i><p class="text-sm font-bold text-gray-500">Syncing properties...</p></div>`; }
+            if(hList.innerHTML === '') { 
+                hList.innerHTML=`<div class="flex flex-col items-center justify-center py-10 text-blue-500"><i class="fas fa-circle-notch fa-spin text-4xl mb-3"></i><p class="text-sm font-bold text-gray-500">Syncing properties...</p></div>`;
+            }
             
             let tExp=0, tRec=0, tPen=0, vCount=0;
             let tempHouseCache = {}; let tempVacantCache = {};
@@ -722,8 +694,9 @@
                     if(r.occupancyStatus === "Occupied") {
                         const amt = r.rentAmount + r.waterBillFixed + (r.currentLightBill||0) + (r.penalty||0);
                         tExp += amt;
-                        if(r.paymentStatus === "Paid") { tRec += amt; } 
-                        else { 
+                        if(r.paymentStatus === "Paid") {
+                            tRec += amt;
+                        } else { 
                             tPen += amt; 
                             htmlBufferPending += `<div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-red-500 cursor-pointer hover:shadow-md transition mb-3" onclick="openRoomManager('${hDoc.id}', '${encRoom}')"><div><p class="font-bold text-gray-800">${hd.houseName} - Room ${r.roomNumber}</p><p class="text-xs text-gray-500 font-medium">${r.tenantName}</p></div><div class="font-black text-red-600 text-lg">₹${amt}</div></div>`;
                         }
@@ -738,16 +711,23 @@
                 const encodedAddress = encodeURIComponent(hd.address);
                 htmlBufferHouses += `
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex justify-between items-center cursor-pointer border-l-4 border-l-blue-500 mb-4 hover:shadow-md transition" onclick="openHouseDetailsModal('${hDoc.id}')">
-                        <div><h3 class="font-extrabold text-gray-800 text-lg">${hd.houseName}</h3>
+                        <div>
+                            <h3 class="font-extrabold text-gray-800 text-lg">${hd.houseName}</h3>
                             <div class="text-xs text-gray-500 mt-1.5 flex items-center bg-gray-50 px-2 py-1 rounded inline-flex border border-gray-100">
-                                <i class="fas fa-map-marker-alt text-red-400 mr-1.5"></i> <span class="truncate max-w-[150px]">${hd.address}</span>
+                                <i class="fas fa-map-marker-alt text-red-400 mr-1.5"></i> 
+                                <span class="truncate max-w-[150px]">${hd.address}</span>
                                 <a href="https://www.google.com/maps/search/?api=1&query=${encodedAddress}" target="_blank" onclick="event.stopPropagation()" class="text-blue-500 hover:text-blue-700 ml-2 bg-blue-100 p-1 rounded transition" title="View on Map"><i class="fas fa-external-link-alt text-[10px]"></i></a>
                             </div>
-                        </div><div class="bg-gray-50 h-10 w-10 rounded-full flex items-center justify-center border border-gray-200"><i class="fas fa-chevron-right text-gray-400"></i></div>
+                        </div>
+                        <div class="bg-gray-50 h-10 w-10 rounded-full flex items-center justify-center border border-gray-200"><i class="fas fa-chevron-right text-gray-400"></i></div>
                     </div>`;
             }
-            window.houseDataCache = tempHouseCache; window.vacantDataCache = tempVacantCache;
-            hList.innerHTML = htmlBufferHouses; pList.innerHTML = htmlBufferPending;
+            
+            window.houseDataCache = tempHouseCache;
+            window.vacantDataCache = tempVacantCache;
+            hList.innerHTML = htmlBufferHouses;
+            pList.innerHTML = htmlBufferPending;
+
             document.getElementById('statExpected').innerText = "₹" + tExp; document.getElementById('statReceived').innerText = "₹" + tRec; document.getElementById('statPending').innerText = "₹" + tPen;
             document.getElementById('vacantCountBadge').innerText = vCount;
             if(tPen === 0 && tExp > 0) pList.innerHTML = `<p class="text-green-600 font-bold bg-green-50 p-4 rounded-xl border border-green-200 shadow-sm flex items-center"><i class="fas fa-check-circle text-xl mr-2"></i> All collections complete!</p>`;
@@ -762,12 +742,16 @@
                 body.innerHTML = `<p class="text-center text-gray-500 mt-5"><i class="fas fa-home text-5xl mb-3 text-gray-300"></i><br>All rooms are currently occupied.</p>`;
             } else {
                 houseIds.forEach(hId => {
-                    const h = window.vacantDataCache[hId]; const encodedAddress = encodeURIComponent(h.address);
+                    const h = window.vacantDataCache[hId];
+                    const encodedAddress = encodeURIComponent(h.address);
                     body.innerHTML += `
                     <div class="bg-white border rounded-xl p-4 flex justify-between items-center shadow-sm cursor-pointer hover:border-blue-400 transition mb-3" onclick="openVacantRoomsView('${hId}')">
                         <div>
                             <h4 class="font-extrabold text-blue-700 text-lg">${h.name}</h4>
-                            <p class="text-xs text-gray-500 mt-1 flex items-center bg-gray-50 px-1 rounded inline-flex"><span class="truncate max-w-[120px]">${h.address}</span><a href="https://www.google.com/maps/search/?api=1&query=${encodedAddress}" target="_blank" onclick="event.stopPropagation()" class="text-blue-500 ml-2"><i class="fas fa-external-link-alt text-[10px]"></i></a></p>
+                            <p class="text-xs text-gray-500 mt-1 flex items-center bg-gray-50 px-1 rounded inline-flex">
+                                <span class="truncate max-w-[120px]">${h.address}</span>
+                                <a href="https://www.google.com/maps/search/?api=1&query=${encodedAddress}" target="_blank" onclick="event.stopPropagation()" class="text-blue-500 ml-2"><i class="fas fa-external-link-alt text-[10px]"></i></a>
+                            </p>
                         </div>
                         <div class="bg-blue-100 text-blue-800 font-black px-3 py-1.5 rounded-lg text-xs shadow-sm">${h.rooms.length} Khali</div>
                     </div>`;
@@ -792,7 +776,7 @@
         };
         window.closeVacantExplorer = () => document.getElementById('vacantExplorerModal').classList.add('hidden');
 
-        // HOUSE DETAILS
+        // HOUSE DETAILS MODAL
         window.openHouseDetailsModal = (hId) => {
             const d = window.houseDataCache[hId]; 
             document.getElementById('hdHouseName').innerText = d.name; 
@@ -814,19 +798,13 @@
         };
         document.getElementById('closeHouseDetailsModal').onclick = () => document.getElementById('houseDetailsModal').classList.add('hidden');
 
-        // ================= ROOM MANAGER MODAL & LIVE ELECTRICITY CALC =================
+        // ================= ROOM MANAGER WITH FEATURE PAYWALLS =================
         window.openRoomManager = (hId, rStringEnc) => {
             const r = JSON.parse(decodeURIComponent(rStringEnc));
             document.getElementById('rmHouseId').value = hId; document.getElementById('rmRoomIdVal').value = r.id;
             document.getElementById('rmRoomName').innerText = "Room " + r.roomNumber; 
             document.getElementById('rmRoomId').innerText = r.occupancyStatus === "Occupied" ? "ID: " + r.tenantUniqueId : "Unassigned";
             
-            const isFree = window.currentUserPlan === 'free';
-            const lockIcon = isFree ? ' <i class="fas fa-lock text-yellow-300 ml-1"></i>' : '';
-            const lockClass = isFree ? 'locked-btn' : '';
-            const actionW = isFree ? `showUpgradeAlert('WhatsApp Invoices')` : `downloadInvoiceAndSend('whatsapp', '${r.tenantMobile}', '${r.tenantEmail}', '${r.tenantName}', '${r.roomNumber}', ${r.rentAmount}, ${r.waterBillFixed}, document.getElementById('editLight').value, document.getElementById('editPen').value, '${r.tenantUniqueId}', document.getElementById('editMeterPrev').value, document.getElementById('editMeterCurr').value, document.getElementById('editUnitRate').value)`;
-            const actionE = isFree ? `showUpgradeAlert('Email PDF Invoices')` : `downloadInvoiceAndSend('email', '${r.tenantMobile}', '${r.tenantEmail}', '${r.tenantName}', '${r.roomNumber}', ${r.rentAmount}, ${r.waterBillFixed}, document.getElementById('editLight').value, document.getElementById('editPen').value, '${r.tenantUniqueId}', document.getElementById('editMeterPrev').value, document.getElementById('editMeterCurr').value, document.getElementById('editUnitRate').value)`;
-
             const body = document.getElementById('roomManagerBody');
             
             if(r.occupancyStatus === "Vacant") {
@@ -858,6 +836,13 @@
             } else {
                 const totalDue = r.rentAmount + r.waterBillFixed + (r.currentLightBill||0) + (r.penalty||0);
                 
+                // FEATURE LOCK CHECKS
+                const isFree = window.currentUserPlan === 'free';
+                const lockIconHtml = isFree ? ' <i class="fas fa-lock text-red-500 ml-1"></i>' : '';
+                const btnOpacity = isFree ? 'opacity-80 bg-gray-200 text-gray-600 border-gray-300' : 'bg-gray-50 text-gray-800 hover:border-gray-400 hover:shadow-md';
+                const whatsappAction = isFree ? `openUpgradeModal('🔒 Premium Feature. Please upgrade to send Invoice PDF.')` : `downloadInvoiceAndSend('whatsapp', '${r.tenantMobile}', '${r.tenantEmail}', '${r.tenantName}', '${r.roomNumber}', ${r.rentAmount}, ${r.waterBillFixed}, document.getElementById('editLight').value, document.getElementById('editPen').value, '${r.tenantUniqueId}', document.getElementById('editMeterPrev').value, document.getElementById('editMeterCurr').value, document.getElementById('editUnitRate').value)`;
+                const emailAction = isFree ? `openUpgradeModal('🔒 Premium Feature. Please upgrade to send Invoice PDF.')` : `downloadInvoiceAndSend('email', '${r.tenantMobile}', '${r.tenantEmail}', '${r.tenantName}', '${r.roomNumber}', ${r.rentAmount}, ${r.waterBillFixed}, document.getElementById('editLight').value, document.getElementById('editPen').value, '${r.tenantUniqueId}', document.getElementById('editMeterPrev').value, document.getElementById('editMeterCurr').value, document.getElementById('editUnitRate').value)`;
+
                 body.innerHTML = `
                     <div class="bg-green-50 p-3 rounded-xl mb-4 flex justify-between items-center border border-green-200"><span class="font-black text-green-800 text-lg">${r.tenantName}</span><button onclick="vacateRoom('${r.tenantName}', ${r.deposit})" class="bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow hover:bg-red-600 transition">Vacate Room</button></div>
                     
@@ -900,8 +885,8 @@
                     <button id="updateRoomBtn" onclick="saveRoomUpdates('${r.tenantName}')" class="w-full bg-green-500 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-green-600 transition mb-4 text-lg"><i class="fas fa-save mr-2"></i> Save Changes</button>
                     
                     <div class="flex gap-3 border-t pt-4">
-                        <button onclick="${actionW}" class="w-1/2 ${lockClass} bg-gray-100 text-gray-800 font-bold py-3 rounded-xl shadow-sm hover:bg-green-50 hover:text-green-600 border border-gray-200 transition flex items-center justify-center text-[10px] tracking-wide uppercase"><i class="fab fa-whatsapp text-lg mr-2 text-green-500"></i> INV ${lockIcon}</button>
-                        <button onclick="${actionE}" class="w-1/2 ${lockClass} bg-gray-100 text-gray-800 font-bold py-3 rounded-xl shadow-sm hover:bg-blue-50 hover:text-blue-600 border border-gray-200 transition flex items-center justify-center text-[10px] tracking-wide uppercase"><i class="fas fa-envelope text-lg mr-2 text-blue-500"></i> PDF ${lockIcon}</button>
+                        <button onclick="${whatsappAction}" class="w-1/2 ${btnOpacity} border border-gray-200 font-bold py-3 rounded-xl transition flex items-center justify-center text-xs tracking-wide uppercase"><i class="fab fa-whatsapp text-lg mr-2 ${isFree?'text-gray-500':'text-green-500'}"></i> PDF ${lockIconHtml}</button>
+                        <button onclick="${emailAction}" class="w-1/2 ${btnOpacity} border border-gray-200 font-bold py-3 rounded-xl transition flex items-center justify-center text-xs tracking-wide uppercase"><i class="fas fa-envelope text-lg mr-2 ${isFree?'text-gray-500':'text-blue-500'}"></i> PDF ${lockIconHtml}</button>
                     </div>
                 `;
             }
@@ -928,13 +913,13 @@
                     ['editMeterCurr','editMeterPrev','editUnitRate','editRent','editWater','editPen'].forEach(id => {
                         document.getElementById(id).addEventListener('input', calcLight);
                     });
-                    calcLight(); 
+                    calcLight();
                 }
             }, 50);
         };
         document.getElementById('closeRoomManagerModal').onclick = () => document.getElementById('roomManagerModal').classList.add('hidden');
 
-        // ================= PDF & INVOICE SENDER =================
+        // INVOICE GENERATOR & SENDER
         window.downloadInvoiceAndSend = (type, mob, email, name, rNo, rent, water, light, pen, tId, prevStr, currStr, rateStr) => {
             if (type === 'whatsapp' && (!mob || mob === 'undefined')) return showAlert('error', 'Missing Data', 'No WhatsApp number saved.');
             if (type === 'email' && (!email || email === 'undefined')) return showAlert('error', 'Missing Data', 'No Email ID saved.');
@@ -945,8 +930,8 @@
             
             const tot = r + w + l + p;
             const dateStr = new Date().toLocaleDateString('en-GB');
+
             const { jsPDF } = window.jspdf; const doc = new jsPDF();
-            
             doc.setFont("helvetica", "bold"); doc.setFontSize(24); doc.setTextColor(37, 99, 235);
             doc.text("RENT INVOICE", 105, 25, null, null, "center");
             
@@ -961,12 +946,14 @@
             
             doc.text("Base Rent", 20, 110); doc.text(`Rs. ${r}`, 150, 110);
             doc.text("Water Bill", 20, 120); doc.text(`Rs. ${w}`, 150, 120);
+            
             doc.text("Electricity Bill", 20, 130); doc.text(`Rs. ${l}`, 150, 130);
             if(rate > 0) {
                 doc.setFontSize(8); doc.setTextColor(120, 120, 120);
                 doc.text(`(Meter: ${prev} to ${curr} | ${units} units @ Rs.${rate}/unit)`, 20, 135);
                 doc.setFontSize(11); doc.setTextColor(80, 80, 80);
             }
+            
             doc.text("Late Penalty", 20, 145); doc.text(`Rs. ${p}`, 150, 145);
             doc.line(20, 153, 190, 153);
             
@@ -987,7 +974,7 @@
             }, 800);
         };
 
-        // ================= BACKGROUND LOGIC =================
+        // BACKGROUND LOGIC
         async function logTransaction(houseName, rName, tName, amt, mode, type) {
             if(amt > 0) {
                 await addDoc(collection(db, "transactions"), { 
@@ -1002,6 +989,7 @@
             const mPrev = Number(document.getElementById('tMeterPrev').value)||0; const uRate = Number(document.getElementById('tUnitRate').value)||0;
             
             if(!name || !mob) return showAlert('error', 'Incomplete', 'Name and Mobile are mandatory.');
+            
             showLoader();
             const hId = document.getElementById('rmHouseId').value, rId = document.getElementById('rmRoomIdVal').value;
             const hName = window.houseDataCache[hId].name;
@@ -1027,8 +1015,11 @@
             
             const rBase = Number(document.getElementById('editRent').value)||0, wBase = Number(document.getElementById('editWater').value)||0;
             const light = Number(document.getElementById('editLight').value)||0, pen = Number(document.getElementById('editPen').value)||0;
-            const mPrev = Number(document.getElementById('editMeterPrev').value)||0, mCurr = Number(document.getElementById('editMeterCurr').value)||0; 
+            
+            const mPrev = Number(document.getElementById('editMeterPrev').value)||0; 
+            const mCurr = Number(document.getElementById('editMeterCurr').value)||0; 
             const uRate = Number(document.getElementById('editUnitRate').value)||0;
+            
             const status = document.getElementById('payStatus').value, mode = document.getElementById('payMode').value;
             
             await updateDoc(doc(db, "houses", hId, "rooms", rId), { 
@@ -1081,7 +1072,7 @@
             showAlert('success', 'New Month Started', 'Meter readings auto-forwarded. Ready for new billing.');
         };
 
-        // ================= TRANSACTION HISTORY (WITH SAAS PAYWALL) =================
+        // ================= TRANSACTION HISTORY WITH SOFT DELETE =================
         window.loadHistoryData = async () => {
             try {
                 const hList = document.getElementById('historyList'); 
@@ -1092,8 +1083,6 @@
                 
                 let transactions = []; snaps.forEach(d => transactions.push({ id: d.id, ...d.data() }));
                 transactions.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
-                
-                const isFree = window.currentUserPlan === 'free';
                 
                 hList.innerHTML = '';
                 transactions.forEach(t => {
@@ -1106,16 +1095,7 @@
                     let c = (t.type && t.type.includes("Refund")) ? "text-red-500" : "text-green-500";
                     if(isDeleted) c = "text-gray-400 line-through";
 
-                    // Paywall on Delete Button
-                    let delBtn = '';
-                    if(!isDeleted) {
-                        if(isFree) {
-                            delBtn = `<button onclick="event.stopPropagation(); showUpgradeAlert('Delete Transactions')" class="locked-btn bg-gray-200 text-gray-500 h-8 w-8 rounded-full flex items-center justify-center border border-gray-300 shadow-sm ml-3"><i class="fas fa-lock text-xs"></i></button>`;
-                        } else {
-                            delBtn = `<button onclick="event.stopPropagation(); openDeleteTxModal('${t.id}')" class="bg-red-50 text-red-500 h-8 w-8 rounded-full flex items-center justify-center hover:bg-red-100 hover:text-red-600 transition border border-red-100 shadow-sm ml-3"><i class="fas fa-trash-alt text-xs"></i></button>`;
-                        }
-                    }
-                    
+                    const delBtn = isDeleted ? '' : `<button onclick="event.stopPropagation(); openDeleteTxModal('${t.id}')" class="bg-red-50 text-red-500 h-8 w-8 rounded-full flex items-center justify-center hover:bg-red-100 hover:text-red-600 transition border border-red-100 shadow-sm ml-3"><i class="fas fa-trash-alt text-xs"></i></button>`;
                     const noteHtml = isDeleted ? `<div class="w-full mt-3 bg-red-50 border border-red-100 p-2 rounded-lg text-xs text-red-600 font-semibold flex items-start"><i class="fas fa-info-circle mt-0.5 mr-1.5"></i> <span>Void Note: ${t.deleteReason}</span></div>` : '';
 
                     const encData = encodeURIComponent(JSON.stringify({...t, roomName: safeRoom, tenantName: (t.tenantName||'Unknown'), houseName: (t.houseName||'-'), type: (t.type||'Transaction'), mode: (t.mode||'N/A'), dateStr, timeStr}));
