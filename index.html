@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- jsPDF Library for generating PDF Invoices -->
+    <!-- jsPDF Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body { background-color: #f4f7fb; font-family: 'Segoe UI', system-ui, sans-serif; }
@@ -27,9 +27,15 @@
 </head>
 <body class="text-gray-800">
 
+    <!-- ================= GLOBAL LOADING ANIMATION ================= -->
+    <div id="globalLoader" class="fixed inset-0 modal-overlay hidden flex flex-col justify-center items-center px-4" style="z-index: 99999;">
+        <i class="fas fa-circle-notch fa-spin text-6xl text-blue-500 mb-4 drop-shadow-lg"></i>
+        <p class="text-white font-bold tracking-widest uppercase text-sm animate-pulse">Processing...</p>
+    </div>
+
     <!-- ================= CUSTOM ALERT POPUP ================= -->
     <div id="customAlert" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4" style="z-index: 9999;">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl border-t-4 border-green-500">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl transform transition-all scale-100 border-t-4 border-green-500">
             <div id="alertIcon" class="text-6xl mb-4 drop-shadow-sm">✅</div>
             <h3 id="alertTitle" class="text-2xl font-extrabold mb-2 text-gray-800">Updated</h3>
             <p id="alertMessage" class="text-gray-500 text-sm mb-6 font-medium">Data saved successfully.</p>
@@ -45,12 +51,8 @@
             <div id="loginForm">
                 <input type="email" id="loginEmail" placeholder="Email ID" class="w-full bg-gray-50 border border-gray-200 p-4 rounded-xl mb-4 outline-none focus:ring-2 focus:ring-blue-400 transition" required>
                 <input type="password" id="loginPassword" placeholder="Password" class="w-full bg-gray-50 border border-gray-200 p-4 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400 transition" required>
-                
-                <div class="text-right mb-6">
-                    <span id="openForgotModal" class="text-sm text-blue-500 cursor-pointer hover:text-blue-700 font-semibold transition">Forgot Password?</span>
-                </div>
-
-                <button id="loginBtn" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition shadow-lg text-lg">Login</button>
+                <div class="text-right mb-6"><span id="openForgotModal" class="text-sm text-blue-500 cursor-pointer hover:text-blue-700 font-semibold transition">Forgot Password?</span></div>
+                <button id="loginBtn" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition shadow-lg text-lg flex justify-center items-center"><span id="loginBtnText">Login</span></button>
                 <p class="text-center text-sm text-gray-500 mt-6 cursor-pointer hover:text-blue-600 font-semibold" id="showRegisterBtn">New here? <span class="text-blue-500">Create Account</span></p>
             </div>
 
@@ -127,15 +129,14 @@
                     <button onclick="loadHistoryData()" class="bg-blue-50 text-blue-600 px-4 py-2 rounded-xl text-sm font-bold hover:bg-blue-100 transition shadow-sm border border-blue-100"><i class="fas fa-sync-alt mr-1"></i> Refresh</button>
                 </div>
                 <div id="historyList" class="space-y-3">
-                    <div class="text-center text-gray-400 mt-10"><i class="fas fa-receipt text-4xl mb-2"></i><p>Loading transactions...</p></div>
+                    <!-- Javascript will inject spinner or data here -->
                 </div>
             </div>
 
-            <!-- TAB 4: PROFILE (MODERNIZED UI) -->
+            <!-- TAB 4: PROFILE -->
             <div id="tabProfile" class="hidden">
                 <h2 class="text-2xl font-extrabold text-gray-800 mb-5">My Profile</h2>
                 
-                <!-- Modern Asset ID Card -->
                 <div class="bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white p-6 rounded-3xl shadow-2xl mb-6 relative overflow-hidden border border-gray-700">
                     <div class="absolute -right-4 -bottom-4 opacity-10"><i class="fas fa-fingerprint text-9xl"></i></div>
                     <div class="relative z-10">
@@ -155,21 +156,18 @@
                 </div>
 
                 <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                    
-                    <!-- Contact Email Add/Remove Setting -->
-                    <h3 class="font-bold text-gray-800 mb-4"><i class="fas fa-address-book mr-2 text-blue-500"></i> Support / Contact Email</h3>
+                    <h3 class="font-bold text-gray-800 mb-4"><i class="fas fa-address-book mr-2 text-blue-500"></i> Contact Email</h3>
                     <div class="flex gap-2 mb-6">
                         <input type="email" id="contactEmailInput" placeholder="Add contact email for tenants" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl outline-none focus:ring-2 focus:ring-blue-400 transition text-sm font-medium">
                         <button id="clearEmailBtn" class="bg-red-50 text-red-500 px-4 rounded-xl hover:bg-red-100 transition border border-red-100 shadow-sm" title="Remove Email"><i class="fas fa-trash-alt"></i></button>
                     </div>
 
-                    <!-- Payment Details -->
                     <h3 class="font-bold text-gray-800 mb-4 border-t pt-5"><i class="fas fa-university mr-2 text-green-500"></i> Receiving Payment Details</h3>
                     <input type="text" id="upiIdInput" placeholder="UPI ID (e.g. 9876543210@ybl)" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400 transition font-medium">
                     <input type="text" id="bankAccInput" placeholder="Bank Account Number" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400 transition font-medium">
                     <input type="text" id="ifscInput" placeholder="IFSC Code" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-6 outline-none focus:ring-2 focus:ring-blue-400 transition font-medium">
                     
-                    <button id="saveProfileBtn" class="w-full bg-green-500 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-green-600 transition text-lg">Save Settings</button>
+                    <button id="saveProfileBtn" class="w-full bg-green-500 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-green-600 transition text-lg flex justify-center items-center"><i class="fas fa-save mr-2"></i> Save Settings</button>
                 </div>
             </div>
         </main>
@@ -177,20 +175,16 @@
         <!-- BOTTOM NAVIGATION -->
         <nav class="fixed bottom-0 w-full bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.05)] border-t border-gray-100 flex justify-around items-center z-40 h-[72px] pb-2">
             <button class="nav-btn active flex flex-col items-center justify-center w-full h-full pt-1" onclick="switchTab('Analytics')">
-                <div class="nav-indicator"></div>
-                <i class="fas fa-home text-xl mb-1"></i><span class="text-[10px] font-bold uppercase tracking-wider">Home</span>
+                <div class="nav-indicator"></div><i class="fas fa-home text-xl mb-1"></i><span class="text-[10px] font-bold uppercase tracking-wider">Home</span>
             </button>
             <button class="nav-btn flex flex-col items-center justify-center w-full h-full pt-1" onclick="switchTab('Properties')">
-                <div class="nav-indicator"></div>
-                <i class="fas fa-building text-xl mb-1"></i><span class="text-[10px] font-bold uppercase tracking-wider">Rooms</span>
+                <div class="nav-indicator"></div><i class="fas fa-building text-xl mb-1"></i><span class="text-[10px] font-bold uppercase tracking-wider">Rooms</span>
             </button>
             <button class="nav-btn flex flex-col items-center justify-center w-full h-full pt-1" onclick="switchTab('History')">
-                <div class="nav-indicator"></div>
-                <i class="fas fa-history text-xl mb-1"></i><span class="text-[10px] font-bold uppercase tracking-wider">History</span>
+                <div class="nav-indicator"></div><i class="fas fa-history text-xl mb-1"></i><span class="text-[10px] font-bold uppercase tracking-wider">History</span>
             </button>
             <button class="nav-btn flex flex-col items-center justify-center w-full h-full pt-1" onclick="switchTab('Profile')">
-                <div class="nav-indicator"></div>
-                <i class="fas fa-user-circle text-xl mb-1"></i><span class="text-[10px] font-bold uppercase tracking-wider">Profile</span>
+                <div class="nav-indicator"></div><i class="fas fa-user-circle text-xl mb-1"></i><span class="text-[10px] font-bold uppercase tracking-wider">Profile</span>
             </button>
         </nav>
     </div>
@@ -237,7 +231,7 @@
     </div>
 
     <!-- HOUSE DETAILS MODAL -->
-    <div id="houseDetailsModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-50">
+        <div id="houseDetailsModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-md modal-content shadow-2xl">
             <div class="flex justify-between border-b pb-4 mb-5 items-start">
                 <div>
@@ -282,7 +276,20 @@
         </div>
     </div>
 
-    <!-- ================= JAVASCRIPT LOGIC ================= -->
+    <!-- ================= NEW: DELETE TRANSACTION (WITH REASON) MODAL ================= -->
+    <div id="deleteTransactionModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[80]">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm modal-content shadow-2xl border-t-4 border-red-500">
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                <h3 class="font-extrabold text-red-600 text-xl"><i class="fas fa-trash-alt mr-2"></i> Delete Entry</h3>
+                <button onclick="document.getElementById('deleteTransactionModal').classList.add('hidden')" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 transition"><i class="fas fa-times"></i></button>
+            </div>
+            <p class="text-sm text-gray-600 mb-4 font-medium">Please provide a reason. This entry will be voided and saved as a note in your history.</p>
+            <input type="hidden" id="delTxId">
+            <input type="text" id="delTxReason" placeholder="Reason (e.g. Wrong amount entered)" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-5 outline-none focus:ring-2 focus:ring-red-400 font-medium" required>
+            <button id="confirmDeleteTxBtn" class="w-full bg-red-500 text-white font-bold py-3.5 rounded-xl shadow-lg hover:bg-red-600 transition text-lg"><i class="fas fa-times-circle mr-2"></i> Confirm Delete</button>
+        </div>
+    </div>
+        <!-- ================= JAVASCRIPT LOGIC ================= -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -302,6 +309,9 @@
         let currentUserId = null;
 
         // UI HELPERS
+        window.showLoader = () => document.getElementById('globalLoader').classList.remove('hidden');
+        window.hideLoader = () => document.getElementById('globalLoader').classList.add('hidden');
+
         window.showAlert = (type, title, msg, cb) => {
             const ab = document.getElementById('customAlert');
             const icon = document.getElementById('alertIcon');
@@ -337,22 +347,23 @@
         };
 
         window.closeAllModals = () => {
-            ['addHouseModal', 'vacantExplorerModal', 'houseDetailsModal', 'roomManagerModal', 'transactionDetailsModal', 'forgotModal'].forEach(m => {
+            ['addHouseModal', 'vacantExplorerModal', 'houseDetailsModal', 'roomManagerModal', 'transactionDetailsModal', 'forgotModal', 'deleteTransactionModal'].forEach(m => {
                 document.getElementById(m).classList.add('hidden');
             });
         };
 
-        // AUTH
+        // AUTHENTICATION
         document.getElementById('showRegisterBtn').onclick = () => { document.getElementById('loginForm').classList.add('hidden'); document.getElementById('registerForm').classList.remove('hidden'); };
         document.getElementById('showLoginBtn').onclick = () => { document.getElementById('registerForm').classList.add('hidden'); document.getElementById('loginForm').classList.remove('hidden'); };
 
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUserId = user.uid;
                 if(document.getElementById('customAlert').classList.contains('hidden')){
                     document.getElementById('authContainer').classList.add('hidden');
                     document.getElementById('appContainer').classList.remove('hidden');
-                    loadProfileData(); loadDashboardData();
+                    loadProfileData(); 
+                    await loadDashboardData();
                 }
             } else {
                 currentUserId = null;
@@ -362,14 +373,14 @@
         });
 
         document.getElementById('loginBtn').onclick = async () => {
-            const btn = document.getElementById('loginBtn'); btn.innerText = "Please wait...";
+            const btnText = document.getElementById('loginBtnText'); btnText.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Checking...';
             try { await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPassword').value); } 
             catch(e) { showAlert('error', 'Login Failed', 'Invalid Email or Password'); }
-            btn.innerText = "Login";
+            btnText.innerHTML = "Login";
         };
         document.getElementById('logoutBtn').onclick = () => signOut(auth);
 
-        // Forgot Password
+        // FORGOT PASSWORD
         document.getElementById('openForgotModal').onclick = () => document.getElementById('forgotModal').classList.remove('hidden');
         document.getElementById('closeForgotModal').onclick = () => document.getElementById('forgotModal').classList.add('hidden');
         document.getElementById('sendResetBtn').onclick = async () => {
@@ -382,23 +393,17 @@
                 showAlert('success', 'Email Sent!', 'Please check your inbox (or spam folder) for the reset link.');
             } catch(error) { showAlert('error', 'Error', error.message); }
         };
-        
-        // ================= PROFILE SECTION (MODERN ASSET ID & EMAIL MANAGEMENT) =================
+                // PROFILE (WITH ASSET ID)
         async function loadProfileData() {
             const dSnap = await getDoc(doc(db, "users", currentUserId));
             if (dSnap.exists()) {
                 const d = dSnap.data();
-                
-                // Show Main details
                 document.getElementById('profileName').innerText = d.ownerName;
                 document.getElementById('profileMobile').innerText = d.mobileNumber;
                 document.getElementById('profileEmail').innerText = d.emailId;
-                
-                // Asset ID Logic (Generated from UID)
                 const assetId = "RE-OWN-" + currentUserId.substring(0, 6).toUpperCase();
                 document.getElementById('ownerAssetId').innerText = assetId;
                 
-                // Editable Fields
                 if(d.upiId) document.getElementById('upiIdInput').value = d.upiId;
                 if(d.bankAcc) document.getElementById('bankAccInput').value = d.bankAcc;
                 if(d.ifsc) document.getElementById('ifscInput').value = d.ifsc;
@@ -406,24 +411,21 @@
             }
         }
         
-        // Remove Email Button logic
-        document.getElementById('clearEmailBtn').onclick = () => {
-            document.getElementById('contactEmailInput').value = '';
-        };
+        document.getElementById('clearEmailBtn').onclick = () => document.getElementById('contactEmailInput').value = '';
 
         document.getElementById('saveProfileBtn').onclick = async () => {
-            const btn = document.getElementById('saveProfileBtn'); btn.innerText = "Saving...";
+            showLoader();
             await updateDoc(doc(db, "users", currentUserId), { 
                 upiId: document.getElementById('upiIdInput').value, 
                 bankAcc: document.getElementById('bankAccInput').value, 
                 ifsc: document.getElementById('ifscInput').value,
                 contactEmail: document.getElementById('contactEmailInput').value
             }); 
-            showAlert('success', 'Profile Updated', 'Your digital asset card and settings are saved.'); 
-            btn.innerText = "Save Settings";
+            hideLoader();
+            showAlert('success', 'Updated Successfully', 'Profile payment details saved in real-time.'); 
         };
 
-        // ================= ADD PROPERTY =================
+        // ADD PROPERTY
         document.getElementById('openAddHouseModal').onclick = () => document.getElementById('addHouseModal').classList.remove('hidden');
         document.getElementById('closeAddHouseModal').onclick = () => document.getElementById('addHouseModal').classList.add('hidden');
         document.getElementById('roomCount').oninput = (e) => {
@@ -434,7 +436,7 @@
         document.getElementById('savePropertyBtn').onclick = async () => {
             const c = parseInt(document.getElementById('roomCount').value);
             if(c>0) {
-                document.getElementById('savePropertyBtn').innerText = "Saving Property...";
+                showLoader();
                 const hRef = await addDoc(collection(db, "houses"), { ownerId: currentUserId, houseName: document.getElementById('houseName').value, address: document.getElementById('houseAddress').value });
                 for(let i=1; i<=c; i++) {
                     if(document.getElementById(`rNo_${i}`).value) {
@@ -445,14 +447,15 @@
                         });
                     }
                 }
-                closeAllModals(); 
-                document.getElementById('savePropertyBtn').innerText = "Save Property";
                 await loadDashboardData();
-                showAlert('success', 'Saved Successfully', 'Property and rooms added to your dashboard.'); 
+                hideLoader();
+                closeAllModals(); 
+                document.getElementById('houseName').value = ''; document.getElementById('houseAddress').value = ''; document.getElementById('roomCount').value = '';
+                document.getElementById('dynamicRoomsContainer').innerHTML = '';
+                showAlert('success', 'Updated Successfully', 'Property and rooms saved in real-time.'); 
             }
         };
-
-        // ================= DASHBOARD DATA & MAPS =================
+              // DASHBOARD DATA
         window.houseDataCache = {};
         window.vacantDataCache = {}; 
         
@@ -460,7 +463,11 @@
             if(!currentUserId) return;
             const hList = document.getElementById('housesList'); 
             const pList = document.getElementById('pendingRoomsList');
-            hList.innerHTML=''; pList.innerHTML=''; 
+            
+            // Local Loader
+            hList.innerHTML=`<div class="flex flex-col items-center justify-center py-10 text-blue-500"><i class="fas fa-circle-notch fa-spin text-4xl mb-3"></i><p class="text-sm font-bold text-gray-500">Syncing properties...</p></div>`;
+            pList.innerHTML=''; 
+            
             let tExp=0, tRec=0, tPen=0, vCount=0;
             window.vacantDataCache = {}; 
             
@@ -472,6 +479,7 @@
                 pList.innerHTML = `<p class="text-gray-400">No collections pending.</p>`;
                 return;
             }
+            hList.innerHTML = ''; // clear loader
 
             for (const hDoc of hSnaps.docs) {
                 const hd = hDoc.data(); 
@@ -489,7 +497,7 @@
                             tRec += amt;
                         } else { 
                             tPen += amt; 
-                            pList.innerHTML += `<div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-red-500 cursor-pointer hover:shadow-md transition" onclick="openRoomManager('${hDoc.id}', '${encRoom}')"><div><p class="font-bold text-gray-800">${hd.houseName} - Room ${r.roomNumber}</p><p class="text-xs text-gray-500 font-medium">${r.tenantName}</p></div><div class="font-black text-red-600 text-lg">₹${amt}</div></div>`;
+                            pList.innerHTML += `<div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-red-500 cursor-pointer hover:shadow-md transition mb-3" onclick="openRoomManager('${hDoc.id}', '${encRoom}')"><div><p class="font-bold text-gray-800">${hd.houseName} - Room ${r.roomNumber}</p><p class="text-xs text-gray-500 font-medium">${r.tenantName}</p></div><div class="font-black text-red-600 text-lg">₹${amt}</div></div>`;
                         }
                     } else if(r.occupancyStatus === "Vacant") {
                         vCount++;
@@ -499,7 +507,6 @@
                 });
                 window.houseDataCache[hDoc.id] = { name: hd.houseName, address: hd.address, rooms: roomsData };
                 
-                // Premium Styled House Card with Map Button
                 const encodedAddress = encodeURIComponent(hd.address);
                 hList.innerHTML += `
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex justify-between items-center cursor-pointer border-l-4 border-l-blue-500 mb-4 hover:shadow-md transition" onclick="openHouseDetailsModal('${hDoc.id}')">
@@ -520,7 +527,7 @@
             if(tPen === 0 && tExp > 0) pList.innerHTML = `<p class="text-green-600 font-bold bg-green-50 p-4 rounded-xl border border-green-200 shadow-sm flex items-center"><i class="fas fa-check-circle text-xl mr-2"></i> All collections complete!</p>`;
         }
 
-        // ================= VACANT EXPLORER =================
+        // VACANT EXPLORER DRILL-DOWN
         window.openVacantHousesModal = () => {
             document.getElementById('veTitle').innerHTML = "Vacant Properties";
             const body = document.getElementById('veBody'); body.innerHTML = '';
@@ -562,8 +569,7 @@
             });
         };
         window.closeVacantExplorer = () => document.getElementById('vacantExplorerModal').classList.add('hidden');
-
-        // ================= HOUSE DETAILS MODAL =================
+             // HOUSE DETAILS MODAL
         window.openHouseDetailsModal = (hId) => {
             const d = window.houseDataCache[hId]; 
             document.getElementById('hdHouseName').innerText = d.name; 
@@ -585,7 +591,7 @@
         };
         document.getElementById('closeHouseDetailsModal').onclick = () => document.getElementById('houseDetailsModal').classList.add('hidden');
 
-        // ================= ROOM MANAGER MODAL =================
+        // ROOM MANAGER MODAL
         window.openRoomManager = (hId, rStringEnc) => {
             const r = JSON.parse(decodeURIComponent(rStringEnc));
             document.getElementById('rmHouseId').value = hId; document.getElementById('rmRoomIdVal').value = r.id;
@@ -656,15 +662,13 @@
         };
         document.getElementById('closeRoomManagerModal').onclick = () => document.getElementById('roomManagerModal').classList.add('hidden');
 
-        // ================= PDF & SEND LOGIC =================
+              // PDF & INVOICE SENDER
         window.downloadInvoiceAndSend = (type, mob, email, name, rNo, rent, water, light, pen, tId) => {
-            if (type === 'whatsapp' && !mob) return showAlert('error', 'Missing Data', 'No WhatsApp number saved.');
-            if (type === 'email' && !email) return showAlert('error', 'Missing Data', 'No Email ID saved.');
+            if (type === 'whatsapp' && (!mob || mob === 'undefined')) return showAlert('error', 'Missing Data', 'No WhatsApp number saved.');
+            if (type === 'email' && (!email || email === 'undefined')) return showAlert('error', 'Missing Data', 'No Email ID saved.');
 
             const tot = rent + water + light + pen;
             const dateStr = new Date().toLocaleDateString('en-GB');
-
-            // Setup jsPDF
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
@@ -672,10 +676,8 @@
             doc.text("RENT INVOICE", 105, 25, null, null, "center");
             
             doc.setFontSize(11); doc.setTextColor(80, 80, 80); doc.setFont("helvetica", "normal");
-            doc.text(`Date: ${dateStr}`, 20, 45);
-            doc.text(`Tenant Name: ${name}`, 20, 55);
-            doc.text(`Room Number: ${rNo}`, 20, 65);
-            doc.text(`Asset ID: ${tId}`, 20, 75);
+            doc.text(`Date: ${dateStr}`, 20, 45); doc.text(`Tenant Name: ${name}`, 20, 55);
+            doc.text(`Room Number: ${rNo}`, 20, 65); doc.text(`Asset ID: ${tId}`, 20, 75);
             
             doc.setDrawColor(200, 200, 200); doc.line(20, 85, 190, 85);
             
@@ -696,7 +698,6 @@
             doc.text("Digitally generated by Rent Easy SaaS.", 105, 180, null, null, "center");
             
             doc.save(`Invoice_Room_${rNo}_${name.replace(/\s+/g, '_')}.pdf`);
-
             const textMsg = `Hello ${name},%0A%0AHere is your Rent Invoice for Room ${rNo} (Date: ${dateStr}):%0A- Rent: Rs.${rent}%0A- Water: Rs.${water}%0A- Light Bill: Rs.${light}%0A- Penalty: Rs.${pen}%0A%0ATotal Due: *Rs.${tot}*%0A%0AI have also downloaded the PDF Invoice and will attach it here.%0APlease pay at your earliest convenience.%0AThanks!`;
 
             setTimeout(() => {
@@ -704,10 +705,13 @@
                 else if (type === 'email') window.open(`mailto:${email}?subject=Rent Invoice - Room ${rNo}&body=${textMsg}`, '_blank');
             }, 800);
         };
-
-        // ================= BACKGROUND LOGIC =================
+             // BACKGROUND LOGIC
         async function logTransaction(houseName, rName, tName, amt, mode, type) {
-            if(amt > 0) await addDoc(collection(db, "transactions"), { ownerId: currentUserId, houseName: houseName || "N/A", roomName: rName, tenantName: tName, amount: amt, mode: mode, type: type, date: new Date().toISOString() });
+            if(amt > 0) {
+                await addDoc(collection(db, "transactions"), { 
+                    ownerId: currentUserId, houseName: houseName || "N/A", roomName: rName, tenantName: tName, amount: amt, mode: mode, type: type, status: 'Active', date: new Date().toISOString() 
+                });
+            }
         }
 
         window.assignTenant = async (rNo) => {
@@ -715,6 +719,7 @@
             const dep = Number(document.getElementById('tDep').value)||0, depMode = document.getElementById('tDepMode').value;
             if(!name || !mob) return showAlert('error', 'Incomplete', 'Name and Mobile are mandatory.');
             
+            showLoader();
             const hId = document.getElementById('rmHouseId').value, rId = document.getElementById('rmRoomIdVal').value;
             const hName = window.houseDataCache[hId].name;
             const prefix = hName.replace(/\s+/g, '').substring(0,2).toUpperCase();
@@ -726,10 +731,13 @@
                 tenantUniqueId: newTenantId, deposit: dep, rentAmount: Number(document.getElementById('rBase').value), waterBillFixed: Number(document.getElementById('wBase').value), paymentStatus: "Pending"
             });
             if(dep > 0) await logTransaction(hName, rNo, name, dep, depMode, "Deposit Received");
-            closeAllModals(); await loadDashboardData(); showAlert('success', 'Tenant Assigned!', 'Room details saved in real-time.');
+            
+            await loadDashboardData(); hideLoader(); closeAllModals(); 
+            showAlert('success', 'Tenant Assigned!', 'Room details saved in real-time.');
         };
 
         window.saveRoomUpdates = async (tName) => {
+            showLoader();
             const hId = document.getElementById('rmHouseId').value, rId = document.getElementById('rmRoomIdVal').value, rNo = document.getElementById('rmRoomName').innerText;
             const hName = window.houseDataCache[hId].name;
             const rBase = Number(document.getElementById('editRent').value), wBase = Number(document.getElementById('editWater').value);
@@ -738,22 +746,28 @@
             
             await updateDoc(doc(db, "houses", hId, "rooms", rId), { rentAmount: rBase, waterBillFixed: wBase, currentLightBill: light, penalty: pen, paymentStatus: status });
             if(status === "Paid") await logTransaction(hName, rNo, tName, (rBase + wBase + light + pen), mode, "Rent Received");
-            closeAllModals(); await loadDashboardData(); showAlert('success', 'Updated Successfully', 'Room details saved in real-time.');
+            
+            await loadDashboardData(); hideLoader(); closeAllModals(); 
+            showAlert('success', 'Updated Successfully', 'Room details saved in real-time.');
         };
 
         window.vacateRoom = async (tName, dep) => {
             const refund = prompt(`Security Deposit was ₹${dep}.\nHow much are you refunding? (Enter amount):`, dep);
             if(refund === null) return;
+            
+            showLoader();
             const hId = document.getElementById('rmHouseId').value, rId = document.getElementById('rmRoomIdVal').value, rNo = document.getElementById('rmRoomName').innerText;
             const hName = window.houseDataCache[hId].name;
-            
             await updateDoc(doc(db, "houses", hId, "rooms", rId), { occupancyStatus: "Vacant", tenantName: "", tenantMobile: "", tenantAlt: "", tenantEmail: "", tenantUniqueId: "Unassigned", deposit: 0, paymentStatus: "Pending", currentLightBill: 0, penalty: 0 });
+            
             await logTransaction(hName, rNo, tName, Number(refund), "Cash", "Deposit Refunded");
-            closeAllModals(); await loadDashboardData(); showAlert('success', 'Room Vacated', 'Details updated in real-time.');
+            await loadDashboardData(); hideLoader(); closeAllModals(); 
+            showAlert('success', 'Room Vacated', 'Details updated in real-time.');
         };
 
         document.getElementById('startNewMonthBtn').onclick = async () => {
             if(!confirm("Start New Month? This resets Light Bills to 0 and Status to 'Pending' for occupied rooms.")) return;
+            showLoader();
             const hSnaps = await getDocs(query(collection(db, "houses"), where("ownerId", "==", currentUserId)));
             for (const hDoc of hSnaps.docs) {
                 const rSnaps = await getDocs(collection(db, "houses", hDoc.id, "rooms"));
@@ -761,14 +775,15 @@
                     if(rDoc.data().occupancyStatus === "Occupied") await updateDoc(doc(db, "houses", hDoc.id, "rooms", rDoc.id), { paymentStatus: "Pending", currentLightBill: 0, penalty: 0 });
                 }
             }
-            await loadDashboardData(); showAlert('success', 'New Month Started', 'Room details saved in real-time.');
+            await loadDashboardData(); hideLoader();
+            showAlert('success', 'New Month Started', 'Room details saved in real-time.');
         };
-
-        // ================= TRANSACTION HISTORY =================
+                // ================= TRANSACTION HISTORY (WITH SOFT DELETE) =================
         window.loadHistoryData = async () => {
             try {
                 const hList = document.getElementById('historyList'); 
-                hList.innerHTML = `<div class="text-center text-gray-500 mt-10"><i class="fas fa-spinner fa-spin text-3xl mb-2 text-blue-500"></i><p>Loading...</p></div>`;
+                hList.innerHTML = `<div class="flex flex-col items-center justify-center py-20 text-gray-400"><i class="fas fa-circle-notch fa-spin text-5xl mb-4 text-blue-500"></i><p class="font-bold tracking-wider text-sm uppercase">Loading History...</p></div>`;
+                
                 const snaps = await getDocs(query(collection(db, "transactions"), where("ownerId", "==", currentUserId)));
                 if(snaps.empty) { hList.innerHTML = `<div class="text-center text-gray-400 mt-10"><i class="fas fa-file-invoice-dollar text-5xl mb-3 text-gray-200"></i><p>No successful transactions yet.</p></div>`; return; }
                 
@@ -782,13 +797,31 @@
                     const dateStr = dObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
                     const timeStr = dObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                     
+                    const isDeleted = t.status === 'Deleted';
                     let c = (t.type && t.type.includes("Refund")) ? "text-red-500" : "text-green-500";
+                    if(isDeleted) c = "text-gray-400 line-through";
+
+                    const delBtn = isDeleted ? '' : `<button onclick="event.stopPropagation(); openDeleteTxModal('${t.id}')" class="bg-red-50 text-red-500 h-8 w-8 rounded-full flex items-center justify-center hover:bg-red-100 hover:text-red-600 transition border border-red-100 shadow-sm ml-3"><i class="fas fa-trash-alt text-xs"></i></button>`;
+                    const noteHtml = isDeleted ? `<div class="w-full mt-3 bg-red-50 border border-red-100 p-2 rounded-lg text-xs text-red-600 font-semibold flex items-start"><i class="fas fa-info-circle mt-0.5 mr-1.5"></i> <span>Void Note: ${t.deleteReason}</span></div>` : '';
+
                     const encData = encodeURIComponent(JSON.stringify({...t, roomName: safeRoom, tenantName: (t.tenantName||'Unknown'), houseName: (t.houseName||'-'), type: (t.type||'Transaction'), mode: (t.mode||'N/A'), dateStr, timeStr}));
 
                     hList.innerHTML += `
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-3 flex justify-between items-center hover:shadow-md transition cursor-pointer" onclick="openTransactionDetails('${encData}')">
-                        <div><p class="font-extrabold text-gray-800 text-lg">Room ${safeRoom}</p><p class="text-xs text-gray-500 mt-1"><i class="far fa-calendar-alt mr-1"></i> ${dateStr}</p></div>
-                        <div class="text-right flex flex-col items-end"><p class="font-black text-xl ${c}">₹${t.amount || 0}</p><div class="flex items-center mt-1 text-blue-500 text-[10px] font-bold uppercase tracking-wide bg-blue-50 px-2 py-0.5 rounded">View <i class="fas fa-chevron-right ml-1"></i></div></div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-3 hover:shadow-md transition cursor-pointer flex flex-col" onclick="${isDeleted ? '' : `openTransactionDetails('${encData}')`}">
+                        <div class="flex justify-between items-center w-full">
+                            <div>
+                                <p class="font-extrabold text-gray-800 text-lg ${isDeleted ? 'text-gray-400' : ''}">Room ${safeRoom}</p>
+                                <p class="text-xs text-gray-500 mt-1"><i class="far fa-calendar-alt mr-1"></i> ${dateStr}</p>
+                            </div>
+                            <div class="text-right flex items-center">
+                                <div class="flex flex-col items-end mr-1">
+                                    <p class="font-black text-xl ${c}">₹${t.amount || 0}</p>
+                                    ${isDeleted ? `<span class="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-0.5 rounded mt-1">DELETED</span>` : `<div class="flex items-center mt-1 text-blue-500 text-[10px] font-bold uppercase tracking-wide bg-blue-50 px-2 py-0.5 rounded">View <i class="fas fa-chevron-right ml-1"></i></div>`}
+                                </div>
+                                ${delBtn}
+                            </div>
+                        </div>
+                        ${noteHtml}
                     </div>`;
                 });
             } catch(e) { document.getElementById('historyList').innerHTML = `<div class="text-center text-red-500 mt-10"><p>Error: ${e.message}</p></div>`; }
@@ -816,6 +849,30 @@
                 </div>
             `;
             document.getElementById('transactionDetailsModal').classList.remove('hidden');
+        };
+
+        // DELETE TRANSACTION REASON LOGIC
+        window.openDeleteTxModal = (txId) => {
+            document.getElementById('delTxId').value = txId;
+            document.getElementById('delTxReason').value = '';
+            document.getElementById('deleteTransactionModal').classList.remove('hidden');
+        };
+
+        document.getElementById('confirmDeleteTxBtn').onclick = async () => {
+            const txId = document.getElementById('delTxId').value;
+            const reason = document.getElementById('delTxReason').value;
+            if(!reason) return showAlert('error', 'Required', 'Please write a reason before deleting.');
+
+            showLoader();
+            try {
+                await updateDoc(doc(db, "transactions", txId), {
+                    status: 'Deleted', deleteReason: reason, deletedAt: new Date().toISOString()
+                });
+                closeAllModals();
+                await window.loadHistoryData();
+                hideLoader();
+                showAlert('success', 'Entry Voided', 'The transaction has been marked as deleted.');
+            } catch(e) { hideLoader(); showAlert('error', 'Error', e.message); }
         };
     </script>
 </body>
