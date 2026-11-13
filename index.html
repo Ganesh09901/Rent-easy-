@@ -22,6 +22,10 @@
         .nav-btn { color: #9ca3af; transition: all 0.3s; }
         .fab { box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); transition: transform 0.2s; }
         .fab:active { transform: scale(0.95); }
+        .plan-card { cursor: pointer; transition: all 0.2s; }
+        .plan-card.active { border-color: #3b82f6; background-color: #eff6ff; }
+        
+        /* Quick-Tap UI Styles */
         .type-card { border: 2px solid #e5e7eb; border-radius: 1rem; padding: 1.25rem 1rem; text-align: center; cursor: pointer; transition: all 0.2s; background: white; }
         .type-card:active { transform: scale(0.95); }
         .type-card.active { border-color: #3b82f6; background-color: #eff6ff; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15); }
@@ -30,6 +34,7 @@
         .chip.active { background: #3b82f6; color: white; border-color: #3b82f6; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        
         @keyframes modalPop { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     </style>
 </head>
@@ -237,18 +242,24 @@
                 <h3 class="font-black text-xl text-gray-800"><i class="fas fa-crown text-yellow-500 mr-2"></i>Buy Subscription</h3>
                 <button onclick="document.getElementById('upgradeModal').classList.add('hidden')" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 hover:bg-red-50 transition"><i class="fas fa-times"></i></button>
             </div>
+            
             <p class="text-xs text-gray-500 mb-3 font-bold tracking-wide uppercase">Select Plan Duration</p>
             <div class="grid grid-cols-3 gap-2 mb-4">
                 <div onclick="selectPlan(99, 'Monthly Plan', 'planMonthly')" id="planMonthly" class="plan-card active border-2 border-gray-200 rounded-xl p-3 text-center bg-gray-50">
-                    <p class="text-sm font-black text-gray-800">1 Mo</p><p class="text-xs font-bold text-blue-600 mt-1">₹99</p>
+                    <p class="text-sm font-black text-gray-800">1 Mo</p>
+                    <p class="text-xs font-bold text-blue-600 mt-1">₹99</p>
                 </div>
                 <div onclick="selectPlan(600, 'Quarterly Plan', 'planQuarter')" id="planQuarter" class="plan-card border-2 border-gray-200 rounded-xl p-3 text-center bg-gray-50">
-                    <p class="text-sm font-black text-gray-800">Quarter</p><p class="text-xs font-bold text-blue-600 mt-1">₹600</p>
+                    <p class="text-sm font-black text-gray-800">Quarter</p>
+                    <p class="text-xs font-bold text-blue-600 mt-1">₹600</p>
                 </div>
                 <div onclick="selectPlan(1100, 'Yearly Plan', 'planYearly')" id="planYearly" class="plan-card border-2 border-gray-200 rounded-xl p-3 text-center bg-gray-50">
-                    <p class="text-sm font-black text-gray-800">1 Year</p><p class="text-xs font-bold text-blue-600 mt-1">₹1100</p>
+                    <p class="text-sm font-black text-gray-800">1 Year</p>
+                    <p class="text-xs font-bold text-blue-600 mt-1">₹1100</p>
                 </div>
             </div>
+
+            <!-- Custom Calculator -->
             <p class="text-xs text-gray-500 mb-2 font-bold tracking-wide uppercase">Or Custom Duration (+/-)</p>
             <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-200 mb-6">
                 <div class="flex items-center gap-4">
@@ -258,16 +269,19 @@
                 </div>
                 <span id="customMonthTotal" class="text-xl font-black text-blue-600">₹99</span>
             </div>
+
             <div class="space-y-3 mb-2" id="paymentOptionsGroup">
                 <button onclick="showQRCode()" class="w-full bg-white border-2 border-gray-200 text-gray-800 font-bold py-3.5 rounded-xl shadow-sm hover:border-gray-400 transition flex justify-center items-center"><i class="fas fa-qrcode text-gray-500 mr-2 text-xl"></i> Show QR & Details</button>
                 <button onclick="payViaUPIApp()" class="w-full bg-gray-900 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-black transition flex justify-center items-center text-lg"><i class="fas fa-mobile-alt text-yellow-400 mr-2"></i> Pay <span id="payBtnAmount" class="ml-1 font-black mr-1">₹99</span> via App</button>
                 <button onclick="payViaWallet()" class="w-full bg-green-500 text-white font-bold py-3.5 rounded-xl shadow-lg hover:bg-green-600 transition flex justify-between items-center px-4"><span class="flex items-center"><i class="fas fa-wallet mr-2"></i> Pay from Wallet</span><span class="bg-green-700 px-2 py-0.5 rounded text-xs" id="upgradeWalletBal">Bal: ₹0</span></button>
             </div>
+
             <div id="qrCodeContainer" class="hidden flex flex-col items-center justify-center mb-5 border-t border-gray-200 pt-5">
                 <p class="text-[10px] font-bold text-gray-500 mb-2 tracking-widest uppercase">Scan to Pay via any App</p>
                 <img id="upiQrImage" src="" alt="UPI QR" class="rounded-xl border border-gray-200 p-2 shadow-sm w-36 h-36 mb-3">
                 <div class="bg-blue-50 border border-blue-100 w-full p-3 rounded-lg text-center"><p class="text-xs text-gray-500 font-bold uppercase mb-1">UPI ID</p><p class="text-sm font-black text-blue-800 tracking-wider">8866653002@Kotakbank</p></div>
             </div>
+
             <button id="notifyPaymentBtn" onclick="notifyAdminPayment()" class="hidden w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl mt-3 shadow-lg hover:bg-blue-700 transition flex justify-center items-center"><i class="fas fa-check-circle text-lg mr-2 text-blue-200"></i> I have made the payment</button>
         </div>
     </div>
@@ -286,7 +300,7 @@
                 <button onclick="grantTenantAccess()" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-md hover:bg-blue-700 transition flex items-center justify-center"><i class="fas fa-plus-circle mr-2"></i> Add / Update Access</button>
             </div>
             <h4 class="text-xs font-bold text-gray-500 mb-3 uppercase tracking-widest border-t pt-4">Active Access</h4>
-            <div id="taAccessList" class="space-y-3"><p class="text-xs text-gray-400 text-center py-2">Loading data...</p></div>
+            <div id="taAccessList" class="space-y-3"></div>
         </div>
     </div>
 
@@ -320,7 +334,6 @@
             </div>
             
             <input type="number" id="roomCount" placeholder="Number of Rooms" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400" required>
-            
             <div id="dynamicRoomsContainer" class="mt-2 space-y-2 border-t pt-3"></div>
             <button id="savePropertyBtn" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl mt-5 shadow-lg hover:bg-blue-700 transition text-lg">Save Property</button>
         </div>
@@ -331,19 +344,22 @@
         <div class="bg-white rounded-2xl p-6 w-full max-w-md modal-content shadow-2xl border-t-4 border-blue-500">
             <div class="flex justify-between items-center mb-4 border-b pb-3">
                 <h3 class="font-extrabold text-xl text-gray-800"><i class="fas fa-plus-circle text-blue-500 mr-2"></i>Add Unit</h3>
-                <button onclick="closeAddNewRoomModal()" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 transition"><i class="fas fa-times"></i></button>
+                <button onclick="document.getElementById('addNewRoomModal').classList.add('hidden')" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 transition"><i class="fas fa-times"></i></button>
             </div>
+            
             <input type="hidden" id="anrHouseId">
             <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">1. Property Type <span class="text-red-500">*</span></p>
             <div class="grid grid-cols-2 gap-3 mb-4">
-                <div id="typeResidential" class="type-card" onclick="selectAnrType('Residential')"><div class="text-3xl mb-1">🏠</div><div class="font-bold text-sm text-gray-700">Residential</div></div>
-                <div id="typeCommercial" class="type-card" onclick="selectAnrType('Commercial')"><div class="text-3xl mb-1">🏪</div><div class="font-bold text-sm text-gray-700">Commercial</div></div>
+                <div id="typeResidential" class="type-card" onclick="selectAnrType('Residential')"><div class="text-3xl mb-1">🏠</div><div class="font-bold text-sm text-gray-700">Residential</div><div class="text-[10px] text-gray-500 font-medium mt-1">Room / Flat</div></div>
+                <div id="typeCommercial" class="type-card" onclick="selectAnrType('Commercial')"><div class="text-3xl mb-1">🏪</div><div class="font-bold text-sm text-gray-700">Commercial</div><div class="text-[10px] text-gray-500 font-medium mt-1">Shop / Godown</div></div>
             </div>
+
             <div id="anrConfigSection" class="hidden mb-4 transition-all">
                 <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">2. Configuration <span class="text-red-500">*</span></p>
                 <div id="anrChipsContainer" class="flex overflow-x-auto whitespace-nowrap pb-2 scrollbar-hide"></div>
                 <input type="text" id="anrCustomConfig" placeholder="Type custom size (e.g. Duplex)" class="w-full bg-white border border-gray-200 p-3.5 rounded-xl mt-1 outline-none focus:ring-2 focus:ring-blue-400 font-bold hidden shadow-sm">
             </div>
+
             <div id="anrDetailsSection" class="hidden space-y-3 border-t border-gray-200 pt-4 transition-all">
                 <input type="text" id="anrRoomNo" placeholder="Unit No / Name (e.g. G-01)*" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl outline-none focus:ring-2 focus:ring-blue-400 font-bold text-gray-800" oninput="checkAnrValidity()">
                 <div class="flex gap-2">
@@ -356,6 +372,7 @@
                 </div>
                 <input type="number" id="anrOnlineRent" placeholder="Online Expected Rent ₹ (Optional)" class="w-full bg-white border border-gray-200 p-3.5 rounded-xl outline-none focus:ring-2 focus:ring-blue-400 font-bold text-blue-600 shadow-sm">
             </div>
+
             <button id="anrSaveBtn" disabled onclick="saveNewRoom()" class="w-full bg-gray-400 text-white font-bold py-4 rounded-xl mt-5 shadow-lg transition text-lg tracking-wide cursor-not-allowed">Save & Add Unit</button>
         </div>
     </div>
@@ -365,7 +382,7 @@
         <div class="bg-white rounded-2xl p-5 w-full max-w-md modal-content shadow-2xl">
             <div class="flex justify-between items-center border-b pb-3 mb-4">
                 <h3 class="text-lg font-bold text-gray-800 flex items-center" id="veTitle">Vacant Properties</h3>
-                <button onclick="closeVacantExplorer()" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 transition"><i class="fas fa-times"></i></button>
+                <button onclick="document.getElementById('vacantExplorerModal').classList.add('hidden')" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 transition"><i class="fas fa-times"></i></button>
             </div>
             <div id="veBody" class="space-y-3"></div>
         </div>
@@ -397,20 +414,21 @@
         </div>
     </div>
 
-    <!-- HOUSE DETAILS MODAL -->
+    <!-- HOUSE DETAILS MODAL (WITH QUICK ADD BTN) -->
     <div id="houseDetailsModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-md modal-content shadow-2xl">
             <div class="flex justify-between border-b pb-4 mb-5 items-start">
                 <div>
                     <h3 class="font-extrabold text-blue-600 text-2xl" id="hdHouseName">House</h3>
                     <p class="text-sm text-gray-500 flex items-center mt-1.5 bg-gray-50 p-1.5 rounded-lg border border-gray-100">
-                        <i class="fas fa-map-marker-alt text-red-500 mr-2 ml-1"></i><span id="hdHouseAddress" class="truncate max-w-[170px]">Address</span>
+                        <i class="fas fa-map-marker-alt text-red-500 mr-2 ml-1"></i>
+                        <span id="hdHouseAddress" class="truncate max-w-[170px]">Address</span>
                         <a id="hdMapLink" href="#" target="_blank" class="ml-2 bg-blue-100 text-blue-600 p-1 rounded hover:bg-blue-200 transition flex items-center justify-center" title="View on Map"><i class="fas fa-external-link-alt text-[10px]"></i></a>
                     </p>
                 </div>
                 <div class="flex items-center gap-2">
                     <button id="deleteHouseBtn" class="bg-red-50 w-8 h-8 rounded-full flex items-center justify-center text-red-500 hover:bg-red-100 transition"><i class="fas fa-trash-alt text-sm"></i></button>
-                    <button id="closeHouseDetailsModal" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 hover:bg-red-50 transition"><i class="fas fa-times"></i></button>
+                    <button onclick="document.getElementById('houseDetailsModal').classList.add('hidden')" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 hover:bg-red-50 transition"><i class="fas fa-times"></i></button>
                 </div>
             </div>
             <div id="hdRoomsList" class="space-y-3"></div>
@@ -418,21 +436,22 @@
         </div>
     </div>
 
-    <!-- ROOM MANAGER MODAL (WITH INFO EDIT OPTION) -->
+    <!-- ROOM MANAGER MODAL -->
     <div id="roomManagerModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[60]">
         <div class="bg-white rounded-2xl p-6 w-full max-w-md modal-content border-t-4 border-blue-500 shadow-2xl">
             <div class="flex justify-between items-center mb-4 border-b pb-3">
                 <h3 class="font-bold text-gray-800 text-lg">Room Manager</h3>
                 <div class="flex gap-2">
                     <button id="deleteRoomBtn" class="bg-red-50 w-8 h-8 rounded-full flex items-center justify-center text-red-500 hover:bg-red-100 transition"><i class="fas fa-trash-alt text-sm"></i></button>
-                    <button id="closeRoomManagerModal" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 transition"><i class="fas fa-times"></i></button>
+                    <button onclick="document.getElementById('roomManagerModal').classList.add('hidden')" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 transition"><i class="fas fa-times"></i></button>
                 </div>
             </div>
             <div class="bg-gradient-to-r from-blue-50 to-blue-100 p-3 text-center rounded-xl mb-5 shadow-sm border border-blue-200">
                 <p id="rmRoomName" class="font-black text-2xl text-blue-900">Room 101</p>
                 <p id="rmRoomId" class="text-xs font-mono text-blue-600 font-bold mt-1 tracking-widest uppercase bg-white inline-block px-2 py-0.5 rounded-full border border-blue-200">ID: XXX</p>
             </div>
-            <input type="hidden" id="rmHouseId"> <input type="hidden" id="rmRoomIdVal">
+            <input type="hidden" id="rmHouseId">
+            <input type="hidden" id="rmRoomIdVal">
             <div id="roomManagerBody"></div>
         </div>
     </div>
@@ -469,13 +488,17 @@
         let currentUserId = null;
         window.currentUserPlan = 'free'; window.currentUserWallet = 0; window.planExpiryDate = null;
 
-        // UI HELPERS
-        window.showLoader = () => document.getElementById('globalLoader').classList.remove('hidden');
-        window.hideLoader = () => document.getElementById('globalLoader').classList.add('hidden');
+        // UI HELPERS (CRASH-PROOF MODALS)
+        window.showLoader = () => { const e = document.getElementById('globalLoader'); if(e) e.classList.remove('hidden'); };
+        window.hideLoader = () => { const e = document.getElementById('globalLoader'); if(e) e.classList.add('hidden'); };
 
         window.showAlert = (type, title, msg, cb) => {
-            const ab = document.getElementById('customAlert'); const icon = document.getElementById('alertIcon');
-            const titleEl = document.getElementById('alertTitle'); const btn = document.getElementById('closeAlertBtn'); const box = ab.querySelector('.bg-white');
+            const ab = document.getElementById('customAlert'); if(!ab) return;
+            const icon = document.getElementById('alertIcon');
+            const titleEl = document.getElementById('alertTitle');
+            const btn = document.getElementById('closeAlertBtn');
+            const box = ab.querySelector('.bg-white');
+
             if(type === 'success') {
                 icon.innerHTML = '✅'; titleEl.className = 'text-2xl font-extrabold mb-2 text-gray-800';
                 box.className = 'bg-white rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl transform transition-all scale-100 border-t-4 border-green-500';
@@ -490,36 +513,44 @@
         };
 
         window.switchTab = (t) => {
-            ['Analytics', 'Properties', 'History', 'Profile'].forEach(x => document.getElementById('tab'+x).classList.add('hidden'));
+            ['Analytics', 'Properties', 'History', 'Profile'].forEach(x => { const e = document.getElementById('tab'+x); if(e) e.classList.add('hidden'); });
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); event.currentTarget.classList.add('active');
-            document.getElementById('tab'+t).classList.remove('hidden');
+            const act = document.getElementById('tab'+t); if(act) act.classList.remove('hidden');
             if(t==='Analytics' || t==='Properties') loadDashboardData();
             if(t==='History') window.loadHistoryData();
         };
 
+        // SAFETY CHECK: Only close if element exists
         window.closeAllModals = () => {
             ['addHouseModal', 'addNewRoomModal', 'vacantExplorerModal', 'houseDetailsModal', 'roomManagerModal', 'transactionDetailsModal', 'forgotModal', 'tenantAccessModal', 'upgradeModal', 'onboardingModal', 'deleteReasonModal', 'trashModal'].forEach(m => {
-                document.getElementById(m).classList.add('hidden');
+                const el = document.getElementById(m);
+                if(el) el.classList.add('hidden');
             });
         };
 
-        // AUTHENTICATION & ONBOARDING
-        document.getElementById('showRegisterBtn').onclick = () => { document.getElementById('loginForm').classList.add('hidden'); document.getElementById('registerForm').classList.remove('hidden'); };
-        document.getElementById('showLoginBtn').onclick = () => { document.getElementById('registerForm').classList.add('hidden'); document.getElementById('loginForm').classList.remove('hidden'); };
+        // AUTHENTICATION
+        const sReg = document.getElementById('showRegisterBtn'); if(sReg) sReg.onclick = () => { document.getElementById('loginForm').classList.add('hidden'); document.getElementById('registerForm').classList.remove('hidden'); };
+        const sLog = document.getElementById('showLoginBtn'); if(sLog) sLog.onclick = () => { document.getElementById('registerForm').classList.add('hidden'); document.getElementById('loginForm').classList.remove('hidden'); };
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUserId = user.uid;
-                if(document.getElementById('customAlert').classList.contains('hidden')){
-                    document.getElementById('authContainer').classList.add('hidden'); document.getElementById('appContainer').classList.remove('hidden');
-                    await loadProfileData(); await loadDashboardData();
+                const cAlert = document.getElementById('customAlert');
+                if(cAlert && cAlert.classList.contains('hidden')){
+                    document.getElementById('authContainer').classList.add('hidden');
+                    document.getElementById('appContainer').classList.remove('hidden');
+                    await loadProfileData(); 
+                    await loadDashboardData();
                 }
             } else {
-                currentUserId = null; document.getElementById('authContainer').classList.remove('hidden'); document.getElementById('appContainer').classList.add('hidden');
+                currentUserId = null;
+                const aCont = document.getElementById('authContainer'); if(aCont) aCont.classList.remove('hidden');
+                const appCont = document.getElementById('appContainer'); if(appCont) appCont.classList.add('hidden');
             }
         });
 
-        document.getElementById('registerBtn').onclick = async () => {
+        const rBtn = document.getElementById('registerBtn');
+        if(rBtn) rBtn.onclick = async () => {
             const n = document.getElementById('regName').value, m = document.getElementById('regMobile').value, e = document.getElementById('regEmail').value, p = document.getElementById('regPassword').value;
             if(!n || !m || !e || p.length < 6) return showAlert('error', 'Error', 'Fill correctly. Pass min 6 chars.');
             const btn = document.getElementById('registerBtn'); btn.innerText = "Processing...";
@@ -531,13 +562,28 @@
             } catch(er) { showAlert('error', 'Failed', er.message); } btn.innerText = "Create Account";
         };
 
-        document.getElementById('loginBtn').onclick = async () => {
+        const lBtn = document.getElementById('loginBtn');
+        if(lBtn) lBtn.onclick = async () => {
             const btnText = document.getElementById('loginBtnText'); btnText.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Checking...';
             try { await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPassword').value); } 
             catch(e) { showAlert('error', 'Login Failed', 'Invalid Email or Password'); } btnText.innerHTML = "Login";
         };
-        document.getElementById('logoutBtn').onclick = () => signOut(auth);
+        const loBtn = document.getElementById('logoutBtn'); if(loBtn) loBtn.onclick = () => signOut(auth);
 
+        // FORGOT PASSWORD
+        const oFgt = document.getElementById('openForgotModal'); if(oFgt) oFgt.onclick = () => document.getElementById('forgotModal').classList.remove('hidden');
+        const cFgt = document.getElementById('closeForgotModal'); if(cFgt) cFgt.onclick = () => document.getElementById('forgotModal').classList.add('hidden');
+        const sRst = document.getElementById('sendResetBtn');
+        if(sRst) sRst.onclick = async () => {
+            const email = document.getElementById('resetEmailInput').value;
+            if(!email) return showAlert('error', 'Required', 'Please enter your registered Email ID.');
+            try {
+                await sendPasswordResetEmail(auth, email);
+                document.getElementById('forgotModal').classList.add('hidden'); document.getElementById('resetEmailInput').value = '';
+                showAlert('success', 'Email Sent!', 'Please check your inbox for the reset link.');
+            } catch(error) { showAlert('error', 'Error', error.message); }
+        };
+        
         // ONBOARDING
         window.saveOnboarding = async () => {
             const state = document.getElementById('obState').value; const city = document.getElementById('obCity').value;
@@ -547,46 +593,109 @@
             await loadProfileData(); hideLoader(); document.getElementById('onboardingModal').classList.add('hidden'); showAlert('success', 'Profile Completed', 'Location saved.');
         };
 
-        // PROFILE
+        // PROFILE & UPGRADE
         async function loadProfileData() {
             const dSnap = await getDoc(doc(db, "users", currentUserId));
             if (dSnap.exists()) {
                 const d = dSnap.data();
-                if(!d.pincode) { document.getElementById('onboardingModal').classList.remove('hidden'); }
+                if(!d.pincode) { const ob = document.getElementById('onboardingModal'); if(ob) ob.classList.remove('hidden'); }
                 
                 window.currentUserPlan = d.planType || 'free'; window.currentUserWallet = d.walletBalance || 0; window.planExpiryDate = d.planExpiry || null;
                 const pb = document.getElementById('headerPlanBadge'); const vb = document.getElementById('headerValidityBadge'); const wb = document.getElementById('headerWalletBadge');
-                pb.innerText = window.currentUserPlan.toUpperCase(); pb.classList.remove('hidden'); vb.classList.remove('hidden');
+                if(pb) { pb.innerText = window.currentUserPlan.toUpperCase(); pb.classList.remove('hidden'); }
+                if(vb) vb.classList.remove('hidden');
                 
-                if(window.currentUserPlan === 'pro' && window.planExpiryDate) {
+                if(window.currentUserPlan === 'pro' && window.planExpiryDate && pb && vb) {
                     pb.classList.remove('bg-yellow-400', 'text-yellow-900', 'border-yellow-500'); pb.classList.add('bg-gradient-to-r', 'from-blue-500', 'to-blue-700', 'text-white', 'border-blue-700', 'shadow-md');
                     const exp = new Date(window.planExpiryDate); const diffDays = Math.ceil(Math.abs(exp - new Date()) / (1000 * 60 * 60 * 24));
                     if(exp > new Date()) vb.innerText = `${diffDays} Days Left`; else { vb.innerText = "EXPIRED"; vb.classList.add('text-red-400'); window.currentUserPlan = 'free'; }
-                } else { pb.className = 'bg-yellow-400 text-yellow-900 text-[9px] font-black px-1.5 py-0.5 rounded shadow-sm tracking-wider border border-yellow-500 cursor-pointer'; vb.innerText = "No Plan"; }
+                } else if(pb && vb) { pb.className = 'hidden bg-yellow-400 text-yellow-900 text-[9px] font-black px-1.5 py-0.5 rounded shadow-sm tracking-wider border border-yellow-500 cursor-pointer'; vb.innerText = "No Plan"; pb.classList.remove('hidden'); }
                 
-                document.getElementById('walletAmtText').innerText = '₹' + window.currentUserWallet;
-                if(window.currentUserWallet < 10) { wb.classList.replace('bg-green-500', 'bg-red-500'); wb.classList.replace('border-green-600', 'border-red-600'); } 
-                else { wb.classList.replace('bg-red-500', 'bg-green-500'); wb.classList.replace('border-red-600', 'border-green-600'); }
-                wb.classList.remove('hidden');
+                const wTxt = document.getElementById('walletAmtText'); if(wTxt) wTxt.innerText = '₹' + window.currentUserWallet;
+                if(wb) {
+                    if(window.currentUserWallet < 10) { wb.classList.replace('bg-green-500', 'bg-red-500'); wb.classList.replace('border-green-600', 'border-red-600'); } 
+                    else { wb.classList.replace('bg-red-500', 'bg-green-500'); wb.classList.replace('border-red-600', 'border-green-600'); }
+                    wb.classList.remove('hidden');
+                }
 
-                document.getElementById('profileName').innerText = d.ownerName; document.getElementById('profileMobile').innerText = d.mobileNumber; document.getElementById('profileEmail').innerText = d.emailId;
-                document.getElementById('ownerAssetId').innerText = "RE-OWN-" + currentUserId.substring(0, 6).toUpperCase();
+                if(document.getElementById('profileName')) document.getElementById('profileName').innerText = d.ownerName;
+                if(document.getElementById('profileMobile')) document.getElementById('profileMobile').innerText = d.mobileNumber;
+                if(document.getElementById('profileEmail')) document.getElementById('profileEmail').innerText = d.emailId;
+                if(document.getElementById('ownerAssetId')) document.getElementById('ownerAssetId').innerText = "RE-OWN-" + currentUserId.substring(0, 6).toUpperCase();
                 
-                if(d.upiId) document.getElementById('upiIdInput').value = d.upiId; if(d.bankAcc) document.getElementById('bankAccInput').value = d.bankAcc; if(d.ifsc) document.getElementById('ifscInput').value = d.ifsc;
-                if(d.state) document.getElementById('profState').value = d.state; if(d.city) document.getElementById('profCity').value = d.city; if(d.area) document.getElementById('profArea').value = d.area; if(d.pincode) document.getElementById('profPincode').value = d.pincode;
+                if(d.upiId && document.getElementById('upiIdInput')) document.getElementById('upiIdInput').value = d.upiId;
+                if(d.bankAcc && document.getElementById('bankAccInput')) document.getElementById('bankAccInput').value = d.bankAcc;
+                if(d.ifsc && document.getElementById('ifscInput')) document.getElementById('ifscInput').value = d.ifsc;
+                if(d.state && document.getElementById('profState')) document.getElementById('profState').value = d.state;
+                if(d.city && document.getElementById('profCity')) document.getElementById('profCity').value = d.city;
+                if(d.area && document.getElementById('profArea')) document.getElementById('profArea').value = d.area;
+                if(d.pincode && document.getElementById('profPincode')) document.getElementById('profPincode').value = d.pincode;
             }
         }
         
-        document.getElementById('saveProfileBtn').onclick = async () => {
+        const spBtn = document.getElementById('saveProfileBtn');
+        if(spBtn) spBtn.onclick = async () => {
             showLoader(); await updateDoc(doc(db, "users", currentUserId), { upiId: document.getElementById('upiIdInput').value, bankAcc: document.getElementById('bankAccInput').value, ifsc: document.getElementById('ifscInput').value, state: document.getElementById('profState').value, city: document.getElementById('profCity').value, area: document.getElementById('profArea').value, pincode: document.getElementById('profPincode').value }); 
             hideLoader(); showAlert('success', 'Updated Successfully', 'Profile details saved.'); 
         };
 
-        // DELETE & TRASH
+        // UPGRADE MODAL OPEN
+        window.openUpgradeModal = (msg) => {
+            const qrC = document.getElementById('qrCodeContainer'); if(qrC) qrC.classList.add('hidden');
+            const nBtn = document.getElementById('notifyPaymentBtn'); if(nBtn) nBtn.classList.add('hidden');
+            const pGrp = document.getElementById('paymentOptionsGroup'); if(pGrp) pGrp.classList.remove('hidden');
+            
+            const wBal = document.getElementById('upgradeWalletBal');
+            if(wBal) {
+                wBal.innerText = `Bal: ₹${window.currentUserWallet}`;
+                if(window.currentUserWallet < 10) wBal.classList.replace('bg-green-700', 'bg-red-600');
+            }
+            if(typeof msg === 'string') alert(msg);
+            document.querySelectorAll('.plan-card').forEach(el => el.classList.remove('active'));
+            const pm = document.getElementById('planMonthly'); if(pm) pm.classList.add('active');
+            window.customMonths = 1; if(document.getElementById('customMonthCount')) document.getElementById('customMonthCount').innerText = 1;
+            if(document.getElementById('customMonthTotal')) document.getElementById('customMonthTotal').innerText = '₹99';
+            window.selectedPlanAmount = 99; window.selectedPlanDesc = "1 Month Premium";
+            if(document.getElementById('payBtnAmount')) document.getElementById('payBtnAmount').innerText = '₹99';
+            
+            const uMod = document.getElementById('upgradeModal'); if(uMod) uMod.classList.remove('hidden');
+        };
+
+        // TENANT ACCESS MODAL
+        window.openTenantAccessModal = () => {
+            const select = document.getElementById('taRoomSelect'); const list = document.getElementById('taAccessList');
+            if(!select || !list) return;
+            select.innerHTML = '<option value="">Select House - Room</option>'; list.innerHTML = ''; let hasAccess = false;
+            Object.keys(window.houseDataCache || {}).forEach(hId => {
+                const h = window.houseDataCache[hId];
+                h.rooms.forEach(r => {
+                    select.innerHTML += `<option value="${hId}|${r.id}">Room ${r.roomNumber} (${h.name})</option>`;
+                    if(r.accessEmail) {
+                        hasAccess = true;
+                        list.innerHTML += `<div class="bg-white border rounded-xl p-3.5 flex justify-between items-center shadow-sm hover:shadow-md transition mb-3"><div><p class="font-bold text-gray-800 text-sm">Room ${r.roomNumber} <span class="text-[10px] font-normal text-gray-500">(${h.name})</span></p><p class="text-xs text-blue-600 font-medium mt-1 tracking-wide"><i class="fas fa-envelope mr-1"></i> ${r.accessEmail}</p></div><button onclick="removeTenantAccess('${hId}', '${r.id}')" class="bg-red-50 text-red-500 h-9 w-9 rounded-full flex justify-center items-center hover:bg-red-100 transition border border-red-100 shadow-sm"><i class="fas fa-trash-alt text-xs"></i></button></div>`;
+                    }
+                });
+            });
+            if(!hasAccess) list.innerHTML = '<p class="text-xs text-gray-500 text-center py-4 bg-gray-50 rounded-xl border border-dashed">No tenant access granted yet.</p>';
+            const taMod = document.getElementById('tenantAccessModal'); if(taMod) taMod.classList.remove('hidden');
+        };
+        window.grantTenantAccess = async () => {
+            const val = document.getElementById('taRoomSelect').value; const email = document.getElementById('taEmailInput').value;
+            if(!val || !email) return showAlert('error', 'Required', 'Please select a room and enter Email.');
+            showLoader(); const [hId, rId] = val.split('|');
+            try { await updateDoc(doc(db, "houses", hId, "rooms", rId), { accessEmail: email }); await loadDashboardData(); document.getElementById('taEmailInput').value = ''; document.getElementById('taRoomSelect').value = ''; openTenantAccessModal(); hideLoader(); showAlert('success', 'Access Granted', 'Tenant can now view their details.'); } catch (e) { hideLoader(); showAlert('error', 'Error', e.message); }
+        };
+        window.removeTenantAccess = async (hId, rId) => {
+            if(!confirm('Revoke access?')) return; showLoader();
+            try { await updateDoc(doc(db, "houses", hId, "rooms", rId), { accessEmail: "" }); await loadDashboardData(); openTenantAccessModal(); hideLoader(); showAlert('success', 'Access Removed', 'Tenant access revoked.'); } catch (e) { hideLoader(); showAlert('error', 'Error', e.message); }
+        };
+
+        // TRASH LOGIC
         window.openDeleteModal = (type, hId, rId, name) => {
             document.getElementById('delType').value = type; document.getElementById('delHId').value = hId; document.getElementById('delRId').value = rId;
             document.getElementById('delPromptText').innerText = `Why are you deleting ${type === 'house' ? 'House' : 'Room'} "${name}"?`;
-            document.getElementById('delReasonInput').value = ''; document.getElementById('deleteReasonModal').classList.remove('hidden');
+            document.getElementById('delReasonInput').value = ''; 
+            const dMod = document.getElementById('deleteReasonModal'); if(dMod) dMod.classList.remove('hidden');
         };
 
         window.confirmSoftDelete = async () => {
@@ -602,7 +711,8 @@
         };
 
         window.openTrashModal = () => {
-            const tb = document.getElementById('trashBody'); tb.innerHTML = ''; let hasItems = false;
+            const tb = document.getElementById('trashBody'); if(!tb) return;
+            tb.innerHTML = ''; let hasItems = false;
             window.trashCache.houses.forEach(h => {
                 hasItems = true; tb.innerHTML += `<div class="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-3 shadow-sm"><div class="flex justify-between items-center mb-2"><div><h4 class="font-bold text-gray-700">🏠 ${h.houseName}</h4><p class="text-[10px] text-red-500 font-bold">Reason: ${h.deleteReason}</p></div><div class="flex gap-2"><button onclick="restoreItem('house', '${h.id}', null)" class="bg-green-100 text-green-700 px-2 py-1 rounded shadow-sm text-xs font-bold hover:bg-green-200">Restore</button><button onclick="permDeleteItem('house', '${h.id}', null)" class="bg-red-100 text-red-700 px-2 py-1 rounded shadow-sm text-xs font-bold hover:bg-red-200">Delete</button></div></div></div>`;
             });
@@ -633,10 +743,21 @@
         // ADD NEW ROOM (QUICK-TAP UI)
         window.anrState = { type: '', config: '', custom: false };
         window.openAddNewRoomModal = (hId) => {
-            document.getElementById('anrHouseId').value = hId; document.getElementById('anrConfigSection').classList.add('hidden'); document.getElementById('anrDetailsSection').classList.add('hidden'); document.getElementById('typeResidential').classList.remove('active'); document.getElementById('typeCommercial').classList.remove('active'); document.getElementById('anrCustomConfig').classList.add('hidden'); document.getElementById('anrCustomConfig').value = ''; document.getElementById('anrRoomNo').value = ''; document.getElementById('anrRent').value = ''; document.getElementById('anrWater').value = ''; document.getElementById('anrMeter').value = ''; document.getElementById('anrRate').value = ''; document.getElementById('anrOnlineRent').value = '';
-            window.anrState = { type: '', config: '', custom: false }; checkAnrValidity(); document.getElementById('addNewRoomModal').classList.remove('hidden');
+            document.getElementById('anrHouseId').value = hId; 
+            document.getElementById('anrConfigSection').classList.add('hidden'); 
+            document.getElementById('anrDetailsSection').classList.add('hidden'); 
+            document.getElementById('typeResidential').classList.remove('active'); 
+            document.getElementById('typeCommercial').classList.remove('active'); 
+            document.getElementById('anrCustomConfig').classList.add('hidden'); 
+            
+            ['anrCustomConfig', 'anrRoomNo', 'anrRent', 'anrWater', 'anrMeter', 'anrRate', 'anrOnlineRent'].forEach(id => {
+                const e = document.getElementById(id); if(e) e.value = '';
+            });
+            
+            window.anrState = { type: '', config: '', custom: false }; checkAnrValidity(); 
+            const md = document.getElementById('addNewRoomModal'); if(md) md.classList.remove('hidden');
         };
-        window.closeAddNewRoomModal = () => document.getElementById('addNewRoomModal').classList.add('hidden');
+        window.closeAddNewRoomModal = () => { const m = document.getElementById('addNewRoomModal'); if(m) m.classList.add('hidden'); };
 
         window.selectAnrType = (type) => {
             window.anrState.type = type; window.anrState.config = ''; window.anrState.custom = false;
@@ -653,10 +774,11 @@
             else { window.anrState.custom = false; window.anrState.config = conf; document.getElementById('anrCustomConfig').classList.add('hidden'); }
             checkAnrValidity();
         };
-        document.getElementById('anrCustomConfig').addEventListener('input', (e) => { window.anrState.config = e.target.value.trim(); checkAnrValidity(); });
+        const aCus = document.getElementById('anrCustomConfig'); if(aCus) aCus.addEventListener('input', (e) => { window.anrState.config = e.target.value.trim(); checkAnrValidity(); });
 
         window.checkAnrValidity = () => {
             const rNo = document.getElementById('anrRoomNo').value.trim(); const rent = document.getElementById('anrRent').value; const btn = document.getElementById('anrSaveBtn');
+            if(!btn) return;
             if(window.anrState.type && window.anrState.config && rNo && rent) { btn.disabled = false; btn.classList.remove('bg-gray-400', 'cursor-not-allowed'); btn.classList.add('bg-blue-600', 'hover:bg-blue-700'); } 
             else { btn.disabled = true; btn.classList.add('bg-gray-400', 'cursor-not-allowed'); btn.classList.remove('bg-blue-600', 'hover:bg-blue-700'); }
         };
@@ -667,21 +789,23 @@
                 await addDoc(collection(db, "houses", hId, "rooms"), {
                     roomNumber: document.getElementById('anrRoomNo').value.trim(), tenantUniqueId: 'Unassigned', accessEmail: "", rentAmount: Number(document.getElementById('anrRent').value), waterBillFixed: Number(document.getElementById('anrWater').value)||0, onlineListingRent: Number(document.getElementById('anrOnlineRent').value)||0, meterPrev: Number(document.getElementById('anrMeter').value)||0, meterCurr: Number(document.getElementById('anrMeter').value)||0, unitRate: Number(document.getElementById('anrRate').value)||0, occupancyStatus: "Vacant", paymentStatus: "Pending", currentLightBill: 0, penalty: 0, isDeleted: false, propertyType: window.anrState.type, configSize: window.anrState.config
                 });
-                await loadDashboardData(); closeAddNewRoomModal(); openHouseDetailsModal(hId); hideLoader(); showAlert('success', 'Added', 'New unit added successfully!');
+                await loadDashboardData(); window.closeAddNewRoomModal(); openHouseDetailsModal(hId); hideLoader(); showAlert('success', 'Added', 'New unit added successfully!');
             } catch(e) { hideLoader(); showAlert('error', 'Error', e.message); }
         };
 
-        // DASHBOARD DATA
+        // DASHBOARD SYNC
         window.houseDataCache = {}; window.vacantDataCache = {}; window.trashCache = { houses: [], rooms: [] };
         
         async function loadDashboardData() {
             if(!currentUserId) return;
             const hList = document.getElementById('housesList'); const pList = document.getElementById('pendingRoomsList');
+            if(!hList) return;
             if(hList.innerHTML === '') { hList.innerHTML=`<div class="flex flex-col items-center justify-center py-10 text-blue-500"><i class="fas fa-circle-notch fa-spin text-4xl mb-3"></i><p class="text-sm font-bold text-gray-500">Syncing properties...</p></div>`; }
             let tExp=0, tRec=0, tPen=0, vCount=0; let tempHouseCache = {}; let tempVacantCache = {}; let tempTrash = { houses: [], rooms: [] };
             let htmlBufferHouses = ''; let htmlBufferPending = '';
+
             const hSnaps = await getDocs(query(collection(db, "houses"), where("ownerId", "==", currentUserId)));
-            if(hSnaps.empty) { hList.innerHTML = `<div class="text-center text-gray-400 mt-10"><p>No properties found.</p></div>`; pList.innerHTML = `<p class="text-gray-400">No collections pending.</p>`; return; }
+            if(hSnaps.empty) { hList.innerHTML = `<div class="text-center text-gray-400 mt-10"><p>No properties found.</p></div>`; if(pList) pList.innerHTML = `<p class="text-gray-400">No collections pending.</p>`; return; }
 
             for (const hDoc of hSnaps.docs) {
                 const hd = hDoc.data(); hd.id = hDoc.id;
@@ -704,39 +828,71 @@
                 const encodedAddress = encodeURIComponent(hd.address + ' ' + (hd.pincode||''));
                 htmlBufferHouses += `<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex justify-between items-center cursor-pointer border-l-4 border-l-blue-500 mb-4 hover:shadow-md transition" onclick="openHouseDetailsModal('${hDoc.id}')"><div><h3 class="font-extrabold text-gray-800 text-lg">${hd.houseName}</h3><div class="text-xs text-gray-500 mt-1.5 flex items-center bg-gray-50 px-2 py-1 rounded inline-flex border border-gray-100"><i class="fas fa-map-marker-alt text-red-400 mr-1.5"></i> <span class="truncate max-w-[150px]">${hd.address}</span><a href="https://www.google.com/maps/search/?api=1&query=${encodedAddress}" target="_blank" onclick="event.stopPropagation()" class="text-blue-500 hover:text-blue-700 ml-2 bg-blue-100 p-1 rounded transition" title="View on Map"><i class="fas fa-external-link-alt text-[10px]"></i></a></div></div><div class="bg-gray-50 h-10 w-10 rounded-full flex items-center justify-center border border-gray-200"><i class="fas fa-chevron-right text-gray-400"></i></div></div>`;
             }
-            window.houseDataCache = tempHouseCache; window.vacantDataCache = tempVacantCache; window.trashCache = tempTrash; hList.innerHTML = htmlBufferHouses; pList.innerHTML = htmlBufferPending;
-            document.getElementById('statExpected').innerText = "₹" + tExp; document.getElementById('statReceived').innerText = "₹" + tRec; document.getElementById('statPending').innerText = "₹" + tPen; document.getElementById('vacantCountBadge').innerText = vCount;
-            if(tPen === 0 && tExp > 0) pList.innerHTML = `<p class="text-green-600 font-bold bg-green-50 p-4 rounded-xl border border-green-200 shadow-sm flex items-center"><i class="fas fa-check-circle text-xl mr-2"></i> All collections complete!</p>`;
+            window.houseDataCache = tempHouseCache; window.vacantDataCache = tempVacantCache; window.trashCache = tempTrash; 
+            hList.innerHTML = htmlBufferHouses; if(pList) pList.innerHTML = htmlBufferPending;
+            const se = document.getElementById('statExpected'); if(se) se.innerText = "₹" + tExp;
+            const sr = document.getElementById('statReceived'); if(sr) sr.innerText = "₹" + tRec;
+            const sp = document.getElementById('statPending'); if(sp) sp.innerText = "₹" + tPen;
+            const vc = document.getElementById('vacantCountBadge'); if(vc) vc.innerText = vCount;
+            if(tPen === 0 && tExp > 0 && pList) pList.innerHTML = `<p class="text-green-600 font-bold bg-green-50 p-4 rounded-xl border border-green-200 shadow-sm flex items-center"><i class="fas fa-check-circle text-xl mr-2"></i> All collections complete!</p>`;
         }
 
-        // HOUSE DETAILS & MANAGER
+        // VACANT EXPLORER
+        window.openVacantHousesModal = () => {
+            const vt = document.getElementById('veTitle'); if(vt) vt.innerHTML = "Vacant Properties"; 
+            const body = document.getElementById('veBody'); if(!body) return; body.innerHTML = '';
+            const houseIds = Object.keys(window.vacantDataCache);
+            if(houseIds.length === 0) { body.innerHTML = `<p class="text-center text-gray-500 mt-5"><i class="fas fa-home text-5xl mb-3 text-gray-300"></i><br>All rooms are currently occupied.</p>`; } 
+            else {
+                houseIds.forEach(hId => {
+                    const h = window.vacantDataCache[hId]; const encodedAddress = encodeURIComponent(h.address);
+                    body.innerHTML += `<div class="bg-white border rounded-xl p-4 flex justify-between items-center shadow-sm cursor-pointer hover:border-blue-400 transition mb-3" onclick="openVacantRoomsView('${hId}')"><div><h4 class="font-extrabold text-blue-700 text-lg">${h.name}</h4><p class="text-xs text-gray-500 mt-1 flex items-center bg-gray-50 px-1 rounded inline-flex"><span class="truncate max-w-[120px]">${h.address}</span><a href="https://www.google.com/maps/search/?api=1&query=${encodedAddress}" target="_blank" onclick="event.stopPropagation()" class="text-blue-500 ml-2"><i class="fas fa-external-link-alt text-[10px]"></i></a></p></div><div class="bg-blue-100 text-blue-800 font-black px-3 py-1.5 rounded-lg text-xs shadow-sm">${h.rooms.length} Khali</div></div>`;
+                });
+            }
+            const vem = document.getElementById('vacantExplorerModal'); if(vem) vem.classList.remove('hidden');
+        };
+
+        window.openVacantRoomsView = (hId) => {
+            const h = window.vacantDataCache[hId]; const vt = document.getElementById('veTitle'); if(vt) vt.innerHTML = `<button onclick="openVacantHousesModal()" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-600 mr-2 hover:bg-gray-200"><i class="fas fa-arrow-left"></i></button> ${h.name}`;
+            const body = document.getElementById('veBody'); if(!body) return; body.innerHTML = '';
+            h.rooms.forEach(r => {
+                let icon = r.propertyType === 'Commercial' ? '🏪' : '🏠'; let size = r.configSize || 'Room';
+                const encRoom = encodeURIComponent(JSON.stringify(r));
+                body.innerHTML += `<div class="bg-gray-50 border rounded-xl p-4 flex justify-between items-center shadow-sm cursor-pointer hover:bg-blue-50 transition border-l-4 border-l-gray-400 mb-3" onclick="openRoomManager('${hId}', '${encRoom}')"><div><h4 class="font-extrabold text-gray-800 text-lg flex items-center gap-1.5">Room ${r.roomNumber} <span class="text-xs font-bold text-gray-500 bg-white px-2 py-0.5 rounded-full border border-gray-200 shadow-sm">${icon} ${size}</span></h4><p class="text-xs text-gray-500 font-bold mt-1 bg-white px-2 py-1 rounded inline-block border">Rent: ₹${r.rentAmount} | Water: ₹${r.waterBillFixed}</p><p class="text-[10px] text-blue-500 font-bold mt-1 ml-1">Online Rent: ₹${r.onlineListingRent||'N/A'}</p></div><button class="bg-blue-600 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition tracking-wide">ASSIGN</button></div>`;
+            });
+        };
+        window.closeVacantExplorer = () => { const vem = document.getElementById('vacantExplorerModal'); if(vem) vem.classList.add('hidden'); };
+
+        // HOUSE DETAILS
         window.openHouseDetailsModal = (hId) => {
-            const d = window.houseDataCache[hId]; document.getElementById('hdHouseName').innerText = d.name; document.getElementById('hdHouseAddress').innerText = d.address;
-            document.getElementById('hdMapLink').href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.address)}`;
-            document.getElementById('deleteHouseBtn').onclick = () => openDeleteModal('house', hId, null, d.name); 
-            document.getElementById('quickAddRoomBtn').onclick = () => { closeAllModals(); openAddNewRoomModal(hId); };
+            const d = window.houseDataCache[hId]; 
+            const hn = document.getElementById('hdHouseName'); if(hn) hn.innerText = d.name; 
+            const ha = document.getElementById('hdHouseAddress'); if(ha) ha.innerText = d.address;
+            const hml = document.getElementById('hdMapLink'); if(hml) hml.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.address)}`;
+            const dhb = document.getElementById('deleteHouseBtn'); if(dhb) dhb.onclick = () => window.openDeleteModal('house', hId, null, d.name); 
+            const qab = document.getElementById('quickAddRoomBtn'); if(qab) qab.onclick = () => { closeAllModals(); openAddNewRoomModal(hId); };
             
-            const rList = document.getElementById('hdRoomsList'); rList.innerHTML = '';
+            const rList = document.getElementById('hdRoomsList'); if(!rList) return; rList.innerHTML = '';
             d.rooms.forEach(r => {
                 let statusDot = r.occupancyStatus === "Vacant" ? "🟢" : "🔴";
                 let sClass = r.occupancyStatus === "Vacant" ? "bg-gray-50 border-gray-200 border-l-gray-400" : (r.paymentStatus === "Paid" ? "bg-green-50 border-green-200 border-l-green-400" : "bg-red-50 border-red-200 border-l-red-400");
                 let sText = r.occupancyStatus === "Vacant" ? "VACANT" : (r.paymentStatus === "Paid" ? "PAID" : "PENDING");
                 let sBadge = r.occupancyStatus === "Vacant" ? "bg-white text-gray-600 border border-gray-200" : (r.paymentStatus === "Paid" ? "bg-green-500 text-white" : "bg-red-500 text-white");
                 let icon = r.propertyType === 'Commercial' ? '🏪' : '🏠'; let size = r.configSize || 'Room';
-
                 rList.innerHTML += `<div class="border border-l-4 rounded-xl p-4 ${sClass} cursor-pointer shadow-sm hover:shadow-md transition mb-3" onclick="openRoomManager('${hId}', '${encodeURIComponent(JSON.stringify(r))}')"><div class="flex justify-between items-center mb-1.5"><span class="font-extrabold text-lg text-gray-800 flex items-center gap-1.5">${statusDot} ${r.roomNumber} <span class="text-xs font-bold text-gray-500 bg-white px-2 py-0.5 rounded-full border border-gray-200 shadow-sm">${icon} ${size}</span></span><span class="text-[10px] px-2.5 py-1 rounded-full font-bold shadow-sm tracking-wider ${sBadge}">${sText}</span></div><div class="flex justify-between items-end"><p class="text-sm font-medium ${r.occupancyStatus==="Occupied" ? 'text-gray-700' : 'text-gray-400'}">${r.occupancyStatus==="Occupied" ? r.tenantName : "Ready to assign"}</p><p class="text-sm font-bold text-gray-700">₹${r.rentAmount}/month</p></div></div>`;
             });
-            document.getElementById('houseDetailsModal').classList.remove('hidden');
+            const hdm = document.getElementById('houseDetailsModal'); if(hdm) hdm.classList.remove('hidden');
         };
 
+        // ROOM MANAGER MODAL & INFO EDIT
         window.openRoomManager = (hId, rStringEnc) => {
             const r = JSON.parse(decodeURIComponent(rStringEnc));
             document.getElementById('rmHouseId').value = hId; document.getElementById('rmRoomIdVal').value = r.id;
             document.getElementById('rmRoomName').innerText = "Room " + r.roomNumber; 
             document.getElementById('rmRoomId').innerText = r.occupancyStatus === "Occupied" ? "ID: " + r.tenantUniqueId : "Unassigned";
-            document.getElementById('deleteRoomBtn').onclick = () => openDeleteModal('room', hId, r.id, r.roomNumber); 
+            const drb = document.getElementById('deleteRoomBtn'); if(drb) drb.onclick = () => window.openDeleteModal('room', hId, r.id, r.roomNumber); 
             
-            const body = document.getElementById('roomManagerBody');
+            const body = document.getElementById('roomManagerBody'); if(!body) return;
             
             if(r.occupancyStatus === "Vacant") {
                 body.innerHTML = `
@@ -756,7 +912,6 @@
                 `;
             } else {
                 const totalDue = r.rentAmount + r.waterBillFixed + (r.currentLightBill||0) + (r.penalty||0);
-                // FEATURE LOCK CHECK FOR PDF
                 const isFree = window.currentUserPlan === 'free'; const lockIconHtml = isFree ? ' <i class="fas fa-lock text-red-500 ml-1"></i>' : '';
                 const btnOpacity = isFree ? 'opacity-80 bg-gray-200 text-gray-600 border-gray-300' : 'bg-gray-50 text-gray-800 hover:border-gray-400 hover:shadow-md';
                 const whatsappAction = isFree ? `openUpgradeModal('🔒 Premium Feature. Please upgrade to send Invoice PDF.')` : `downloadInvoiceAndSend('whatsapp', '${r.tenantMobile}', '${r.tenantEmail}', '${r.tenantName}', '${r.roomNumber}', document.getElementById('editRent').value, document.getElementById('editWater').value, document.getElementById('editLight').value, document.getElementById('editPen').value, '${r.tenantUniqueId}', document.getElementById('editMeterPrev').value, document.getElementById('editMeterCurr').value, document.getElementById('editUnitRate').value)`;
@@ -771,23 +926,15 @@
                         </div>
                     </div>
                     
-                    <!-- NEW: HIDDEN EDIT TENANT INFO FORM -->
                     <div id="editTenantInfoSection" class="hidden bg-gray-100 border border-gray-300 p-4 rounded-xl mb-4 shadow-inner">
                         <h4 class="text-xs font-black text-gray-500 mb-3 uppercase tracking-widest">Edit Details</h4>
                         <input type="text" id="updTName" value="${r.tenantName}" class="w-full bg-white border border-gray-300 p-2.5 mb-2 rounded-lg text-sm font-bold" placeholder="Full Name">
-                        <div class="flex gap-2 mb-2">
-                            <input type="tel" id="updTMob" value="${r.tenantMobile}" class="w-1/2 bg-white border border-gray-300 p-2.5 rounded-lg text-sm font-bold" placeholder="Mobile">
-                            <input type="tel" id="updTAlt" value="${r.tenantAlt||''}" class="w-1/2 bg-white border border-gray-300 p-2.5 rounded-lg text-sm font-bold" placeholder="Alt Mobile">
-                        </div>
+                        <div class="flex gap-2 mb-2"><input type="tel" id="updTMob" value="${r.tenantMobile}" class="w-1/2 bg-white border border-gray-300 p-2.5 rounded-lg text-sm font-bold"><input type="tel" id="updTAlt" value="${r.tenantAlt||''}" class="w-1/2 bg-white border border-gray-300 p-2.5 rounded-lg text-sm font-bold" placeholder="Alt Mobile"></div>
                         <input type="email" id="updTEmail" value="${r.tenantEmail||''}" class="w-full bg-white border border-gray-300 p-2.5 mb-2 rounded-lg text-sm font-bold" placeholder="Email">
-                        <div class="flex gap-2 mb-3">
-                            <div class="w-1/2"><label class="text-[10px] font-bold text-gray-500">Base Rent</label><input type="number" id="updRBase" value="${r.rentAmount}" class="w-full bg-white border border-gray-300 p-2.5 rounded-lg text-sm font-bold"></div>
-                            <div class="w-1/2"><label class="text-[10px] font-bold text-gray-500">Water Bill</label><input type="number" id="updWBase" value="${r.waterBillFixed}" class="w-full bg-white border border-gray-300 p-2.5 rounded-lg text-sm font-bold"></div>
-                        </div>
+                        <div class="flex gap-2 mb-3"><div class="w-1/2"><label class="text-[10px] font-bold text-gray-500">Base Rent</label><input type="number" id="updRBase" value="${r.rentAmount}" class="w-full bg-white border border-gray-300 p-2.5 rounded-lg text-sm font-bold"></div><div class="w-1/2"><label class="text-[10px] font-bold text-gray-500">Water Bill</label><input type="number" id="updWBase" value="${r.waterBillFixed}" class="w-full bg-white border border-gray-300 p-2.5 rounded-lg text-sm font-bold"></div></div>
                         <button onclick="saveTenantInfoUpdates('${r.tenantName}')" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-lg shadow-sm hover:bg-blue-700 transition text-sm"><i class="fas fa-check mr-1"></i> Save Updates</button>
                     </div>
 
-                    <!-- BILLING SECTION -->
                     <div class="grid grid-cols-3 gap-2 mb-3 bg-gray-50 p-3 border rounded-xl">
                         <div><label class="text-[10px] text-gray-500 font-bold uppercase tracking-wider block mb-1">Rent (₹)</label><input type="number" id="editRent" value="${r.rentAmount}" class="w-full border rounded-lg p-2.5 font-bold bg-white outline-none"></div>
                         <div><label class="text-[10px] text-gray-500 font-bold uppercase tracking-wider block mb-1">Water (₹)</label><input type="number" id="editWater" value="${r.waterBillFixed}" class="w-full border rounded-lg p-2.5 font-bold bg-white outline-none"></div>
@@ -821,9 +968,8 @@
                     </div>
                 `;
             }
-            document.getElementById('roomManagerModal').classList.remove('hidden');
+            const rMod = document.getElementById('roomManagerModal'); if(rMod) rMod.classList.remove('hidden');
 
-            // Attach Live Calc Events
             setTimeout(() => {
                 if(document.getElementById('editMeterCurr')) {
                     const calcLight = () => {
@@ -836,44 +982,26 @@
                         const rBase = parseFloat(document.getElementById('editRent').value) || 0; const wBase = parseFloat(document.getElementById('editWater').value) || 0; const pen = parseFloat(document.getElementById('editPen').value) || 0;
                         document.getElementById('displayTotalDue').innerText = "₹" + (rBase + wBase + bill + pen);
                     };
-                    ['editMeterCurr','editMeterPrev','editUnitRate','editRent','editWater','editPen'].forEach(id => { document.getElementById(id).addEventListener('input', calcLight); });
+                    ['editMeterCurr','editMeterPrev','editUnitRate','editRent','editWater','editPen'].forEach(id => { const e = document.getElementById(id); if(e) e.addEventListener('input', calcLight); });
                     calcLight();
                 }
             }, 50);
         };
-        document.getElementById('closeRoomManagerModal').onclick = () => document.getElementById('roomManagerModal').classList.add('hidden');
 
         // TENANT EDIT INFO FUNCTIONS
-        window.toggleEditTenantInfo = () => {
-            const el = document.getElementById('editTenantInfoSection');
-            if(el) el.classList.toggle('hidden');
-        };
+        window.toggleEditTenantInfo = () => { const el = document.getElementById('editTenantInfoSection'); if(el) el.classList.toggle('hidden'); };
 
         window.saveTenantInfoUpdates = async (oldName) => {
             showLoader();
-            const hId = document.getElementById('rmHouseId').value;
-            const rId = document.getElementById('rmRoomIdVal').value;
-            const rNo = document.getElementById('rmRoomName').innerText;
+            const hId = document.getElementById('rmHouseId').value; const rId = document.getElementById('rmRoomIdVal').value; const rNo = document.getElementById('rmRoomName').innerText;
             const hName = window.houseDataCache[hId].name;
-
-            const nName = document.getElementById('updTName').value;
-            const nMob = document.getElementById('updTMob').value;
-            const nAlt = document.getElementById('updTAlt').value;
-            const nEmail = document.getElementById('updTEmail').value;
-            const nRent = Number(document.getElementById('updRBase').value);
-            const nWater = Number(document.getElementById('updWBase').value);
+            const nName = document.getElementById('updTName').value; const nMob = document.getElementById('updTMob').value; const nAlt = document.getElementById('updTAlt').value; const nEmail = document.getElementById('updTEmail').value;
+            const nRent = Number(document.getElementById('updRBase').value); const nWater = Number(document.getElementById('updWBase').value);
             
             try {
-                await updateDoc(doc(db, "houses", hId, "rooms", rId), { 
-                    tenantName: nName, tenantMobile: nMob, tenantAlt: nAlt, tenantEmail: nEmail, rentAmount: nRent, waterBillFixed: nWater
-                });
-                // Log Info Update in History (Amount 0 handled automatically now)
-                await addDoc(collection(db, "transactions"), { 
-                    ownerId: currentUserId, houseName: hName, roomName: rNo, tenantName: nName, amount: 0, mode: "System", type: "Info Updated", note: `Updated details for ${oldName}`, date: new Date().toISOString(), status: 'Active' 
-                });
-                
-                await loadDashboardData(); hideLoader(); closeAllModals(); 
-                showAlert('success', 'Info Updated', 'Tenant details saved successfully.');
+                await updateDoc(doc(db, "houses", hId, "rooms", rId), { tenantName: nName, tenantMobile: nMob, tenantAlt: nAlt, tenantEmail: nEmail, rentAmount: nRent, waterBillFixed: nWater });
+                await addDoc(collection(db, "transactions"), { ownerId: currentUserId, houseName: hName, roomName: rNo, tenantName: nName, amount: 0, mode: "System", type: "Info Updated", note: `Updated details for ${oldName}`, date: new Date().toISOString(), status: 'Active' });
+                await loadDashboardData(); hideLoader(); closeAllModals(); showAlert('success', 'Info Updated', 'Tenant details saved successfully.');
             } catch(e) { hideLoader(); showAlert('error', 'Error', e.message); }
         };
 
@@ -918,36 +1046,31 @@
             await loadDashboardData(); hideLoader(); closeAllModals(); showAlert('success', 'Updated Successfully', 'Billing saved in real-time.');
         };
 
-        // TENANT PORTAL ACCESS
-        window.openTenantAccessModal = () => {
-            const select = document.getElementById('taRoomSelect'); const list = document.getElementById('taAccessList');
-            select.innerHTML = '<option value="">Select House - Room</option>'; list.innerHTML = ''; let hasAccess = false;
-            Object.keys(window.houseDataCache || {}).forEach(hId => {
-                const h = window.houseDataCache[hId];
-                h.rooms.forEach(r => {
-                    select.innerHTML += `<option value="${hId}|${r.id}">Room ${r.roomNumber} (${h.name})</option>`;
-                    if(r.accessEmail) {
-                        hasAccess = true;
-                        list.innerHTML += `<div class="bg-white border rounded-xl p-3.5 flex justify-between items-center shadow-sm hover:shadow-md transition mb-3"><div><p class="font-bold text-gray-800 text-sm">Room ${r.roomNumber} <span class="text-[10px] font-normal text-gray-500">(${h.name})</span></p><p class="text-xs text-blue-600 font-medium mt-1 tracking-wide"><i class="fas fa-envelope mr-1"></i> ${r.accessEmail}</p></div><button onclick="removeTenantAccess('${hId}', '${r.id}')" class="bg-red-50 text-red-500 h-9 w-9 rounded-full flex justify-center items-center hover:bg-red-100 transition border border-red-100 shadow-sm"><i class="fas fa-trash-alt text-xs"></i></button></div>`;
+        window.vacateRoom = async (tName, dep) => {
+            const refund = prompt(`Security Deposit was ₹${dep}.\nHow much are you refunding? (Enter amount):`, dep);
+            if(refund === null) return; showLoader();
+            const hId = document.getElementById('rmHouseId').value, rId = document.getElementById('rmRoomIdVal').value, rNo = document.getElementById('rmRoomName').innerText;
+            const hName = window.houseDataCache[hId].name;
+            await updateDoc(doc(db, "houses", hId, "rooms", rId), { occupancyStatus: "Vacant", tenantName: "", tenantMobile: "", tenantAlt: "", tenantEmail: "", tenantUniqueId: "Unassigned", deposit: 0, paymentStatus: "Pending", currentLightBill: 0, penalty: 0, meterPrev: window.houseDataCache[hId].rooms.find(x => x.id === rId).meterCurr || 0, meterCurr: window.houseDataCache[hId].rooms.find(x => x.id === rId).meterCurr || 0 });
+            await logTransaction(hName, rNo, tName, Number(refund), "Cash", "Deposit Refunded");
+            await loadDashboardData(); hideLoader(); closeAllModals(); showAlert('success', 'Room Vacated', 'Details updated in real-time.');
+        };
+
+        document.getElementById('startNewMonthBtn').onclick = async () => {
+            if(!confirm("Start New Month? This forwards meter readings, resets bills to 0, and status to 'Pending'.")) return;
+            showLoader();
+            const hSnaps = await getDocs(query(collection(db, "houses"), where("ownerId", "==", currentUserId)));
+            for (const hDoc of hSnaps.docs) {
+                const rSnaps = await getDocs(collection(db, "houses", hDoc.id, "rooms"));
+                for (const rDoc of rSnaps.docs) {
+                    const d = rDoc.data();
+                    if(d.occupancyStatus === "Occupied") {
+                        const nextPrev = d.meterCurr !== undefined ? d.meterCurr : (d.meterPrev || 0);
+                        await updateDoc(doc(db, "houses", hDoc.id, "rooms", rDoc.id), { paymentStatus: "Pending", currentLightBill: 0, penalty: 0, meterPrev: nextPrev, meterCurr: nextPrev });
                     }
-                });
-            });
-            if(!hasAccess) list.innerHTML = '<p class="text-xs text-gray-500 text-center py-4 bg-gray-50 rounded-xl border border-dashed">No access granted yet.</p>';
-            document.getElementById('tenantAccessModal').classList.remove('hidden');
-        };
-        // Explicit global bind in case HTML button misses it
-        document.getElementById('tenantAccessBtn').addEventListener('click', window.openTenantAccessModal);
-
-        window.grantTenantAccess = async () => {
-            const val = document.getElementById('taRoomSelect').value; const email = document.getElementById('taEmailInput').value;
-            if(!val || !email) return showAlert('error', 'Required', 'Please select a room and enter Email.');
-            showLoader(); const [hId, rId] = val.split('|');
-            try { await updateDoc(doc(db, "houses", hId, "rooms", rId), { accessEmail: email }); await loadDashboardData(); document.getElementById('taEmailInput').value = ''; document.getElementById('taRoomSelect').value = ''; openTenantAccessModal(); hideLoader(); showAlert('success', 'Access Granted', 'Tenant can now view their details.'); } catch (e) { hideLoader(); showAlert('error', 'Error', e.message); }
-        };
-
-        window.removeTenantAccess = async (hId, rId) => {
-            if(!confirm('Revoke access?')) return; showLoader();
-            try { await updateDoc(doc(db, "houses", hId, "rooms", rId), { accessEmail: "" }); await loadDashboardData(); openTenantAccessModal(); hideLoader(); showAlert('success', 'Access Removed', 'Tenant access revoked.'); } catch (e) { hideLoader(); showAlert('error', 'Error', e.message); }
+                }
+            }
+            await loadDashboardData(); hideLoader(); showAlert('success', 'New Month Started', 'Meter readings auto-forwarded.');
         };
 
         // HISTORY FIX
@@ -965,12 +1088,10 @@
                 transactions.forEach(t => {
                     const safeRoom = t.roomName ? String(t.roomName).replace('Room ','') : 'N/A';
                     const dObj = new Date(t.date || 0); const dateStr = dObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }); const timeStr = dObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                    const isDeleted = t.status === 'Deleted';
-                    const isInfoUpdate = t.type === 'Info Updated';
+                    const isDeleted = t.status === 'Deleted'; const isInfoUpdate = t.type === 'Info Updated';
                     
                     let c = (t.type && t.type.includes("Refund")) ? "text-red-500" : "text-green-500";
-                    let amtDisplay = `₹${t.amount || 0}`;
-                    let typeBadge = t.type;
+                    let amtDisplay = `₹${t.amount || 0}`; let typeBadge = t.type;
                     
                     if(isInfoUpdate) { c = "text-blue-500"; amtDisplay = "-"; }
                     if(isDeleted) { c = "text-gray-400 line-through"; }
@@ -980,38 +1101,25 @@
 
                     const encData = encodeURIComponent(JSON.stringify({...t, roomName: safeRoom, tenantName: (t.tenantName||'Unknown'), houseName: (t.houseName||'-'), type: typeBadge, mode: (t.mode||'System'), dateStr, timeStr}));
 
-                    hList.innerHTML += `
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-3 hover:shadow-md transition cursor-pointer flex flex-col" onclick="${isDeleted ? '' : `openTransactionDetails('${encData}')`}">
-                        <div class="flex justify-between items-center w-full">
-                            <div><p class="font-extrabold text-gray-800 text-lg ${isDeleted ? 'text-gray-400' : ''}">${isInfoUpdate ? '<i class="fas fa-pen text-blue-400 mr-1 text-sm"></i> ' : ''}Room ${safeRoom}</p><p class="text-xs text-gray-500 mt-1"><i class="far fa-calendar-alt mr-1"></i> ${dateStr}</p></div>
-                            <div class="text-right flex items-center">
-                                <div class="flex flex-col items-end mr-1"><p class="font-black text-xl ${c}">${amtDisplay}</p>${isDeleted ? `<span class="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-0.5 rounded mt-1">DELETED</span>` : `<div class="flex items-center mt-1 text-blue-500 text-[10px] font-bold uppercase tracking-wide bg-blue-50 px-2 py-0.5 rounded">View <i class="fas fa-chevron-right ml-1"></i></div>`}</div>
-                                ${delBtn}
-                            </div>
-                        </div>
-                        ${noteHtml}
-                    </div>`;
+                    hList.innerHTML += `<div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-3 hover:shadow-md transition cursor-pointer flex flex-col" onclick="${isDeleted ? '' : `openTransactionDetails('${encData}')`}">
+                        <div class="flex justify-between items-center w-full"><div><p class="font-extrabold text-gray-800 text-lg ${isDeleted ? 'text-gray-400' : ''}">${isInfoUpdate ? '<i class="fas fa-pen text-blue-400 mr-1 text-sm"></i> ' : ''}Room ${safeRoom}</p><p class="text-xs text-gray-500 mt-1"><i class="far fa-calendar-alt mr-1"></i> ${dateStr}</p></div>
+                        <div class="text-right flex items-center"><div class="flex flex-col items-end mr-1"><p class="font-black text-xl ${c}">${amtDisplay}</p>${isDeleted ? `<span class="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-0.5 rounded mt-1">DELETED</span>` : `<div class="flex items-center mt-1 text-blue-500 text-[10px] font-bold uppercase tracking-wide bg-blue-50 px-2 py-0.5 rounded">View <i class="fas fa-chevron-right ml-1"></i></div>`}</div>${delBtn}</div></div>${noteHtml}</div>`;
                 });
             } catch(e) { document.getElementById('historyList').innerHTML = `<div class="text-center text-red-500 mt-10"><p>Error: ${e.message}</p></div>`; }
         };
 
-        // Ensure closing and rendering works properly
         window.openTransactionDetails = (encData) => {
             const t = JSON.parse(decodeURIComponent(encData)); const body = document.getElementById('tdBody');
             let c = (t.type && t.type.includes("Refund")) ? "text-red-500" : (t.type === "Info Updated" ? "text-blue-500" : "text-green-500");
             let bgType = (t.type && t.type.includes("Refund")) ? "bg-red-50 text-red-700 border-red-200" : (t.type === "Info Updated" ? "bg-blue-50 text-blue-700 border-blue-200" : "bg-green-50 text-green-700 border-green-200");
             let amtStr = t.type === "Info Updated" ? "-" : `₹${t.amount}`;
             
-            body.innerHTML = `
-                <div class="text-center mb-6 mt-2"><p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Amount ${t.type && t.type.includes("Refund") ? "Refunded" : (t.type === "Info Updated" ? "N/A" : "Received")}</p><p class="text-5xl font-black ${c} tracking-tight">${amtStr}</p><p class="text-[10px] mt-3 font-bold inline-block px-3 py-1 rounded-full border uppercase tracking-wider ${bgType}">${t.type}</p></div>
-                <div class="bg-gray-50 p-5 rounded-xl border border-gray-100 space-y-4 text-sm shadow-inner">
-                    <div class="flex justify-between items-center border-b border-gray-200 pb-3"><span class="text-gray-500 font-bold text-xs uppercase tracking-wide">Date & Time</span><span class="font-bold text-gray-800 text-right">${t.dateStr}<br><span class="text-xs text-gray-500">${t.timeStr}</span></span></div>
-                    <div class="flex justify-between items-center"><span class="text-gray-500 font-bold text-xs uppercase tracking-wide">Room No.</span><span class="font-black text-blue-600 text-lg">${t.roomName}</span></div>
-                    <div class="flex justify-between items-center"><span class="text-gray-500 font-bold text-xs uppercase tracking-wide">Tenant</span><span class="font-bold text-gray-800">${t.tenantName}</span></div>
-                    ${t.note ? `<div class="flex flex-col pt-3 border-t border-gray-200"><span class="text-gray-500 font-bold text-xs uppercase tracking-wide mb-1">Note</span><span class="font-bold text-gray-800 text-xs">${t.note}</span></div>` : ''}
-                </div>
-            `;
-            document.getElementById('transactionDetailsModal').classList.remove('hidden');
+            body.innerHTML = `<div class="text-center mb-6 mt-2"><p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Amount ${t.type && t.type.includes("Refund") ? "Refunded" : (t.type === "Info Updated" ? "N/A" : "Received")}</p><p class="text-5xl font-black ${c} tracking-tight">${amtStr}</p><p class="text-[10px] mt-3 font-bold inline-block px-3 py-1 rounded-full border uppercase tracking-wider ${bgType}">${t.type}</p></div>
+                <div class="bg-gray-50 p-5 rounded-xl border border-gray-100 space-y-4 text-sm shadow-inner"><div class="flex justify-between items-center border-b border-gray-200 pb-3"><span class="text-gray-500 font-bold text-xs uppercase tracking-wide">Date & Time</span><span class="font-bold text-gray-800 text-right">${t.dateStr}<br><span class="text-xs text-gray-500">${t.timeStr}</span></span></div>
+                <div class="flex justify-between items-center"><span class="text-gray-500 font-bold text-xs uppercase tracking-wide">Room No.</span><span class="font-black text-blue-600 text-lg">${t.roomName}</span></div>
+                <div class="flex justify-between items-center"><span class="text-gray-500 font-bold text-xs uppercase tracking-wide">Tenant</span><span class="font-bold text-gray-800">${t.tenantName}</span></div>
+                ${t.note ? `<div class="flex flex-col pt-3 border-t border-gray-200"><span class="text-gray-500 font-bold text-xs uppercase tracking-wide mb-1">Note</span><span class="font-bold text-gray-800 text-xs">${t.note}</span></div>` : ''}</div>`;
+            const tdm = document.getElementById('transactionDetailsModal'); if(tdm) tdm.classList.remove('hidden');
         };
 
     </script>
