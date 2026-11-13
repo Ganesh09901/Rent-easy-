@@ -24,6 +24,8 @@
         .fab:active { transform: scale(0.95); }
         .plan-card { cursor: pointer; transition: all 0.2s; }
         .plan-card.active { border-color: #3b82f6; background-color: #eff6ff; }
+        
+        /* Quick-Tap UI Styles */
         .type-card { border: 2px solid #e5e7eb; border-radius: 1rem; padding: 1.25rem 1rem; text-align: center; cursor: pointer; transition: all 0.2s; background: white; }
         .type-card:active { transform: scale(0.95); }
         .type-card.active { border-color: #3b82f6; background-color: #eff6ff; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15); }
@@ -32,6 +34,7 @@
         .chip.active { background: #3b82f6; color: white; border-color: #3b82f6; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        
         @keyframes modalPop { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     </style>
 </head>
@@ -49,7 +52,7 @@
             <div id="alertIcon" class="text-6xl mb-4 drop-shadow-sm">✅</div>
             <h3 id="alertTitle" class="text-2xl font-extrabold mb-2 text-gray-800">Updated</h3>
             <p id="alertMessage" class="text-gray-500 text-sm mb-6 font-medium">Data saved successfully.</p>
-            <button onclick="closeAlert()" class="w-full bg-green-500 text-white font-bold py-3.5 rounded-xl hover:bg-green-600 shadow-lg transition text-lg">Continue</button>
+            <button id="closeAlertBtn" class="w-full bg-green-500 text-white font-bold py-3.5 rounded-xl hover:bg-green-600 shadow-lg transition text-lg">Continue</button>
         </div>
     </div>
 
@@ -89,7 +92,7 @@
                 <div id="headerWalletBadge" onclick="openUpgradeModal('wallet')" class="hidden bg-green-500 text-white text-[10px] font-black px-2 py-1.5 rounded shadow-sm cursor-pointer hover:scale-105 transition border border-green-600 flex items-center">
                     <i class="fas fa-wallet mr-1"></i> <span id="walletAmtText">₹0</span>
                 </div>
-                <button id="logoutBtn" class="bg-blue-700 px-3 py-1.5 rounded-lg text-sm font-bold shadow hover:bg-red-500 transition ml-1"><i class="fas fa-power-off"></i></button>
+                <button onclick="logoutUser()" class="bg-blue-700 px-3 py-1.5 rounded-lg text-sm font-bold shadow hover:bg-red-500 transition ml-1"><i class="fas fa-power-off"></i></button>
             </div>
         </header>
 
@@ -188,7 +191,7 @@
                 <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
                     <h3 class="font-bold text-gray-800 mb-2"><i class="fas fa-users-cog mr-2 text-blue-500"></i> Tenant Portal Access</h3>
                     <p class="text-xs text-gray-500 mb-4 font-medium">Grant your tenants access to view their bills & history.</p>
-                    <button id="tenantAccessBtn" onclick="openTenantAccessModal()" class="w-full bg-blue-50 text-blue-600 font-bold py-3.5 rounded-xl border border-blue-200 shadow-sm hover:bg-blue-100 transition mb-6 flex items-center justify-center text-sm"><i id="tenantAccessIcon" class="fas fa-envelope-open-text mr-2"></i> Manage Tenant Access</button>
+                    <button onclick="openTenantAccessModal()" class="w-full bg-blue-50 text-blue-600 font-bold py-3.5 rounded-xl border border-blue-200 shadow-sm hover:bg-blue-100 transition mb-6 flex items-center justify-center text-sm"><i id="tenantAccessIcon" class="fas fa-envelope-open-text mr-2"></i> Manage Tenant Access</button>
 
                     <h3 class="font-bold text-gray-800 mb-4 border-t pt-5"><i class="fas fa-university mr-2 text-green-500"></i> Receiving Payment Details</h3>
                     <input type="text" id="upiIdInput" placeholder="UPI ID (e.g. 9876543210@ybl)" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400 transition font-medium">
@@ -260,7 +263,13 @@
             <div class="space-y-3 mb-2" id="paymentOptionsGroup">
                 <button onclick="showQRCode()" class="w-full bg-white border-2 border-gray-200 text-gray-800 font-bold py-3.5 rounded-xl shadow-sm hover:border-gray-400 transition flex justify-center items-center"><i class="fas fa-qrcode text-gray-500 mr-2 text-xl"></i> Show QR & Details</button>
                 <button onclick="payViaUPIApp()" class="w-full bg-gray-900 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-black transition flex justify-center items-center text-lg"><i class="fas fa-mobile-alt text-yellow-400 mr-2"></i> Pay <span id="payBtnAmount" class="ml-1 font-black mr-1">₹99</span> via App</button>
-                <button onclick="payViaWallet()" class="w-full bg-green-500 text-white font-bold py-3.5 rounded-xl shadow-lg hover:bg-green-600 transition flex justify-between items-center px-4"><span class="flex items-center"><i class="fas fa-wallet mr-2"></i> Pay from Wallet</span><span class="bg-green-700 px-2 py-0.5 rounded text-xs" id="upgradeWalletBal">Bal: ₹0</span></button>
+                
+                <!-- NEW: Wallet Validation & Warning Text added here -->
+                <button id="walletPayBtn" onclick="payViaWallet()" class="w-full bg-green-500 text-white font-bold py-3.5 rounded-xl shadow-lg hover:bg-green-600 transition flex justify-between items-center px-4">
+                    <span class="flex items-center"><i class="fas fa-wallet mr-2"></i> Pay from Wallet</span>
+                    <span class="bg-green-700 px-2 py-0.5 rounded text-xs" id="upgradeWalletBal">Bal: ₹0</span>
+                </button>
+                <p id="walletWarningText" class="text-xs text-red-500 text-center font-bold hidden"></p>
             </div>
 
             <div id="qrCodeContainer" class="hidden flex flex-col items-center justify-center mb-5 border-t border-gray-200 pt-5">
@@ -408,7 +417,8 @@
                 <p id="rmRoomName" class="font-black text-2xl text-blue-900">Room 101</p>
                 <p id="rmRoomId" class="text-xs font-mono text-blue-600 font-bold mt-1 tracking-widest uppercase bg-white inline-block px-2 py-0.5 rounded-full border border-blue-200">ID: XXX</p>
             </div>
-            <input type="hidden" id="rmHouseId"> <input type="hidden" id="rmRoomIdVal">
+            <input type="hidden" id="rmHouseId">
+            <input type="hidden" id="rmRoomIdVal">
             <div id="roomManagerBody"></div>
         </div>
     </div>
@@ -471,7 +481,7 @@
         window.currentUserId = null;
         window.currentUserPlan = 'free'; window.currentUserWallet = 0; window.planExpiryDate = null;
 
-        // UI HELPERS
+        // UI HELPER FUNCTIONS
         window.showLoader = () => { const e = document.getElementById('globalLoader'); if(e) e.classList.remove('hidden'); };
         window.hideLoader = () => { const e = document.getElementById('globalLoader'); if(e) e.classList.add('hidden'); };
 
@@ -518,7 +528,16 @@
             else { document.getElementById('registerForm').classList.add('hidden'); document.getElementById('loginForm').classList.remove('hidden'); }
         };
 
-        // AUTHENTICATION
+        // NEW: FIX LOGOUT LOGIC
+        window.logoutUser = () => {
+            signOut(auth).then(() => {
+                window.currentUserId = null;
+                const aCont = document.getElementById('authContainer'); if(aCont) aCont.classList.remove('hidden');
+                const appCont = document.getElementById('appContainer'); if(appCont) appCont.classList.add('hidden');
+            }).catch(e => showAlert('error', 'Error', e.message));
+        };
+
+        // AUTHENTICATION STATE
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 window.currentUserId = user.uid;
@@ -535,23 +554,39 @@
             }
         });
 
-        // ================= GLOBAL EXPOSED FUNCTIONS (CRASH PROOF) =================
+        // LOGIN / REGISTRATION
+        const rBtn = document.getElementById('registerBtn');
+        if(rBtn) rBtn.onclick = async () => {
+            const n = document.getElementById('regName').value, m = document.getElementById('regMobile').value, e = document.getElementById('regEmail').value, p = document.getElementById('regPassword').value;
+            if(!n || !m || !e || p.length < 6) return showAlert('error', 'Error', 'Fill correctly. Pass min 6 chars.');
+            const btn = document.getElementById('registerBtn'); btn.innerText = "Processing...";
+            try {
+                const cred = await createUserWithEmailAndPassword(auth, e, p);
+                await setDoc(doc(db, "users", cred.user.uid), { ownerName: n, mobileNumber: m, emailId: e, planType: "free", walletBalance: 0, planExpiry: null });
+                document.getElementById('authContainer').classList.add('hidden'); document.getElementById('appContainer').classList.remove('hidden');
+                await loadProfileData(); await loadDashboardData(); showAlert('success', 'Welcome!', 'Account created.');
+            } catch(er) { showAlert('error', 'Failed', er.message); } btn.innerText = "Create Account";
+        };
 
-        window.openAddHouseModal = () => document.getElementById('addHouseModal').classList.remove('hidden');
-        window.openForgotModal = () => document.getElementById('forgotModal').classList.remove('hidden');
+        const lBtn = document.getElementById('loginBtn');
+        if(lBtn) lBtn.onclick = async () => {
+            const btnText = document.getElementById('loginBtnText'); btnText.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Checking...';
+            try { await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPassword').value); } 
+            catch(e) { showAlert('error', 'Login Failed', 'Invalid Email or Password'); } btnText.innerHTML = "Login";
+        };
 
-        // FORGOT PASSWORD
+        // EXPOSED GLOBAL BINDINGS
+        window.openAddHouseModal = () => { const el = document.getElementById('addHouseModal'); if(el) el.classList.remove('hidden'); };
+        window.openForgotModal = () => { const el = document.getElementById('forgotModal'); if(el) el.classList.remove('hidden'); };
         window.sendPasswordReset = async () => {
             const email = document.getElementById('resetEmailInput').value;
             if(!email) return showAlert('error', 'Required', 'Please enter your registered Email ID.');
             try {
-                await sendPasswordResetEmail(auth, email);
-                window.closeModal('forgotModal'); document.getElementById('resetEmailInput').value = '';
+                await sendPasswordResetEmail(auth, email); window.closeModal('forgotModal'); document.getElementById('resetEmailInput').value = '';
                 showAlert('success', 'Email Sent!', 'Please check your inbox for the reset link.');
             } catch(error) { showAlert('error', 'Error', error.message); }
         };
         
-        // ONBOARDING
         window.saveOnboarding = async () => {
             const state = document.getElementById('obState').value; const city = document.getElementById('obCity').value;
             const area = document.getElementById('obArea').value; const pin = document.getElementById('obPincode').value;
@@ -560,7 +595,32 @@
             await loadProfileData(); hideLoader(); window.closeModal('onboardingModal'); showAlert('success', 'Profile Completed', 'Location saved.');
         };
 
-        // UPGRADE MODAL LOGIC
+        // ================= UPGRADE & WALLET LOGIC WITH LOW BALANCE FIX =================
+        window.customMonths = 1; window.selectedPlanAmount = 99; window.selectedPlanDesc = "1 Month Premium";
+
+        // Intelligent Wallet Validator
+        window.evaluateWalletStatus = () => {
+            const wBtn = document.getElementById('walletPayBtn');
+            const wWarn = document.getElementById('walletWarningText');
+            if(!wBtn) return;
+
+            const needed = Number(window.selectedPlanAmount);
+            const have = Number(window.currentUserWallet);
+
+            if (have < needed) {
+                wBtn.classList.replace('bg-green-500', 'bg-gray-400');
+                wBtn.classList.replace('hover:bg-green-600', 'hover:bg-gray-500');
+                if(wWarn) {
+                    wWarn.innerText = `Low Balance! You need ₹${needed - have} more. Recharge via UPI App.`;
+                    wWarn.classList.remove('hidden');
+                }
+            } else {
+                wBtn.classList.replace('bg-gray-400', 'bg-green-500');
+                wBtn.classList.replace('hover:bg-gray-500', 'hover:bg-green-600');
+                if(wWarn) wWarn.classList.add('hidden');
+            }
+        };
+
         window.openUpgradeModal = (msg) => {
             const qrC = document.getElementById('qrCodeContainer'); if(qrC) qrC.classList.add('hidden');
             const nBtn = document.getElementById('notifyPaymentBtn'); if(nBtn) nBtn.classList.add('hidden');
@@ -574,6 +634,8 @@
             if(document.getElementById('customMonthTotal')) document.getElementById('customMonthTotal').innerText = '₹99';
             window.selectedPlanAmount = 99; window.selectedPlanDesc = "1 Month Premium";
             if(document.getElementById('payBtnAmount')) document.getElementById('payBtnAmount').innerText = '₹99';
+            
+            window.evaluateWalletStatus();
             const uMod = document.getElementById('upgradeModal'); if(uMod) uMod.classList.remove('hidden');
         };
 
@@ -585,6 +647,7 @@
             const pm = document.getElementById(id); if(pm) pm.classList.add('active');
             window.selectedPlanAmount = amt; window.selectedPlanDesc = desc;
             if(document.getElementById('payBtnAmount')) document.getElementById('payBtnAmount').innerText = '₹' + amt;
+            window.evaluateWalletStatus();
         };
 
         window.updateCustomPlan = (delta) => {
@@ -598,6 +661,7 @@
             document.querySelectorAll('.plan-card').forEach(el => el.classList.remove('active'));
             window.selectedPlanAmount = amt; window.selectedPlanDesc = `Custom ${window.customMonths} Months Plan`;
             if(document.getElementById('payBtnAmount')) document.getElementById('payBtnAmount').innerText = '₹' + amt;
+            window.evaluateWalletStatus();
         };
 
         window.showQRCode = () => {
@@ -618,17 +682,24 @@
         };
 
         window.payViaWallet = async () => {
-            if(window.currentUserWallet < window.selectedPlanAmount) return showAlert('error', 'Low Balance', `Your wallet balance is ₹${window.currentUserWallet}. You need ₹${window.selectedPlanAmount}.`);
-            if(!confirm(`Deduct ₹${window.selectedPlanAmount} from your wallet to buy ${window.selectedPlanDesc}?`)) return;
+            const planAmt = Number(window.selectedPlanAmount);
+            const currentBal = Number(window.currentUserWallet);
+
+            if(currentBal < planAmt) {
+                return showAlert('error', 'Low Balance', `Your wallet balance is ₹${currentBal}. You need ₹${planAmt} for this plan. Please use UPI App to recharge.`);
+            }
+
+            if(!confirm(`Deduct ₹${planAmt} from your wallet to buy ${window.selectedPlanDesc}?`)) return;
             showLoader();
             try {
-                const newBal = window.currentUserWallet - window.selectedPlanAmount; 
-                let monthsToAdd = 1; if(window.selectedPlanAmount === 600) monthsToAdd = 3; else if(window.selectedPlanAmount === 1100) monthsToAdd = 12; else if(window.selectedPlanDesc.includes('Custom')) monthsToAdd = window.customMonths;
+                const newBal = currentBal - planAmt; 
+                let monthsToAdd = 1; if(planAmt === 600) monthsToAdd = 3; else if(planAmt === 1100) monthsToAdd = 12; else if(window.selectedPlanDesc.includes('Custom')) monthsToAdd = window.customMonths;
                 let newExpiry = new Date(); if (window.planExpiryDate && new Date(window.planExpiryDate) > new Date()) newExpiry = new Date(window.planExpiryDate);
                 newExpiry.setMonth(newExpiry.getMonth() + monthsToAdd);
+                
                 await updateDoc(doc(db, "users", window.currentUserId), { walletBalance: newBal, planType: "pro", planExpiry: newExpiry.toISOString() });
-                await addDoc(collection(db, "transactions"), { ownerId: window.currentUserId, houseName: "N/A", roomName: "Wallet", tenantName: "Admin", amount: window.selectedPlanAmount, mode: "Wallet", type: "Subscription Purchased", status: 'Active', date: new Date().toISOString() });
-                await loadProfileData(); hideLoader(); window.closeAllModals(); showAlert('success', 'Plan Activated!', `Your plan is active until ${newExpiry.toLocaleDateString('en-GB')}. Wallet: ₹${newBal}`);
+                await addDoc(collection(db, "transactions"), { ownerId: window.currentUserId, houseName: "N/A", roomName: "Wallet", tenantName: "Admin", amount: planAmt, mode: "Wallet", type: "Subscription Purchased", status: 'Active', date: new Date().toISOString() });
+                await loadProfileData(); hideLoader(); window.closeAllModals(); showAlert('success', 'Plan Activated!', `Your plan is active until ${newExpiry.toLocaleDateString('en-GB')}. Remaining Wallet: ₹${newBal}`);
             } catch(e) { hideLoader(); showAlert('error', 'Error', e.message); }
         };
 
@@ -638,7 +709,7 @@
             catch(e) { hideLoader(); showAlert('error', 'Error', e.message); }
         };
 
-        // PROFILE
+        // ================= DASHBOARD & PROFILE LOGIC =================
         async function loadProfileData() {
             const dSnap = await getDoc(doc(db, "users", window.currentUserId));
             if (dSnap.exists()) {
@@ -677,8 +748,14 @@
                 if(d.pincode && document.getElementById('profPincode')) document.getElementById('profPincode').value = d.pincode;
             }
         }
+        
+        const spBtn = document.getElementById('saveProfileBtn');
+        if(spBtn) spBtn.onclick = async () => {
+            showLoader(); await updateDoc(doc(db, "users", window.currentUserId), { upiId: document.getElementById('upiIdInput').value, bankAcc: document.getElementById('bankAccInput').value, ifsc: document.getElementById('ifscInput').value, state: document.getElementById('profState').value, city: document.getElementById('profCity').value, area: document.getElementById('profArea').value, pincode: document.getElementById('profPincode').value }); 
+            hideLoader(); showAlert('success', 'Updated Successfully', 'Profile details saved.'); 
+        };
 
-        // TENANT ACCESS
+        // TENANT PORTAL ACCESS
         window.openTenantAccessModal = () => {
             const select = document.getElementById('taRoomSelect'); const list = document.getElementById('taAccessList');
             if(!select || !list) return; select.innerHTML = '<option value="">Select House - Room</option>'; list.innerHTML = ''; let hasAccess = false;
@@ -692,14 +769,15 @@
                     }
                 });
             });
-            if(!hasAccess) list.innerHTML = '<p class="text-xs text-gray-500 text-center py-4 bg-gray-50 rounded-xl border border-dashed">No tenant access granted yet.</p>';
+            if(!hasAccess) list.innerHTML = '<p class="text-xs text-gray-500 text-center py-4 bg-gray-50 rounded-xl border border-dashed">No access granted yet.</p>';
             const taMod = document.getElementById('tenantAccessModal'); if(taMod) taMod.classList.remove('hidden');
         };
+        
         window.grantTenantAccess = async () => {
             const val = document.getElementById('taRoomSelect').value; const email = document.getElementById('taEmailInput').value;
             if(!val || !email) return showAlert('error', 'Required', 'Please select a room and enter Email.');
             showLoader(); const [hId, rId] = val.split('|');
-            try { await updateDoc(doc(db, "houses", hId, "rooms", rId), { accessEmail: email }); await loadDashboardData(); document.getElementById('taEmailInput').value = ''; document.getElementById('taRoomSelect').value = ''; window.openTenantAccessModal(); hideLoader(); showAlert('success', 'Access Granted', 'Tenant can now view their details.'); } catch (e) { hideLoader(); showAlert('error', 'Error', e.message); }
+            try { await updateDoc(doc(db, "houses", hId, "rooms", rId), { accessEmail: email }); await loadDashboardData(); document.getElementById('taEmailInput').value = ''; document.getElementById('taRoomSelect').value = ''; window.openTenantAccessModal(); hideLoader(); showAlert('success', 'Access Granted', 'Tenant can view details.'); } catch (e) { hideLoader(); showAlert('error', 'Error', e.message); }
         };
         window.removeTenantAccess = async (hId, rId) => {
             if(!confirm('Revoke access?')) return; showLoader();
@@ -873,7 +951,7 @@
         };
 
         window.openVacantRoomsView = (hId) => {
-            const h = window.vacantDataCache[hId]; const vt = document.getElementById('veTitle'); if(vt) vt.innerHTML = `<button onclick="openVacantHousesModal()" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-600 mr-2 hover:bg-gray-200"><i class="fas fa-arrow-left"></i></button> ${h.name}`;
+            const h = window.vacantDataCache[hId]; const vt = document.getElementById('veTitle'); if(vt) vt.innerHTML = `<button onclick="window.openVacantHousesModal()" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-600 mr-2 hover:bg-gray-200"><i class="fas fa-arrow-left"></i></button> ${h.name}`;
             const body = document.getElementById('veBody'); if(!body) return; body.innerHTML = '';
             h.rooms.forEach(r => {
                 let icon = r.propertyType === 'Commercial' ? '🏪' : '🏠'; let size = r.configSize || 'Room';
@@ -886,11 +964,10 @@
         // HOUSE DETAILS
         window.openHouseDetailsModal = (hId) => {
             const d = window.houseDataCache[hId]; 
-            const hn = document.getElementById('hdHouseName'); if(hn) hn.innerText = d.name; 
+            const hn = document.getElementById('hdHouseName'); if(hn) { hn.innerText = d.name; hn.setAttribute('data-hid', hId); }
             const ha = document.getElementById('hdHouseAddress'); if(ha) ha.innerText = d.address;
             const hml = document.getElementById('hdMapLink'); if(hml) hml.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.address)}`;
             const dhb = document.getElementById('deleteHouseBtn'); if(dhb) dhb.onclick = () => window.openDeleteModal('house', hId, null, d.name); 
-            const qab = document.getElementById('quickAddRoomBtn'); if(qab) qab.onclick = () => { window.closeAllModals(); window.openAddNewRoomModal(hId); };
             
             const rList = document.getElementById('hdRoomsList'); if(!rList) return; rList.innerHTML = '';
             d.rooms.forEach(r => {
@@ -904,7 +981,7 @@
             const hdm = document.getElementById('houseDetailsModal'); if(hdm) hdm.classList.remove('hidden');
         };
 
-        // ROOM MANAGER MODAL & INFO EDIT
+        // ROOM MANAGER MODAL
         window.openRoomManager = (hId, rStringEnc) => {
             const r = JSON.parse(decodeURIComponent(rStringEnc));
             document.getElementById('rmHouseId').value = hId; document.getElementById('rmRoomIdVal').value = r.id;
@@ -928,14 +1005,14 @@
                         <div><label class="text-[10px] font-bold text-gray-500">Meter Read</label><input type="number" id="tMeterPrev" value="${r.meterCurr||r.meterPrev||''}" class="w-full border p-3.5 rounded-xl font-bold bg-blue-50 border-blue-200"></div>
                         <div><label class="text-[10px] font-bold text-gray-500">Unit Rate (₹)</label><input type="number" id="tUnitRate" value="${r.unitRate||''}" class="w-full border p-3.5 rounded-xl font-bold bg-blue-50 border-blue-200"></div>
                     </div>
-                    <button onclick="assignTenant('${r.roomNumber}')" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl mt-4 shadow-lg hover:bg-blue-800 transition text-lg tracking-wide"><i class="fas fa-user-plus mr-2"></i> Assign Tenant & Save</button>
+                    <button onclick="assignTenant('${r.roomNumber}')" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl mt-4 shadow-lg hover:bg-blue-700 transition text-lg tracking-wide"><i class="fas fa-user-plus mr-2"></i> Assign Tenant & Save</button>
                 `;
             } else {
                 const totalDue = r.rentAmount + r.waterBillFixed + (r.currentLightBill||0) + (r.penalty||0);
                 const isFree = window.currentUserPlan === 'free'; const lockIconHtml = isFree ? ' <i class="fas fa-lock text-red-500 ml-1"></i>' : '';
                 const btnOpacity = isFree ? 'opacity-80 bg-gray-200 text-gray-600 border-gray-300' : 'bg-gray-50 text-gray-800 hover:border-gray-400 hover:shadow-md';
-                const whatsappAction = isFree ? `window.openUpgradeModal('🔒 Premium Feature. Please upgrade to send Invoice PDF.')` : `downloadInvoiceAndSend('whatsapp', '${r.tenantMobile}', '${r.tenantEmail}', '${r.tenantName}', '${r.roomNumber}', document.getElementById('editRent').value, document.getElementById('editWater').value, document.getElementById('editLight').value, document.getElementById('editPen').value, '${r.tenantUniqueId}', document.getElementById('editMeterPrev').value, document.getElementById('editMeterCurr').value, document.getElementById('editUnitRate').value)`;
-                const emailAction = isFree ? `window.openUpgradeModal('🔒 Premium Feature. Please upgrade to send Invoice PDF.')` : `downloadInvoiceAndSend('email', '${r.tenantMobile}', '${r.tenantEmail}', '${r.tenantName}', '${r.roomNumber}', document.getElementById('editRent').value, document.getElementById('editWater').value, document.getElementById('editLight').value, document.getElementById('editPen').value, '${r.tenantUniqueId}', document.getElementById('editMeterPrev').value, document.getElementById('editMeterCurr').value, document.getElementById('editUnitRate').value)`;
+                const whatsappAction = isFree ? `window.openUpgradeModal('🔒 Premium Feature. Please upgrade to send Invoice PDF.')` : `window.downloadInvoiceAndSend('whatsapp', '${r.tenantMobile}', '${r.tenantEmail}', '${r.tenantName}', '${r.roomNumber}', document.getElementById('editRent').value, document.getElementById('editWater').value, document.getElementById('editLight').value, document.getElementById('editPen').value, '${r.tenantUniqueId}', document.getElementById('editMeterPrev').value, document.getElementById('editMeterCurr').value, document.getElementById('editUnitRate').value)`;
+                const emailAction = isFree ? `window.openUpgradeModal('🔒 Premium Feature. Please upgrade to send Invoice PDF.')` : `window.downloadInvoiceAndSend('email', '${r.tenantMobile}', '${r.tenantEmail}', '${r.tenantName}', '${r.roomNumber}', document.getElementById('editRent').value, document.getElementById('editWater').value, document.getElementById('editLight').value, document.getElementById('editPen').value, '${r.tenantUniqueId}', document.getElementById('editMeterPrev').value, document.getElementById('editMeterCurr').value, document.getElementById('editUnitRate').value)`;
 
                 body.innerHTML = `
                     <div class="bg-green-50 p-3 rounded-xl mb-4 flex justify-between items-center border border-green-200">
@@ -946,6 +1023,7 @@
                         </div>
                     </div>
                     
+                    <!-- EDIT TENANT INFO FORM -->
                     <div id="editTenantInfoSection" class="hidden bg-gray-100 border border-gray-300 p-4 rounded-xl mb-4 shadow-inner">
                         <h4 class="text-xs font-black text-gray-500 mb-3 uppercase tracking-widest">Edit Details</h4>
                         <input type="text" id="updTName" value="${r.tenantName}" class="w-full bg-white border border-gray-300 p-2.5 mb-2 rounded-lg text-sm font-bold" placeholder="Full Name">
@@ -1008,7 +1086,7 @@
             }, 50);
         };
 
-        // TENANT EDIT INFO FUNCTIONS
+        // EDIT TENANT INFO
         window.toggleEditTenantInfo = () => { const el = document.getElementById('editTenantInfoSection'); if(el) el.classList.toggle('hidden'); };
 
         window.saveTenantInfoUpdates = async (oldName) => {
@@ -1025,17 +1103,62 @@
             } catch(e) { hideLoader(); showAlert('error', 'Error', e.message); }
         };
 
-        // DB ACTIONS
+        // INVOICE
+        window.downloadInvoiceAndSend = (type, mob, email, name, rNo, rent, water, light, pen, tId, prevStr, currStr, rateStr) => {
+            if (type === 'whatsapp' && (!mob || mob === 'undefined')) return showAlert('error', 'Missing Data', 'No WhatsApp number saved.');
+            if (type === 'email' && (!email || email === 'undefined')) return showAlert('error', 'Missing Data', 'No Email ID saved.');
+
+            const r = parseFloat(rent)||0; const w = parseFloat(water)||0; const l = parseFloat(light)||0; const p = parseFloat(pen)||0;
+            const prev = parseFloat(prevStr)||0; const curr = parseFloat(currStr)||0; const rate = parseFloat(rateStr)||0;
+            const units = Math.max(0, curr - prev); const tot = r + w + l + p;
+            const dateStr = new Date().toLocaleDateString('en-GB');
+
+            const { jsPDF } = window.jspdf; const doc = new jsPDF();
+            doc.setFont("helvetica", "bold"); doc.setFontSize(24); doc.setTextColor(37, 99, 235);
+            doc.text("RENT INVOICE", 105, 25, null, null, "center");
+            
+            doc.setFontSize(11); doc.setTextColor(80, 80, 80); doc.setFont("helvetica", "normal");
+            doc.text(`Date: ${dateStr}`, 20, 45); doc.text(`Tenant Name: ${name}`, 20, 55);
+            doc.text(`Room Number: ${rNo}`, 20, 65); doc.text(`Asset ID: ${tId}`, 20, 75);
+            
+            doc.setDrawColor(200, 200, 200); doc.line(20, 85, 190, 85);
+            doc.setFont("helvetica", "bold"); doc.setTextColor(0, 0, 0); doc.text("Description", 20, 95); doc.text("Amount (INR)", 150, 95);
+            doc.setFont("helvetica", "normal"); doc.line(20, 100, 190, 100);
+            
+            doc.text("Base Rent", 20, 110); doc.text(`Rs. ${r}`, 150, 110);
+            doc.text("Water Bill", 20, 120); doc.text(`Rs. ${w}`, 150, 120);
+            doc.text("Electricity Bill", 20, 130); doc.text(`Rs. ${l}`, 150, 130);
+            if(rate > 0) { doc.setFontSize(8); doc.setTextColor(120, 120, 120); doc.text(`(Meter: ${prev} to ${curr} | ${units} units @ Rs.${rate}/unit)`, 20, 135); doc.setFontSize(11); doc.setTextColor(80, 80, 80); }
+            doc.text("Late Penalty", 20, 145); doc.text(`Rs. ${p}`, 150, 145);
+            doc.line(20, 153, 190, 153);
+            
+            doc.setFont("helvetica", "bold"); doc.setFontSize(16); doc.text("Total Payable:", 20, 165); doc.text(`Rs. ${tot}`, 150, 165);
+            doc.setFontSize(9); doc.setFont("helvetica", "italic"); doc.setTextColor(150, 150, 150); doc.text("Digitally generated by Rent Easy SaaS.", 105, 185, null, null, "center");
+            
+            doc.save(`Invoice_Room_${rNo}_${name.replace(/\s+/g, '_')}.pdf`);
+
+            let unitText = rate > 0 ? ` (Meter: ${prev} to ${curr} = ${units} units @ Rs.${rate})` : '';
+            const textMsg = `Hello ${name},%0A%0AHere is your Rent Invoice for Room ${rNo} (Date: ${dateStr}):%0A- Rent: Rs.${r}%0A- Water: Rs.${w}%0A- Light Bill: Rs.${l}${unitText}%0A- Penalty: Rs.${p}%0A%0ATotal Due: *Rs.${tot}*%0A%0AI have also downloaded the PDF Invoice and will attach it here.%0APlease pay at your earliest convenience.%0AThanks!`;
+
+            setTimeout(() => {
+                if (type === 'whatsapp') window.open(`https://wa.me/91${mob}?text=${textMsg}`, '_blank');
+                else if (type === 'email') window.open(`mailto:${email}?subject=Rent Invoice - Room ${rNo}&body=${textMsg}`, '_blank');
+            }, 800);
+        };
+
+        // BACKGROUND LOGIC
         async function logTransaction(houseName, rName, tName, amt, mode, type) {
-            await addDoc(collection(db, "transactions"), { ownerId: window.currentUserId, houseName: houseName || "N/A", roomName: rName, tenantName: tName, amount: amt, mode: mode, type: type, status: 'Active', date: new Date().toISOString() });
+            if(amt > 0) { await addDoc(collection(db, "transactions"), { ownerId: window.currentUserId, houseName: houseName || "N/A", roomName: rName, tenantName: tName, amount: amt, mode: mode, type: type, status: 'Active', date: new Date().toISOString() }); }
         }
 
         window.assignTenant = async (rNo) => {
             const name = document.getElementById('tName').value, mob = document.getElementById('tMob').value;
             const dep = Number(document.getElementById('tDep').value)||0, depMode = document.getElementById('tDepMode').value;
             const mPrev = Number(document.getElementById('tMeterPrev').value)||0; const uRate = Number(document.getElementById('tUnitRate').value)||0;
+            const oRent = Number(document.getElementById('oRent') ? document.getElementById('oRent').value : 0)||0;
             
             if(!name || !mob) return showAlert('error', 'Incomplete', 'Name and Mobile are mandatory.');
+            
             showLoader();
             const hId = document.getElementById('rmHouseId').value, rId = document.getElementById('rmRoomIdVal').value;
             const hName = window.houseDataCache[hId].name;
@@ -1045,9 +1168,10 @@
             await updateDoc(doc(db, "houses", hId, "rooms", rId), {
                 occupancyStatus: "Occupied", tenantName: name, tenantMobile: mob, tenantAlt: document.getElementById('tAlt').value, tenantEmail: document.getElementById('tEmail').value,
                 tenantUniqueId: newTenantId, deposit: dep, rentAmount: Number(document.getElementById('rBase').value), waterBillFixed: Number(document.getElementById('wBase').value), paymentStatus: "Pending",
-                meterPrev: mPrev, meterCurr: mPrev, unitRate: uRate
+                meterPrev: mPrev, meterCurr: mPrev, unitRate: uRate, onlineListingRent: oRent
             });
             if(dep > 0) await logTransaction(hName, rNo, name, dep, depMode, "Deposit Received");
+            
             await loadDashboardData(); hideLoader(); window.closeAllModals(); showAlert('success', 'Tenant Assigned!', 'Room details saved in real-time.');
         };
 
@@ -1071,7 +1195,6 @@
             if(refund === null) return; showLoader();
             const hId = document.getElementById('rmHouseId').value, rId = document.getElementById('rmRoomIdVal').value, rNo = document.getElementById('rmRoomName').innerText;
             const hName = window.houseDataCache[hId].name;
-            
             await updateDoc(doc(db, "houses", hId, "rooms", rId), { occupancyStatus: "Vacant", tenantName: "", tenantMobile: "", tenantAlt: "", tenantEmail: "", tenantUniqueId: "Unassigned", deposit: 0, paymentStatus: "Pending", currentLightBill: 0, penalty: 0, meterPrev: window.houseDataCache[hId].rooms.find(x => x.id === rId).meterCurr || 0, meterCurr: window.houseDataCache[hId].rooms.find(x => x.id === rId).meterCurr || 0 });
             await logTransaction(hName, rNo, tName, Number(refund), "Cash", "Deposit Refunded");
             await loadDashboardData(); hideLoader(); window.closeAllModals(); showAlert('success', 'Room Vacated', 'Details updated in real-time.');
@@ -1091,84 +1214,7 @@
                     }
                 }
             }
-            await loadDashboardData(); hideLoader(); showAlert('success', 'New Month Started', 'Meter readings auto-forwarded.');
-        };
-
-        // HISTORY FIX
-        window.loadHistoryData = async () => {
-            try {
-                const hList = document.getElementById('historyList'); 
-                hList.innerHTML = `<div class="flex flex-col items-center justify-center py-20 text-gray-400"><i class="fas fa-circle-notch fa-spin text-5xl mb-4 text-blue-500"></i><p class="font-bold tracking-wider text-sm uppercase">Loading History...</p></div>`;
-                const snaps = await getDocs(query(collection(db, "transactions"), where("ownerId", "==", window.currentUserId)));
-                if(snaps.empty) { hList.innerHTML = `<div class="text-center text-gray-400 mt-10"><i class="fas fa-file-invoice-dollar text-5xl mb-3 text-gray-200"></i><p>No successful transactions yet.</p></div>`; return; }
-                
-                let transactions = []; snaps.forEach(d => transactions.push({ id: d.id, ...d.data() }));
-                transactions.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
-                
-                hList.innerHTML = '';
-                transactions.forEach(t => {
-                    const safeRoom = t.roomName ? String(t.roomName).replace('Room ','') : 'N/A';
-                    const dObj = new Date(t.date || 0); const dateStr = dObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }); const timeStr = dObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                    const isDeleted = t.status === 'Deleted'; const isInfoUpdate = t.type === 'Info Updated';
-                    
-                    let c = (t.type && t.type.includes("Refund")) ? "text-red-500" : "text-green-500";
-                    let amtDisplay = `₹${t.amount || 0}`; let typeBadge = t.type;
-                    
-                    if(isInfoUpdate) { c = "text-blue-500"; amtDisplay = "-"; }
-                    if(isDeleted) { c = "text-gray-400 line-through"; }
-
-                    const delBtn = isDeleted ? '' : `<button onclick="event.stopPropagation(); window.openDeleteModal('tx', '${t.id}', null, 'Transaction')" class="bg-red-50 text-red-500 h-8 w-8 rounded-full flex items-center justify-center hover:bg-red-100 hover:text-red-600 transition border border-red-100 shadow-sm ml-3"><i class="fas fa-trash-alt text-xs"></i></button>`;
-                    const noteHtml = isDeleted ? `<div class="w-full mt-3 bg-red-50 border border-red-100 p-2 rounded-lg text-xs text-red-600 font-semibold flex items-start"><i class="fas fa-info-circle mt-0.5 mr-1.5"></i> <span>Void Note: ${t.deleteReason}</span></div>` : '';
-
-                    const encData = encodeURIComponent(JSON.stringify({...t, roomName: safeRoom, tenantName: (t.tenantName||'Unknown'), houseName: (t.houseName||'-'), type: typeBadge, mode: (t.mode||'System'), dateStr, timeStr}));
-
-                    hList.innerHTML += `<div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-3 hover:shadow-md transition cursor-pointer flex flex-col" onclick="${isDeleted ? '' : `openTransactionDetails('${encData}')`}"><div class="flex justify-between items-center w-full"><div><p class="font-extrabold text-gray-800 text-lg ${isDeleted ? 'text-gray-400' : ''}">${isInfoUpdate ? '<i class="fas fa-pen text-blue-400 mr-1 text-sm"></i> ' : ''}Room ${safeRoom}</p><p class="text-xs text-gray-500 mt-1"><i class="far fa-calendar-alt mr-1"></i> ${dateStr}</p></div><div class="text-right flex items-center"><div class="flex flex-col items-end mr-1"><p class="font-black text-xl ${c}">${amtDisplay}</p>${isDeleted ? `<span class="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-0.5 rounded mt-1">DELETED</span>` : `<div class="flex items-center mt-1 text-blue-500 text-[10px] font-bold uppercase tracking-wide bg-blue-50 px-2 py-0.5 rounded">View <i class="fas fa-chevron-right ml-1"></i></div>`}</div>${delBtn}</div></div>${noteHtml}</div>`;
-                });
-            } catch(e) { document.getElementById('historyList').innerHTML = `<div class="text-center text-red-500 mt-10"><p>Error: ${e.message}</p></div>`; }
-        };
-
-        window.openTransactionDetails = (encData) => {
-            const t = JSON.parse(decodeURIComponent(encData)); const body = document.getElementById('tdBody');
-            let c = (t.type && t.type.includes("Refund")) ? "text-red-500" : (t.type === "Info Updated" ? "text-blue-500" : "text-green-500");
-            let bgType = (t.type && t.type.includes("Refund")) ? "bg-red-50 text-red-700 border-red-200" : (t.type === "Info Updated" ? "bg-blue-50 text-blue-700 border-blue-200" : "bg-green-50 text-green-700 border-green-200");
-            let amtStr = t.type === "Info Updated" ? "-" : `₹${t.amount}`;
-            
-            body.innerHTML = `<div class="text-center mb-6 mt-2"><p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Amount ${t.type && t.type.includes("Refund") ? "Refunded" : (t.type === "Info Updated" ? "N/A" : "Received")}</p><p class="text-5xl font-black ${c} tracking-tight">${amtStr}</p><p class="text-[10px] mt-3 font-bold inline-block px-3 py-1 rounded-full border uppercase tracking-wider ${bgType}">${t.type}</p></div>
-                <div class="bg-gray-50 p-5 rounded-xl border border-gray-100 space-y-4 text-sm shadow-inner"><div class="flex justify-between items-center border-b border-gray-200 pb-3"><span class="text-gray-500 font-bold text-xs uppercase tracking-wide">Date & Time</span><span class="font-bold text-gray-800 text-right">${t.dateStr}<br><span class="text-xs text-gray-500">${t.timeStr}</span></span></div>
-                <div class="flex justify-between items-center"><span class="text-gray-500 font-bold text-xs uppercase tracking-wide">Room No.</span><span class="font-black text-blue-600 text-lg">${t.roomName}</span></div>
-                <div class="flex justify-between items-center"><span class="text-gray-500 font-bold text-xs uppercase tracking-wide">Tenant</span><span class="font-bold text-gray-800">${t.tenantName}</span></div>
-                ${t.note ? `<div class="flex flex-col pt-3 border-t border-gray-200"><span class="text-gray-500 font-bold text-xs uppercase tracking-wide mb-1">Note</span><span class="font-bold text-gray-800 text-xs">${t.note}</span></div>` : ''}</div>`;
-            const tdm = document.getElementById('transactionDetailsModal'); if(tdm) tdm.classList.remove('hidden');
-        };
-
-        window.downloadInvoiceAndSend = (type, mob, email, name, rNo, rent, water, light, pen, tId, prevStr, currStr, rateStr) => {
-            if (type === 'whatsapp' && (!mob || mob === 'undefined')) return showAlert('error', 'Missing Data', 'No WhatsApp number saved.');
-            if (type === 'email' && (!email || email === 'undefined')) return showAlert('error', 'Missing Data', 'No Email ID saved.');
-            const r = parseFloat(rent)||0; const w = parseFloat(water)||0; const l = parseFloat(light)||0; const p = parseFloat(pen)||0;
-            const prev = parseFloat(prevStr)||0; const curr = parseFloat(currStr)||0; const rate = parseFloat(rateStr)||0;
-            const units = Math.max(0, curr - prev); const tot = r + w + l + p;
-            const dateStr = new Date().toLocaleDateString('en-GB');
-            const { jsPDF } = window.jspdf; const doc = new jsPDF();
-            doc.setFont("helvetica", "bold"); doc.setFontSize(24); doc.setTextColor(37, 99, 235);
-            doc.text("RENT INVOICE", 105, 25, null, null, "center");
-            doc.setFontSize(11); doc.setTextColor(80, 80, 80); doc.setFont("helvetica", "normal");
-            doc.text(`Date: ${dateStr}`, 20, 45); doc.text(`Tenant Name: ${name}`, 20, 55);
-            doc.text(`Room Number: ${rNo}`, 20, 65); doc.text(`Asset ID: ${tId}`, 20, 75);
-            doc.setDrawColor(200, 200, 200); doc.line(20, 85, 190, 85);
-            doc.setFont("helvetica", "bold"); doc.setTextColor(0, 0, 0); doc.text("Description", 20, 95); doc.text("Amount (INR)", 150, 95);
-            doc.setFont("helvetica", "normal"); doc.line(20, 100, 190, 100);
-            doc.text("Base Rent", 20, 110); doc.text(`Rs. ${r}`, 150, 110);
-            doc.text("Water Bill", 20, 120); doc.text(`Rs. ${w}`, 150, 120);
-            doc.text("Electricity Bill", 20, 130); doc.text(`Rs. ${l}`, 150, 130);
-            if(rate > 0) { doc.setFontSize(8); doc.setTextColor(120, 120, 120); doc.text(`(Meter: ${prev} to ${curr} | ${units} units @ Rs.${rate}/unit)`, 20, 135); doc.setFontSize(11); doc.setTextColor(80, 80, 80); }
-            doc.text("Late Penalty", 20, 145); doc.text(`Rs. ${p}`, 150, 145);
-            doc.line(20, 153, 190, 153);
-            doc.setFont("helvetica", "bold"); doc.setFontSize(16); doc.text("Total Payable:", 20, 165); doc.text(`Rs. ${tot}`, 150, 165);
-            doc.setFontSize(9); doc.setFont("helvetica", "italic"); doc.setTextColor(150, 150, 150); doc.text("Digitally generated by Rent Easy SaaS.", 105, 185, null, null, "center");
-            doc.save(`Invoice_Room_${rNo}_${name.replace(/\s+/g, '_')}.pdf`);
-            let unitText = rate > 0 ? ` (Meter: ${prev} to ${curr} = ${units} units @ Rs.${rate})` : '';
-            const textMsg = `Hello ${name},%0A%0AHere is your Rent Invoice for Room ${rNo} (Date: ${dateStr}):%0A- Rent: Rs.${r}%0A- Water: Rs.${w}%0A- Light Bill: Rs.${l}${unitText}%0A- Penalty: Rs.${p}%0A%0ATotal Due: *Rs.${tot}*%0A%0AI have also downloaded the PDF Invoice and will attach it here.%0APlease pay at your earliest convenience.%0AThanks!`;
-            setTimeout(() => { if (type === 'whatsapp') window.open(`https://wa.me/91${mob}?text=${textMsg}`, '_blank'); else if (type === 'email') window.open(`mailto:${email}?subject=Rent Invoice - Room ${rNo}&body=${textMsg}`, '_blank'); }, 800);
+            await loadDashboardData(); hideLoader(); showAlert('success', 'New Month Started', 'Meter readings auto-forwarded. Ready for new billing.');
         };
     </script>
 </body>
