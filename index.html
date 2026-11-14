@@ -539,7 +539,6 @@ onAuthStateChanged(auth, async (user) => {
             const isBlocked = (vRaw === false || vRaw === "false" || vRaw === 0 || vRaw === "0");
 
             if (vRaw === undefined || vRaw === null) {
-                // Legacy account -> auto heal
                 try { await updateDoc(doc(db, "users", user.uid), { isVerified: true }); } catch(e) { console.warn('auto-verify failed', e); }
                 userData.isVerified = true;
             }
@@ -931,19 +930,24 @@ window.openRoomManager = (hId, rStringEnc) => {
         const whatsappAction = isFree ? `window.openUpgradeModal('🔒 Premium Feature. Please upgrade to send Invoice PDF.')` : `downloadInvoiceAndSend('whatsapp', '${r.tenantMobile}', '${r.tenantEmail}', '${r.tenantName}', '${r.roomNumber}', document.getElementById('editRent').value, document.getElementById('editWater').value, document.getElementById('editLight').value, document.getElementById('editPen').value, '${r.tenantUniqueId}', document.getElementById('editMeterPrev').value, document.getElementById('editMeterCurr').value, document.getElementById('editUnitRate').value)`;
         const emailAction = isFree ? `window.openUpgradeModal('🔒 Premium Feature. Please upgrade to send Invoice PDF.')` : `downloadInvoiceAndSend('email', '${r.tenantMobile}', '${r.tenantEmail}', '${r.tenantName}', '${r.roomNumber}', document.getElementById('editRent').value, document.getElementById('editWater').value, document.getElementById('editLight').value, document.getElementById('editPen').value, '${r.tenantUniqueId}', document.getElementById('editMeterPrev').value, document.getElementById('editMeterCurr').value, document.getElementById('editUnitRate').value)`;
         body.innerHTML = `
-        <div class="bg-green-50 p-3 rounded-xl mb-4 flex justify-between items-center border border-green-200">
+        <div class="bg-green-50 p-3 rounded-xl mb-3 flex justify-between items-center border border-green-200">
             <span class="font-black text-green-800 text-lg">${r.tenantName}</span>
             <div class="flex gap-2">
                 <button onclick="toggleEditTenantInfo()" class="bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow hover:bg-blue-600"><i class="fas fa-edit mr-1"></i> Edit Info</button>
-                <button onclick="vacateRoom('${r.tenantName}', ${r.deposit})" class="bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow hover:bg-red-600"><i class="fas fa-sign-out-alt mr-1"></i> Vacate</button>
+                <button onclick="vacateRoom('${r.tenantName}', ${r.deposit || 0})" class="bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow hover:bg-red-600"><i class="fas fa-sign-out-alt mr-1"></i> Vacate</button>
             </div>
+        </div>
+        <div class="bg-yellow-50 border border-yellow-200 p-3 rounded-xl mb-4 flex justify-between items-center">
+            <span class="text-xs font-black text-yellow-800 uppercase tracking-wide"><i class="fas fa-hand-holding-usd mr-1"></i> Deposit Jama</span>
+            <span class="font-black text-yellow-700 text-xl">₹${r.deposit || 0}</span>
         </div>
         <div id="editTenantInfoSection" class="hidden bg-gray-100 border border-gray-300 p-4 rounded-xl mb-4">
             <h4 class="text-xs font-black text-gray-500 mb-3 uppercase">Edit Details</h4>
             <input type="text" id="updTName" value="${r.tenantName}" class="w-full bg-white border border-gray-300 p-2.5 mb-2 rounded-lg text-sm font-bold">
             <div class="flex gap-2 mb-2"><input type="tel" id="updTMob" value="${r.tenantMobile}" maxlength="10" class="w-1/2 bg-white border border-gray-300 p-2.5 rounded-lg text-sm font-bold"><input type="tel" id="updTAlt" value="${r.tenantAlt||''}" class="w-1/2 bg-white border border-gray-300 p-2.5 rounded-lg text-sm font-bold"></div>
             <input type="email" id="updTEmail" value="${r.tenantEmail||''}" class="w-full bg-white border border-gray-300 p-2.5 mb-2 rounded-lg text-sm font-bold">
-            <div class="flex gap-2 mb-3"><div class="w-1/2"><label class="text-[10px] font-bold text-gray-500">Base Rent</label><input type="number" id="updRBase" value="${r.rentAmount}" class="w-full bg-white border border-gray-300 p-2.5 rounded-lg text-sm font-bold"></div><div class="w-1/2"><label class="text-[10px] font-bold text-gray-500">Water Bill</label><input type="number" id="updWBase" value="${r.waterBillFixed}" class="w-full bg-white border border-gray-300 p-2.5 rounded-lg text-sm font-bold"></div></div>
+            <div class="flex gap-2 mb-2"><div class="w-1/2"><label class="text-[10px] font-bold text-gray-500">Base Rent</label><input type="number" id="updRBase" value="${r.rentAmount}" class="w-full bg-white border border-gray-300 p-2.5 rounded-lg text-sm font-bold"></div><div class="w-1/2"><label class="text-[10px] font-bold text-gray-500">Water Bill</label><input type="number" id="updWBase" value="${r.waterBillFixed}" class="w-full bg-white border border-gray-300 p-2.5 rounded-lg text-sm font-bold"></div></div>
+            <div class="mb-3"><label class="text-[10px] font-bold text-gray-500">Deposit (₹)</label><input type="number" id="updDep" value="${r.deposit || 0}" class="w-full bg-white border border-gray-300 p-2.5 rounded-lg text-sm font-bold"></div>
             <button onclick="saveTenantInfoUpdates('${r.tenantName}')" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-lg shadow-sm hover:bg-blue-700 text-sm"><i class="fas fa-check mr-1"></i> Save Updates</button>
         </div>
         <div class="grid grid-cols-3 gap-2 mb-3 bg-gray-50 p-3 border rounded-xl">
@@ -1031,7 +1035,8 @@ window.saveTenantInfoUpdates = async (oldName) => {
             tenantAlt: document.getElementById('updTAlt').value,
             tenantEmail: document.getElementById('updTEmail').value,
             rentAmount: Number(document.getElementById('updRBase').value),
-            waterBillFixed: Number(document.getElementById('updWBase').value)
+            waterBillFixed: Number(document.getElementById('updWBase').value),
+            deposit: Number(document.getElementById('updDep').value) || 0
         });
         await addDoc(collection(db, "transactions"), { ownerId: window.currentUserId, houseName: hName, roomName: rNo, tenantName: document.getElementById('updTName').value, amount: 0, mode: "System", type: "Info Updated", note: `Updated ${oldName}`, date: new Date().toISOString(), status: 'Active' });
         await loadDashboardData();
@@ -1094,20 +1099,21 @@ window.saveRoomUpdates = async (tName) => {
     } catch(e) { hideLoader(); showAlert('error', 'Error', e.message); }
 };
 
+// ===== VACATE: AUTO REFUND DEPOSIT + HISTORY ENTRY =====
 window.vacateRoom = async (tName, dep) => {
-    const refund = prompt(`Deposit was ₹${dep}. Refund amount?`, dep);
-    if(refund === null) return;
+    const refundAmt = Number(dep) || 0;
+    if(!confirm(`Vacate ${tName}?\n\nDeposit ₹${refundAmt} will be auto-refunded and logged in History.`)) return;
     showLoader();
     const hId = document.getElementById('rmHouseId').value, rId = document.getElementById('rmRoomIdVal').value, rNo = document.getElementById('rmRoomName').innerText;
     const hName = window.houseDataCache[hId].name;
     const room = window.houseDataCache[hId].rooms.find(x => x.id === rId);
     try {
         await updateDoc(doc(db, "houses", hId, "rooms", rId), { occupancyStatus: "Vacant", tenantName: "", tenantMobile: "", tenantAlt: "", tenantEmail: "", tenantUniqueId: "Unassigned", deposit: 0, paymentStatus: "Pending", currentLightBill: 0, penalty: 0, meterPrev: room.meterCurr || 0, meterCurr: room.meterCurr || 0 });
-        await logTransaction(hName, rNo, tName, Number(refund), "Cash", "Deposit Refunded");
+        if(refundAmt > 0) await logTransaction(hName, rNo, tName, refundAmt, "Cash", "Deposit Refunded");
         await loadDashboardData();
         hideLoader();
         window.closeAllModals();
-        showAlert('success', 'Vacated', 'Room is now vacant.');
+        showAlert('success', 'Vacated', refundAmt > 0 ? `Room is now vacant. Deposit ₹${refundAmt} auto-refunded & logged in History.` : 'Room is now vacant. No deposit to refund.');
     } catch(e) { hideLoader(); showAlert('error', 'Error', e.message); }
 };
 
@@ -1132,7 +1138,7 @@ window.startNewMonth = async () => {
     } catch(e) { hideLoader(); showAlert('error', 'Error', e.message); }
 };
 
-// ===== HISTORY =====
+// ===== HISTORY (refund shown as minus) =====
 window.loadHistoryData = async () => {
     try {
         const hList = document.getElementById('historyList');
@@ -1149,8 +1155,9 @@ window.loadHistoryData = async () => {
             const timeStr = dObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             const isDeleted = t.status === 'Deleted';
             const isInfoUpdate = t.type === 'Info Updated';
-            let c = (t.type && t.type.includes("Refund")) ? "text-red-500" : "text-green-500";
-            let amtDisplay = `₹${t.amount || 0}`;
+            const isRefund = t.type && t.type.includes("Refund");
+            let c = isRefund ? "text-red-500" : "text-green-500";
+            let amtDisplay = isRefund ? `-₹${t.amount || 0}` : `₹${t.amount || 0}`;
             if(isInfoUpdate) { c = "text-blue-500"; amtDisplay = "-"; }
             if(isDeleted) { c = "text-gray-400 line-through"; }
             const delBtn = isDeleted ? '' : `<button onclick="event.stopPropagation(); window.openDeleteModal('tx', '${t.id}', null, 'Transaction')" class="bg-red-50 text-red-500 h-8 w-8 rounded-full flex items-center justify-center ml-3"><i class="fas fa-trash-alt text-xs"></i></button>`;
@@ -1164,9 +1171,10 @@ window.loadHistoryData = async () => {
 window.openTransactionDetails = (encData) => {
     const t = JSON.parse(decodeURIComponent(encData));
     const body = document.getElementById('tdBody');
-    let c = (t.type && t.type.includes("Refund")) ? "text-red-500" : (t.type === "Info Updated" ? "text-blue-500" : "text-green-500");
-    let bgType = (t.type && t.type.includes("Refund")) ? "bg-red-50 text-red-700 border-red-200" : (t.type === "Info Updated" ? "bg-blue-50 text-blue-700 border-blue-200" : "bg-green-50 text-green-700 border-green-200");
-    let amtStr = t.type === "Info Updated" ? "-" : `₹${t.amount}`;
+    const isRefund = t.type && t.type.includes("Refund");
+    let c = isRefund ? "text-red-500" : (t.type === "Info Updated" ? "text-blue-500" : "text-green-500");
+    let bgType = isRefund ? "bg-red-50 text-red-700 border-red-200" : (t.type === "Info Updated" ? "bg-blue-50 text-blue-700 border-blue-200" : "bg-green-50 text-green-700 border-green-200");
+    let amtStr = t.type === "Info Updated" ? "-" : (isRefund ? `-₹${t.amount}` : `₹${t.amount}`);
     body.innerHTML = `<div class="text-center mb-6 mt-2"><p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Amount</p><p class="text-5xl font-black ${c}">${amtStr}</p><p class="text-[10px] mt-3 font-bold inline-block px-3 py-1 rounded-full border uppercase ${bgType}">${t.type}</p></div><div class="bg-gray-50 p-5 rounded-xl border border-gray-100 space-y-4 text-sm"><div class="flex justify-between items-center border-b border-gray-200 pb-3"><span class="text-gray-500 font-bold text-xs uppercase">Date</span><span class="font-bold text-gray-800 text-right">${t.dateStr}<br><span class="text-xs text-gray-500">${t.timeStr}</span></span></div><div class="flex justify-between items-center"><span class="text-gray-500 font-bold text-xs uppercase">Room</span><span class="font-black text-blue-600 text-lg">${t.roomName}</span></div><div class="flex justify-between items-center"><span class="text-gray-500 font-bold text-xs uppercase">Tenant</span><span class="font-bold text-gray-800">${t.tenantName}</span></div>${t.note ? `<div class="pt-3 border-t"><span class="text-gray-500 font-bold text-xs uppercase block mb-1">Note</span><span class="font-bold text-gray-800 text-xs">${t.note}</span></div>` : ''}</div>`;
     document.getElementById('transactionDetailsModal').classList.remove('hidden');
 };
@@ -1449,7 +1457,6 @@ document.getElementById('loginBtn').addEventListener('click', async () => {
     showLoader();
     try {
         await signInWithEmailAndPassword(auth, email, pass);
-        // onAuthStateChanged handles the rest (verification check + dashboard load)
         hideLoader();
         document.getElementById('loginEmail').value = '';
         document.getElementById('loginPassword').value = '';
@@ -1472,16 +1479,16 @@ document.getElementById('registerBtn').addEventListener('click', async () => {
     if(mob.length !== 10) return showAlert('error', 'Invalid Mobile', '10-digit mobile number daalein.');
     if(pass.length < 6) return showAlert('error', 'Weak Password', 'Password min 6 characters ka hona chahiye.');
     showLoader();
-    window.isRegistering = true; // block onAuthStateChanged auto-load
+    window.isRegistering = true;
     try {
         const cred = await createUserWithEmailAndPassword(auth, email, pass);
         await setDoc(doc(db, "users", cred.user.uid), {
             ownerName: name, mobileNumber: mob, emailId: email,
             walletBalance: 0, planType: 'free', planExpiry: null,
-            isVerified: true, // AUTO-VERIFIED on registration
+            isVerified: true,
             createdAt: new Date().toISOString()
         });
-        await signOut(auth); // force manual login
+        await signOut(auth);
         window.isRegistering = false;
         hideLoader();
         document.getElementById('regName').value = '';
