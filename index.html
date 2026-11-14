@@ -519,7 +519,7 @@ window.autoFillFromPincode = async (pincode, prefix) => {
     } catch(err) { console.error('Pincode error:', err); }
 };
 
-// ===== AUTH STATE (verification check) =====
+// ===== AUTH STATE (verification check - FIXED FOR OLD ACCOUNTS) =====
 onAuthStateChanged(auth, async (user) => {
     if (window.isRegistering) return;
     if (user) {
@@ -533,13 +533,25 @@ onAuthStateChanged(auth, async (user) => {
                 return;
             }
             const userData = userDoc.data();
-            if(userData.isVerified !== true) {
+
+            // ===== FIX: purane accounts jisme isVerified field hi nahi hai, unhe auto-verify karo =====
+            const vRaw = userData.isVerified;
+            const isBlocked = (vRaw === false || vRaw === "false" || vRaw === 0 || vRaw === "0");
+
+            if (vRaw === undefined || vRaw === null) {
+                // Legacy account -> auto heal
+                try { await updateDoc(doc(db, "users", user.uid), { isVerified: true }); } catch(e) { console.warn('auto-verify failed', e); }
+                userData.isVerified = true;
+            }
+
+            if (isBlocked) {
                 await signOut(auth);
                 document.getElementById('authContainer').classList.remove('hidden');
                 document.getElementById('appContainer').classList.add('hidden');
                 showAlert('error', 'Not Verified', 'Aapka account verified nahi hai. Contact admin.');
                 return;
             }
+
             window.currentUserId = user.uid;
             document.getElementById('authContainer').classList.add('hidden');
             document.getElementById('appContainer').classList.remove('hidden');
