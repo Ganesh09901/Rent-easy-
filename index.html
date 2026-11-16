@@ -12,7 +12,7 @@
     body { background-color: #f4f7fb; font-family: 'Segoe UI', system-ui, sans-serif; overflow-x: hidden; }
     .hidden { display: none !important; }
     
-    /* SCROLL FIX: Ensures content scrolls properly above bottom nav */
+    /* SCROLL FIX: Ensures content scrolls properly above bottom nav & FAB */
     .tab-content { 
         padding-bottom: 120px; 
         min-height: calc(100vh - 60px); 
@@ -36,6 +36,7 @@
     .nav-indicator { width: 0; height: 3px; background: #3b82f6; border-radius: 3px; transition: 0.3s; opacity: 0; margin-bottom: 4px; }
     .nav-btn { color: #9ca3af; transition: all 0.3s; }
     
+    /* FAB Styling */
     .fab { box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); transition: transform 0.2s; }
     .fab:active { transform: scale(0.95); }
     
@@ -208,17 +209,8 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Outstanding Dues Section with View All Button -->
-                <div class="mt-2">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-bold text-red-600 flex items-center"><i class="fas fa-clock mr-2"></i> Outstanding Dues</h3>
-                        <button onclick="openOutstandingDuesModal()" id="viewAllDuesBtn" class="hidden bg-red-50 text-red-600 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm hover:bg-red-100 transition border border-red-200">
-                            <i class="fas fa-list mr-1"></i> View All
-                        </button>
-                    </div>
-                    <div id="pendingRoomsList" class="space-y-3"></div>
-                </div>
+                
+                <!-- Outstanding Dues section removed from here as requested -->
             </div>
 
             <div id="tabProperties" class="hidden">
@@ -281,7 +273,7 @@
             </div>
         </main>
 
-        <!-- NEW SMALL ROUND FLOATING BUTTON FOR DUES -->
+        <!-- NEW SMALL ROUND FLOATING BUTTON FOR DUES (Only shows on Home) -->
         <button onclick="openOutstandingDuesModal()" id="duesFAB" class="fab hidden fixed bottom-24 right-6 bg-red-500 text-white w-14 h-14 rounded-full flex flex-col justify-center items-center z-40 hover:bg-red-600 transition shadow-lg">
             <i class="fas fa-clock text-xl"></i>
             <span class="text-[10px] font-bold mt-0.5">Dues</span>
@@ -719,6 +711,11 @@ window.switchTab = async (t) => {
     }
     document.querySelectorAll('.sidebar-link').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.sidebar-link').forEach(b => { if(b.getAttribute('data-tab') === t) b.classList.add('active'); });
+    
+    // Hide FAB by default on tab switch
+    const duesFAB = document.getElementById('duesFAB');
+    if(duesFAB) duesFAB.classList.add('hidden');
+
     try {
         if(t === 'Analytics' || t === 'Properties') { setLoaderText('Loading properties...'); await loadDashboardData(); }
         if(t === 'History') { setLoaderText('Loading history...'); await window.loadHistoryData(); }
@@ -728,6 +725,12 @@ window.switchTab = async (t) => {
     if(elapsed < 350) await new Promise(r => setTimeout(r, 350 - elapsed));
     const act = document.getElementById('tab'+t);
     if(act) { act.classList.remove('hidden'); act.classList.add('tab-fade-in'); }
+
+    // Show FAB only on Analytics (Home) tab if there are dues
+    if(t === 'Analytics' && window.allPendingData.length > 0) {
+        if(duesFAB) duesFAB.classList.remove('hidden');
+    }
+
     hideLoader();
 };
 
@@ -807,6 +810,13 @@ onAuthStateChanged(auth, async (user) => {
             const analytics = document.getElementById('tabAnalytics');
             if(analytics) analytics.classList.add('tab-fade-in');
             window.activeTab = 'Analytics';
+            
+            // Initial FAB check
+            if(window.allPendingData.length > 0) {
+                const duesFAB = document.getElementById('duesFAB');
+                if(duesFAB) duesFAB.classList.remove('hidden');
+            }
+
             hideLoader();
         } catch(e) {
             await signOut(auth);
@@ -1196,23 +1206,23 @@ window.trashCache = { houses: [], rooms: [] };
 async function loadDashboardData() {
     if(!window.currentUserId) return;
     const hList = document.getElementById('housesList');
-    const pList = document.getElementById('pendingRoomsList');
     if(!hList) return;
     hList.innerHTML = `<div class="flex flex-col items-center justify-center py-10 text-blue-500"><i class="fas fa-circle-notch fa-spin text-4xl mb-3"></i><p class="text-sm font-bold text-gray-500">Syncing properties...</p></div>`;
-    if(pList) pList.innerHTML = `<div class="flex flex-col items-center justify-center py-6 text-red-400"><i class="fas fa-circle-notch fa-spin text-3xl mb-2"></i><p class="text-xs font-bold text-gray-500">Loading dues...</p></div>`;
 
     let tExp=0, tRec=0, tPen=0, tDep=0, vCount=0, occCount=0;
     let tempHouseCache = {}, tempVacantCache = {}, tempTrash = { houses: [], rooms: [] };
-    let htmlBufferHouses = '', htmlBufferPending = '';
+    let htmlBufferHouses = '';
     let tempPendingData = []; // Store all pending items
 
     const hSnaps = await getDocs(query(collection(db, "houses"), where("ownerId", "==", window.currentUserId)));
     if(hSnaps.empty) {
         hList.innerHTML = `<div class="text-center text-gray-400 mt-10"><p>No properties found.</p></div>`;
-        if(pList) pList.innerHTML = `<p class="text-gray-400">No pending.</p>`;
         const sd = document.getElementById('statDeposit'); if(sd) sd.innerText = "₹0";
         const sdc = document.getElementById('statDepositCount'); if(sdc) sdc.innerText = '0 occupied';
         await loadPaymentRequestsCount();
+        // Hide FAB
+        const duesFAB = document.getElementById('duesFAB');
+        if(duesFAB) duesFAB.classList.add('hidden');
         return;
     }
     for (const hDoc of hSnaps.docs) {
@@ -1270,36 +1280,16 @@ async function loadDashboardData() {
 
     hList.innerHTML = htmlBufferHouses;
     
-    // Render only top 3 pending items on Dashboard
-    if(pList) {
-        if (tempPendingData.length === 0) {
-            pList.innerHTML = `<p class="text-green-600 font-bold bg-green-50 p-4 rounded-xl border border-green-200 shadow-sm flex items-center"><i class="fas fa-check-circle text-xl mr-2"></i> All collections complete!</p>`;
-            document.getElementById('viewAllDuesBtn').classList.add('hidden');
-        } else {
-            let renderLimit = Math.min(3, tempPendingData.length);
-            for(let i=0; i<renderLimit; i++) {
-                let p = tempPendingData[i];
-                htmlBufferPending += `<div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-red-500 cursor-pointer hover:shadow-md transition mb-3 gap-2" onclick="openRoomManager('${p.hId}', '${p.encRoom}')"><div class="min-w-0 flex-1"><p class="font-bold text-gray-800 truncate">${p.hName} - Room ${p.r.roomNumber}</p><p class="text-xs text-gray-500 font-medium truncate">${p.r.tenantName}</p></div><div class="font-black text-red-600 text-lg shrink-0">₹${p.amt}</div></div>`;
-            }
-            pList.innerHTML = htmlBufferPending;
-            
-            // Show "View All" button if more than 3 items
-            const vBtn = document.getElementById('viewAllDuesBtn');
-            if (tempPendingData.length > 3) {
-                vBtn.classList.remove('hidden');
-                vBtn.innerHTML = `<i class="fas fa-list mr-1"></i> View All (${tempPendingData.length})`;
-            } else {
-                vBtn.classList.add('hidden');
-            }
-        }
-    }
-
     // Handle FAB visibility and count
     const duesFAB = document.getElementById('duesFAB');
     const fabCount = document.getElementById('fabDueCount');
     if(tempPendingData.length > 0) {
-        duesFAB.classList.remove('hidden');
         fabCount.innerText = tempPendingData.length;
+        if (window.activeTab === 'Analytics') {
+            duesFAB.classList.remove('hidden');
+        } else {
+            duesFAB.classList.add('hidden');
+        }
     } else {
         duesFAB.classList.add('hidden');
     }
