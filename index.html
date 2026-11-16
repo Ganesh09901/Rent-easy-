@@ -8,11 +8,22 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-    html, body { min-height: 100vh; }
-    body { background-color: #f4f7fb; font-family: 'Segoe UI', system-ui, sans-serif; overflow-x: hidden; }
+    /* SCROLL FIX: Ensure vertical scroll works flawlessly on mobile */
+    html, body { 
+        margin: 0; 
+        padding: 0; 
+        width: 100%; 
+        overflow-x: hidden; 
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    body { background-color: #f4f7fb; font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+    
     .hidden { display: none !important; }
-    /* FIX: Increased bottom padding for mobile so content doesn't hide behind bottom nav */
-    .tab-content { padding-bottom: 120px; }
+    
+    /* SCROLL FIX: Added extra padding at the bottom so content easily scrolls above the mobile nav bar */
+    .tab-content { padding-bottom: 160px; }
+    
     @media (min-width: 768px) {
         body { display: block; }
         .desktop-sidebar { display: flex !important; }
@@ -21,6 +32,7 @@
         .tab-content { padding-bottom: 40px; padding-top: 24px; max-width: 1200px; margin: 0 auto; width: 100%; }
         .fab { bottom: 30px !important; right: 30px !important; }
     }
+    
     .modal-overlay { background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 50; transition: all 0.3s ease-in-out; }
     .modal-content { max-height: 90vh; overflow-y: auto; animation: modalPop 0.3s ease-out; }
     .nav-btn.active { color: #3b82f6; }
@@ -94,7 +106,7 @@
     </div>
 </div>
 
-<div id="appContainer" class="hidden min-h-screen w-full">
+<div id="appContainer" class="hidden w-full">
     <aside class="desktop-sidebar hidden fixed left-0 top-0 h-screen w-[260px] bg-white border-r border-gray-200 flex-col shadow-sm z-40">
         <div class="p-6 border-b border-gray-100">
             <h1 class="text-xl font-black text-blue-600 flex items-center"><i class="fas fa-building mr-2"></i> Rent Easy</h1>
@@ -649,7 +661,7 @@ window.planExpiryDate = null;
 window.isRegistering = false;
 window.depositEditRoom = null;
 window.activeTab = 'Analytics';
-window.allPendingData = []; // Global cache for modal
+window.allPendingData = [];
 
 (function(){
     const d = new Date();
