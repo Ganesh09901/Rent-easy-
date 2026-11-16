@@ -6,14 +6,16 @@
     <title>Rent Easy Room - Tenant Portal</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- jsPDF for Invoice Download -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: { extend: {} }
         }
     </script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { font-family: 'Segoe UI', system-ui, sans-serif; transition: background-color 0.3s, color 0.3s; }
         .hidden { display: none !important; }
@@ -43,6 +45,12 @@
     <div id="globalLoader" class="fixed inset-0 modal-overlay hidden flex flex-col justify-center items-center px-4" style="z-index: 99999;">
         <i class="fas fa-circle-notch fa-spin text-6xl text-blue-500 dark:text-blue-400 mb-4 drop-shadow-lg"></i>
         <p class="text-white font-bold tracking-widest uppercase text-sm animate-pulse">Loading...</p>
+    </div>
+
+    <!-- NOTIFICATION SNACKBAR -->
+    <div id="snackbar" class="fixed top-20 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-xl shadow-2xl z-[100] hidden flex items-center transition-all duration-300 opacity-0 translate-y-[-20px]">
+        <i id="snackbarIcon" class="fas fa-check-circle text-green-400 mr-2 text-lg"></i>
+        <span id="snackbarMsg" class="font-bold text-sm">Action Successful</span>
     </div>
 
     <!-- HEADER -->
@@ -198,7 +206,7 @@
                         <span class="bg-green-500 text-white text-[10px] font-black px-3 py-1.5 rounded-lg uppercase tracking-wider shadow-lg border border-green-400">ACTIVE</span>
                     </div>
                 </div>
-              
+
                 <!-- Bill Details Card -->
                 <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-lg border border-gray-100 dark:border-gray-700 p-6 transition-colors">
                     <div class="flex justify-between items-center mb-4 border-b border-gray-100 dark:border-gray-700 pb-3">
@@ -469,7 +477,7 @@
 
                 let html = suggestionBanner;
                 // Group by house for clean UI
-                             let houseMap = {};
+                let houseMap = {};
                 filtered.forEach(p => {
                     if(!houseMap[p.houseId]) {
                         houseMap[p.houseId] = { houseName: p.houseName, address: p.address, pincode: p.pincode, ownerId: p.ownerId, rooms: [] };
