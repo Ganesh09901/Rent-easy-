@@ -283,12 +283,14 @@
             <button onclick="document.getElementById('roomDetailsModal').classList.add('hidden')" class="absolute top-4 right-4 bg-gray-100 dark:bg-gray-700 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 transition shadow-inner"><i class="fas fa-times"></i></button>
 
             <div class="mb-5 border-b border-gray-200 dark:border-gray-700 pb-4 mt-2">
-                <div class="flex items-center gap-2 mb-1">
-                    <span id="rdTypeBadge" class="bg-blue-100 text-blue-700 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider">Room</span>
+                <div class="flex items-center gap-2 mb-1 flex-wrap">
+                    <span id="rdPropertyTypeBadge" class="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider">Residential</span>
+                    <span id="rdTypeBadge" class="bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider">Room</span>
                     <h3 class="font-black text-2xl text-gray-900 dark:text-white" id="rdHouseName">House Name</h3>
                 </div>
                 <p class="text-sm font-medium text-gray-600 dark:text-gray-300 leading-snug flex items-center mt-1"><i class="fas fa-map-marker-alt text-red-500 mr-2"></i> <span id="rdAddress">Full Address</span></p>
-                <p class="text-xs font-bold text-gray-400 mt-1.5 ml-5">Pincode: <span id="rdPincode" class="text-gray-700 dark:text-gray-300 font-mono">------</span></p>
+                <p class="text-xs font-bold text-gray-400 mt-1.5 ml-5">City / State: <span id="rdCityState" class="text-gray-700 dark:text-gray-300">--</span></p>
+                <p class="text-xs font-bold text-gray-400 mt-1 ml-5">Pincode: <span id="rdPincode" class="text-gray-700 dark:text-gray-300 font-mono">------</span></p>
             </div>
 
             <div class="grid grid-cols-2 gap-3 mb-4">
@@ -297,14 +299,15 @@
                     <p class="text-2xl font-black text-blue-600 dark:text-blue-400" id="rdRent">₹0</p>
                 </div>
                 <div class="bg-gray-50 dark:bg-gray-900 p-3.5 rounded-2xl border border-gray-100 dark:border-gray-700 text-center">
-                    <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Property Size</p>
-                    <p class="text-sm font-black text-gray-800 dark:text-white mt-1" id="rdSize">Standard</p>
+                    <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Room Size</p>
+                    <p class="text-sm font-black text-gray-800 dark:text-white mt-1" id="rdSize">Single Room</p>
                 </div>
             </div>
 
             <div class="bg-gray-50 dark:bg-gray-900 p-4 rounded-2xl border border-gray-100 dark:border-gray-700">
                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Owner Details</p>
-                <p class="font-black text-gray-800 dark:text-white text-base mb-2"><i class="fas fa-user-circle mr-2 text-xl"></i> <span id="rdOwnerName">Loading...</span></p>
+                <p class="font-black text-gray-800 dark:text-white text-base mb-1"><i class="fas fa-user-circle mr-2 text-xl"></i> <span id="rdOwnerName">Loading...</span></p>
+                <p class="text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 ml-7"><i class="fas fa-location-dot mr-1"></i> <span id="rdOwnerLocation">--</span></p>
                 <div class="flex items-center justify-between mb-2.5 bg-white dark:bg-gray-800 p-2.5 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
                     <p class="font-bold text-gray-700 dark:text-gray-200 text-sm"><i class="fas fa-headset text-blue-500 mr-2"></i> <span id="rdOwnerMobile">---</span></p>
                     <a id="rdMobileLink" href="#" class="bg-green-500 text-white px-4 py-1.5 rounded-lg text-xs font-bold">Call</a>
@@ -464,12 +467,14 @@
                                 address: house.address || "",
                                 pincode: (house.pincode || "").toString(),
                                 city: (house.city || "").toLowerCase(),
+                                state: house.state || "",
+                                propertyType: house.propertyType || house.type || "Residential",
                                 ownerId: house.ownerId || "",
                                 rId: r.id,
                                 roomNumber: rd.roomNumber ?? "--",
                                 rent: rd.rentAmount || 0,
                                 type: rd.roomType || "Room",
-                                size: rd.roomSize || "Standard"
+                                size: rd.roomSize || "Single Room"
                             });
                         }
                     });
@@ -503,7 +508,7 @@
 
             const map = {};
             props.forEach(p => {
-                if (!map[p.houseId]) map[p.houseId] = { houseName: p.houseName, address: p.address, pincode: p.pincode, rooms: [] };
+                if (!map[p.houseId]) map[p.houseId] = { houseName: p.houseName, address: p.address, pincode: p.pincode, propertyType: p.propertyType, rooms: [] };
                 map[p.houseId].rooms.push(p);
             });
 
@@ -511,12 +516,15 @@
             Object.keys(map).forEach(hId => {
                 const h = map[hId];
                 html += `<div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-                    <h4 class="font-black text-xl text-gray-800 dark:text-white">${h.houseName}</h4>
+                    <div class="flex items-center gap-2 mb-1 flex-wrap">
+                        <span class="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-wider">${h.propertyType}</span>
+                        <h4 class="font-black text-xl text-gray-800 dark:text-white">${h.houseName}</h4>
+                    </div>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3"><i class="fas fa-map-marker-alt text-red-400 mr-1"></i> ${h.address}${h.pincode ? ' - ' + h.pincode : ''}</p>
                     <div class="flex gap-3 overflow-x-auto hide-scroll pb-2">`;
                 h.rooms.forEach(vr => {
-                    html += `<div onclick="openRoomDetails('${hId}','${vr.rId}')" class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 min-w-[140px] text-center cursor-pointer shadow-sm hover:border-blue-400 transition">
-                        <p class="text-[10px] font-bold text-gray-400 uppercase">${vr.type} (${vr.size})</p>
+                    html += `<div onclick="openRoomDetails('${hId}','${vr.rId}')" class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 min-w-[150px] text-center cursor-pointer shadow-sm hover:border-blue-400 transition">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase">${vr.type} · ${vr.size}</p>
                         <p class="font-black text-blue-600 dark:text-blue-400 text-lg">No. ${vr.roomNumber}</p>
                         <p class="text-[11px] font-bold uppercase mb-2 text-gray-700 dark:text-gray-300">₹${vr.rent}</p>
                         <button class="w-full bg-white dark:bg-gray-800 border border-blue-200 dark:border-gray-600 text-blue-600 dark:text-blue-400 text-xs font-bold py-1.5 rounded-lg pointer-events-none">View Details</button>
@@ -533,7 +541,7 @@
             if (!area && !pin) { showToast('Enter area or pincode to search', true); return; }
 
             const filtered = allVacantProps.filter(p => {
-                const haystack = `${p.houseName} ${p.address} ${p.city}`.toLowerCase();
+                const haystack = `${p.houseName} ${p.address} ${p.city} ${p.state}`.toLowerCase();
                 const matchArea = !area || haystack.includes(area);
                 const matchPin = !pin || p.pincode.includes(pin);
                 return matchArea && matchPin;
@@ -571,15 +579,28 @@
                     if (oSnap.exists()) owner = oSnap.data();
                 }
 
+                document.getElementById('rdPropertyTypeBadge').innerText = house.propertyType || house.type || 'Residential';
                 document.getElementById('rdTypeBadge').innerText = prop.type;
                 document.getElementById('rdHouseName').innerText = house.houseName || prop.houseName;
                 document.getElementById('rdAddress').innerText = house.address || 'Address not available';
+                document.getElementById('rdCityState').innerText = [house.city, house.state].filter(Boolean).join(', ') || '--';
                 document.getElementById('rdPincode').innerText = house.pincode || 'N/A';
                 document.getElementById('rdRent').innerText = '₹' + (prop.rent || 0);
-                document.getElementById('rdSize').innerText = prop.size || 'Standard';
-                document.getElementById('rdOwnerName').innerText = owner.ownerName || owner.fullName || 'Owner';
-                document.getElementById('rdOwnerMobile').innerText = owner.mobileNumber || 'Not available';
-                document.getElementById('rdMobileLink').href = owner.mobileNumber ? `tel:${owner.mobileNumber}` : '#';
+                document.getElementById('rdSize').innerText = prop.size || 'Single Room';
+
+                const ownerName = owner.ownerName || owner.fullName || 'Owner';
+                const ownerMobile = owner.mobileNumber || owner.mobile || '';
+                document.getElementById('rdOwnerName').innerText = ownerName;
+                document.getElementById('rdOwnerLocation').innerText = [owner.city, owner.state].filter(Boolean).join(', ') || '--';
+                document.getElementById('rdOwnerMobile').innerText = ownerMobile || 'Not available';
+                const callBtn = document.getElementById('rdMobileLink');
+                if (ownerMobile) {
+                    callBtn.href = `tel:${ownerMobile}`;
+                    callBtn.style.display = '';
+                } else {
+                    callBtn.href = '#';
+                    callBtn.style.display = 'none';
+                }
 
                 document.getElementById('roomDetailsModal').classList.remove('hidden');
             } catch (e) {
@@ -780,8 +801,8 @@
                 const oSnap = await getDoc(doc(db, "users", currentOwnerId));
                 if (oSnap.exists()) {
                     currentOwnerData = { ...oSnap.data(), ownerId: currentOwnerId };
-                    document.getElementById('dashOwnerContact').innerText = currentOwnerData.mobileNumber || '--';
-                    document.getElementById('dashOwnerCall').href = currentOwnerData.mobileNumber ? `tel:${currentOwnerData.mobileNumber}` : '#';
+                    document.getElementById('dashOwnerContact').innerText = currentOwnerData.mobileNumber || currentOwnerData.mobile || '--';
+                    document.getElementById('dashOwnerCall').href = (currentOwnerData.mobileNumber || currentOwnerData.mobile) ? `tel:${currentOwnerData.mobileNumber || currentOwnerData.mobile}` : '#';
                 }
             });
 
@@ -868,7 +889,7 @@
             }
             const amt = totalDue(currentActiveRoomData);
             sessionStorage.setItem('rer-returned-from-upi', '1');
-            window.location.href = `upi://pay?pa=${currentOwnerData.upiId}&pn=${encodeURIComponent(currentOwnerData.ownerName || 'Owner')}&am=${amt}&cu=INR`;
+            window.location.href = `upi://pay?pa=${currentOwnerData.upiId}&pn=${encodeURIComponent(currentOwnerData.ownerName || currentOwnerData.fullName || 'Owner')}&am=${amt}&cu=INR`;
         };
 
         window.showOwnerBankDetails = () => {
@@ -879,7 +900,7 @@
 
             if (currentOwnerData.upiId) {
                 const amt = totalDue(currentActiveRoomData);
-                const upiUrl = `upi://pay?pa=${currentOwnerData.upiId}&pn=${encodeURIComponent(currentOwnerData.ownerName || 'Owner')}&am=${amt}&cu=INR`;
+                const upiUrl = `upi://pay?pa=${currentOwnerData.upiId}&pn=${encodeURIComponent(currentOwnerData.ownerName || currentOwnerData.fullName || 'Owner')}&am=${amt}&cu=INR`;
                 document.getElementById('ownerQRImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(upiUrl)}`;
             }
             document.getElementById('paymentModal').classList.remove('hidden');
