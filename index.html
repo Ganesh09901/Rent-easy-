@@ -38,13 +38,14 @@
     .scrollbar-hide::-webkit-scrollbar { display: none; }
     .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
     @keyframes modalPop { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .tab-fade-in { animation: fadeIn 0.35s ease-out; }
     .sidebar-link { display: flex; align-items: center; padding: 12px 20px; border-radius: 12px; color: #6b7280; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-bottom: 4px; }
     .sidebar-link:hover { background: #eff6ff; color: #3b82f6; }
     .sidebar-link.active { background: #dbeafe; color: #2563eb; }
     .sidebar-link i { width: 24px; margin-right: 12px; text-align: center; }
     .stat-card { transition: transform 0.2s, box-shadow 0.2s; }
     .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
-    /* Fix: proper text wrapping for lists on mobile */
     .list-row-text { min-width: 0; overflow: hidden; }
     .list-row-text > * { overflow: hidden; text-overflow: ellipsis; }
 </style>
@@ -53,7 +54,7 @@
 
 <div id="globalLoader" class="fixed inset-0 modal-overlay hidden flex flex-col justify-center items-center px-4" style="z-index: 99999;">
     <i class="fas fa-circle-notch fa-spin text-6xl text-blue-500 mb-4 drop-shadow-lg"></i>
-    <p class="text-white font-bold tracking-widest uppercase text-sm animate-pulse">Processing...</p>
+    <p id="loaderText" class="text-white font-bold tracking-widest uppercase text-sm animate-pulse">Loading...</p>
 </div>
 
 <div id="customAlert" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4" style="z-index: 99999;">
@@ -133,7 +134,6 @@
                     </div>
                 </div>
 
-                <!-- Vacant Hero Card -->
                 <div class="bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white p-5 md:p-6 rounded-2xl shadow-xl mb-4 cursor-pointer transform hover:scale-[1.005] transition border border-gray-800 relative overflow-hidden" onclick="openVacantHousesModal()">
                     <div class="absolute -right-6 -top-6 opacity-10 pointer-events-none"><i class="fas fa-key text-[140px] md:text-[180px]"></i></div>
                     <div class="flex justify-between items-center relative z-10 gap-3">
@@ -145,7 +145,6 @@
                     </div>
                 </div>
 
-                <!-- Stats Grid -->
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-4">
                     <div class="stat-card bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-blue-500">
                         <div class="flex items-center justify-between mb-1">
@@ -170,7 +169,6 @@
                     </div>
                 </div>
 
-                <!-- Deposit Collection Special Card - CLICKABLE -->
                 <div class="bg-gradient-to-br from-yellow-400 via-amber-400 to-yellow-500 p-4 md:p-6 rounded-2xl shadow-lg mb-5 border border-yellow-600 relative overflow-hidden cursor-pointer hover:scale-[1.01] transition" onclick="openDepositCollection()">
                     <div class="absolute -right-4 -top-4 opacity-20 pointer-events-none"><i class="fas fa-vault text-[120px] md:text-[150px] text-yellow-900"></i></div>
                     <div class="flex justify-between items-center relative z-10 gap-3">
@@ -185,7 +183,6 @@
                     </div>
                 </div>
 
-                <!-- Outstanding Dues -->
                 <div>
                     <h3 class="text-lg font-bold mb-4 text-red-600 flex items-center"><i class="fas fa-clock mr-2"></i> Outstanding Dues</h3>
                     <div id="pendingRoomsList" class="space-y-3"></div>
@@ -213,7 +210,7 @@
                     </div>
                     <button onclick="loadHistoryData()" class="bg-blue-50 text-blue-600 px-4 py-2 rounded-xl text-sm font-bold hover:bg-blue-100 transition shadow-sm border border-blue-100"><i class="fas fa-sync-alt mr-1"></i> Refresh</button>
                 </div>
-                <div id="historyList" class="space-y-3"><div class="text-center text-gray-400 mt-10"><i class="fas fa-receipt text-4xl mb-2"></i><p>Loading...</p></div></div>
+                <div id="historyList" class="space-y-3"></div>
             </div>
             <div id="tabProfile" class="hidden">
                 <h2 class="text-2xl md:text-3xl font-extrabold text-gray-800 mb-5">My Profile</h2>
@@ -272,7 +269,6 @@
     </div>
 </div>
 
-<!-- DEPOSIT COLLECTION LIST -->
 <div id="depositCollectionModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-3 z-[72]">
     <div class="bg-white rounded-2xl p-4 sm:p-5 w-full max-w-lg modal-content shadow-2xl border-t-4 border-yellow-500">
         <div class="flex justify-between items-center border-b pb-3 mb-3">
@@ -309,7 +305,6 @@
     </div>
 </div>
 
-<!-- DEPOSIT EDIT -->
 <div id="depositEditModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[76]">
     <div class="bg-white rounded-2xl p-6 w-full max-w-sm modal-content shadow-2xl border-t-4 border-blue-500">
         <div class="flex justify-between items-center mb-4 border-b pb-3">
@@ -346,37 +341,34 @@
             <button onclick="quickFullCollect()" class="bg-green-500 text-white font-bold py-3 rounded-xl text-xs shadow hover:bg-green-600 flex items-center justify-center"><i class="fas fa-check-circle mr-1"></i> Collect Full</button>
             <button onclick="quickHalfCollect()" class="bg-blue-500 text-white font-bold py-3 rounded-xl text-xs shadow hover:bg-blue-600 flex items-center justify-center"><i class="fas fa-adjust mr-1"></i> Collect Half</button>
         </div>
-        <!-- MANUAL ENTRY - Prominent, separated section -->
-<div class="mt-4 pt-4 border-t-2 border-dashed border-gray-200">
-    <p class="text-xs font-black text-gray-700 uppercase tracking-wider text-center mb-3">
-        <i class="fas fa-hand-holding-usd mr-1 text-green-600"></i> Manual Deposit Entry
-    </p>
 
-    <label class="text-[10px] font-bold text-gray-500 uppercase block mb-1.5 text-center">Enter Amount (₹)</label>
-    <input type="number" id="deCustomAmt" placeholder="0" inputmode="decimal"
-           oninput="updateDepositPreview()"
-           class="w-full bg-gray-50 border-2 border-gray-300 p-4 rounded-xl font-black text-3xl text-center text-gray-800 mb-2 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 outline-none transition">
-
-    <div id="dePreview" class="hidden text-center text-[11px] font-bold mb-3">
-        <span class="text-green-600">Collect → ₹<span id="dePreviewCollect">0</span></span>
-        <span class="text-gray-300 mx-2">|</span>
-        <span class="text-red-600">Refund → ₹<span id="dePreviewRefund">0</span></span>
-    </div>
-
-    <div class="grid grid-cols-2 gap-3">
-        <button onclick="collectCustomDeposit()"
-                class="bg-green-500 hover:bg-green-600 active:scale-95 text-white font-black py-4 rounded-xl shadow-lg transition flex flex-col items-center justify-center">
-            <i class="fas fa-arrow-circle-down text-2xl mb-1"></i>
-            <span class="text-sm tracking-wider">COLLECT</span>
-        </button>
-        <button onclick="refundCustomDeposit()"
-                class="bg-red-500 hover:bg-red-600 active:scale-95 text-white font-black py-4 rounded-xl shadow-lg transition flex flex-col items-center justify-center">
-            <i class="fas fa-arrow-circle-up text-2xl mb-1"></i>
-            <span class="text-sm tracking-wider">REFUND</span>
-        </button>
-    </div>
-    <p class="text-[10px] text-gray-400 mt-2 text-center font-medium">Collect = deposit mein add • Refund = deposit se minus</p>
-</div>
+        <div class="mt-4 pt-4 border-t-2 border-dashed border-gray-200">
+            <p class="text-xs font-black text-gray-700 uppercase tracking-wider text-center mb-3">
+                <i class="fas fa-hand-holding-usd mr-1 text-green-600"></i> Manual Deposit Entry
+            </p>
+            <label class="text-[10px] font-bold text-gray-500 uppercase block mb-1.5 text-center">Enter Amount (₹)</label>
+            <input type="number" id="deCustomAmt" placeholder="0" inputmode="decimal"
+                   oninput="updateDepositPreview()"
+                   class="w-full bg-gray-50 border-2 border-gray-300 p-4 rounded-xl font-black text-3xl text-center text-gray-800 mb-2 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 outline-none transition">
+            <div id="dePreview" class="hidden text-center text-[11px] font-bold mb-3">
+                <span class="text-green-600">Collect → ₹<span id="dePreviewCollect">0</span></span>
+                <span class="text-gray-300 mx-2">|</span>
+                <span class="text-red-600">Refund → ₹<span id="dePreviewRefund">0</span></span>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="collectCustomDeposit()"
+                        class="bg-green-500 hover:bg-green-600 active:scale-95 text-white font-black py-4 rounded-xl shadow-lg transition flex flex-col items-center justify-center">
+                    <i class="fas fa-arrow-circle-down text-2xl mb-1"></i>
+                    <span class="text-sm tracking-wider">COLLECT</span>
+                </button>
+                <button onclick="refundCustomDeposit()"
+                        class="bg-red-500 hover:bg-red-600 active:scale-95 text-white font-black py-4 rounded-xl shadow-lg transition flex flex-col items-center justify-center">
+                    <i class="fas fa-arrow-circle-up text-2xl mb-1"></i>
+                    <span class="text-sm tracking-wider">REFUND</span>
+                </button>
+            </div>
+            <p class="text-[10px] text-gray-400 mt-2 text-center font-medium">Collect = deposit mein add • Refund = deposit se minus</p>
+        </div>
     </div>
 </div>
 
@@ -613,6 +605,7 @@ window.currentUserWallet = 0;
 window.planExpiryDate = null;
 window.isRegistering = false;
 window.depositEditRoom = null;
+window.activeTab = 'Analytics';
 
 (function(){
     const d = new Date();
@@ -620,7 +613,9 @@ window.depositEditRoom = null;
     if(el) el.innerText = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 })();
 
-window.showLoader = () => { const e = document.getElementById('globalLoader'); if(e) e.classList.remove('hidden'); };
+// ===== LOADER HELPERS =====
+window.setLoaderText = (msg) => { const e = document.getElementById('loaderText'); if(e) e.innerText = msg; };
+window.showLoader = (msg) => { if(msg) window.setLoaderText(msg); const e = document.getElementById('globalLoader'); if(e) e.classList.remove('hidden'); };
 window.hideLoader = () => { const e = document.getElementById('globalLoader'); if(e) e.classList.add('hidden'); };
 window.closeModal = (id) => { const el = document.getElementById(id); if(el) el.classList.add('hidden'); };
 window.closeAlert = () => window.closeModal('customAlert');
@@ -646,10 +641,23 @@ window.showAlert = (type, title, msg, cb) => {
     btn.onclick = () => { ab.classList.add('hidden'); if(cb) cb(); };
 };
 
-window.switchTab = (t) => {
+// ===== STEP-BY-STEP TAB SWITCH =====
+window.switchTab = async (t) => {
+    if(window.activeTab === t && document.getElementById('tab'+t) && !document.getElementById('tab'+t).classList.contains('hidden')) {
+        // Already on this tab - still refresh
+    }
+    const startTime = Date.now();
+    window.activeTab = t;
+
+    showLoader('Loading ' + t + '...');
+
+    // 1. Hide all tabs immediately & reset fade-in
     ['Analytics', 'Properties', 'History', 'Profile'].forEach(x => {
-        const e = document.getElementById('tab'+x); if(e) e.classList.add('hidden');
+        const e = document.getElementById('tab'+x);
+        if(e) { e.classList.add('hidden'); e.classList.remove('tab-fade-in'); }
     });
+
+    // 2. Update nav highlight
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     if(event && event.currentTarget && event.currentTarget.classList.contains('nav-btn')) event.currentTarget.classList.add('active');
     else {
@@ -659,9 +667,35 @@ window.switchTab = (t) => {
     }
     document.querySelectorAll('.sidebar-link').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.sidebar-link').forEach(b => { if(b.getAttribute('data-tab') === t) b.classList.add('active'); });
-    const act = document.getElementById('tab'+t); if(act) act.classList.remove('hidden');
-    if(t==='Analytics' || t==='Properties') loadDashboardData();
-    if(t==='History') window.loadHistoryData();
+
+    // 3. STEP-BY-STEP: Load data FIRST (tab is hidden so user sees loader)
+    try {
+        if(t === 'Analytics' || t === 'Properties') {
+            setLoaderText('Loading properties...');
+            await loadDashboardData();
+        }
+        if(t === 'History') {
+            setLoaderText('Loading history...');
+            await window.loadHistoryData();
+        }
+        if(t === 'Profile') {
+            setLoaderText('Loading profile...');
+            await loadProfileData();
+        }
+    } catch(err) { console.error('Tab load error:', err); }
+
+    // 4. Minimum loader display for smooth feel (prevents flash)
+    const elapsed = Date.now() - startTime;
+    if(elapsed < 350) await new Promise(r => setTimeout(r, 350 - elapsed));
+
+    // 5. Reveal tab with fade-in
+    const act = document.getElementById('tab'+t);
+    if(act) {
+        act.classList.remove('hidden');
+        act.classList.add('tab-fade-in');
+    }
+
+    hideLoader();
 };
 
 window.closeAllModals = () => {
@@ -677,7 +711,7 @@ window.toggleAuth = (type) => {
 
 window.handleLogout = async () => {
     if(!confirm('Logout karna chahte hain?')) return;
-    showLoader();
+    showLoader('Logging out...');
     try { await signOut(auth); hideLoader(); showAlert('success', 'Logged Out', 'Aap successfully logout ho gaye.'); }
     catch(e) { hideLoader(); showAlert('error', 'Error', e.message); }
 };
@@ -699,15 +733,18 @@ window.autoFillFromPincode = async (pincode, prefix) => {
     } catch(err) { console.error('Pincode error:', err); }
 };
 
+// ===== AUTH STATE — shows loader during initial app load =====
 onAuthStateChanged(auth, async (user) => {
     if (window.isRegistering) return;
     if (user) {
+        showLoader('Verifying account...');
         try {
             const userDoc = await getDoc(doc(db, "users", user.uid));
             if(!userDoc.exists()) {
                 await signOut(auth);
                 document.getElementById('authContainer').classList.remove('hidden');
                 document.getElementById('appContainer').classList.add('hidden');
+                hideLoader();
                 showAlert('error', 'Profile Missing', 'User profile Firestore me nahi mila.');
                 return;
             }
@@ -722,24 +759,39 @@ onAuthStateChanged(auth, async (user) => {
                 await signOut(auth);
                 document.getElementById('authContainer').classList.remove('hidden');
                 document.getElementById('appContainer').classList.add('hidden');
+                hideLoader();
                 showAlert('error', 'Not Verified', 'Aapka account verified nahi hai. Contact admin.');
                 return;
             }
             window.currentUserId = user.uid;
+
+            // LOAD DATA BEFORE SHOWING APP (prevents empty flash)
+            setLoaderText('Loading profile...');
+            await loadProfileData();
+            setLoaderText('Loading properties...');
+            await loadDashboardData();
+            setLoaderText('Almost ready...');
+            await new Promise(r => setTimeout(r, 200));
+
+            // NOW show the app
             document.getElementById('authContainer').classList.add('hidden');
             document.getElementById('appContainer').classList.remove('hidden');
-            await loadProfileData();
-            await loadDashboardData();
+            const analytics = document.getElementById('tabAnalytics');
+            if(analytics) analytics.classList.add('tab-fade-in');
+            window.activeTab = 'Analytics';
+            hideLoader();
         } catch(e) {
             await signOut(auth);
             document.getElementById('authContainer').classList.remove('hidden');
             document.getElementById('appContainer').classList.add('hidden');
+            hideLoader();
             showAlert('error', 'Error', e.message);
         }
     } else {
         window.currentUserId = null;
         document.getElementById('authContainer').classList.remove('hidden');
         document.getElementById('appContainer').classList.add('hidden');
+        hideLoader();
     }
 });
 
@@ -793,7 +845,7 @@ window.saveOnboarding = async () => {
     const area = document.getElementById('obArea').value;
     const pin = document.getElementById('obPincode').value;
     if(!pin) return showAlert('error', 'Required', 'Pincode mandatory.');
-    showLoader();
+    showLoader('Saving location...');
     await updateDoc(doc(db, "users", window.currentUserId), { state, city, area, pincode: pin });
     await loadProfileData();
     hideLoader();
@@ -891,7 +943,7 @@ window.payViaUPIApp = () => {
 };
 
 window.payViaWallet = async () => {
-    showLoader();
+    showLoader('Checking wallet...');
     try {
         const dSnap = await getDoc(doc(db, "users", window.currentUserId));
         if(dSnap.exists()) window.currentUserWallet = dSnap.data().walletBalance || 0;
@@ -908,7 +960,7 @@ window.payViaWallet = async () => {
         return showAlert('error', 'Insufficient Balance', `Wallet: ₹${window.currentUserWallet}. Required: ₹${window.selectedPlanAmount}. Shortfall: ₹${shortfall}.`);
     }
     if(!confirm(`₹${window.selectedPlanAmount} wallet se deduct karein?`)) return;
-    showLoader();
+    showLoader('Activating plan...');
     try {
         const newBal = window.currentUserWallet - window.selectedPlanAmount;
         let monthsToAdd = 1;
@@ -928,7 +980,7 @@ window.payViaWallet = async () => {
 };
 
 window.notifyAdminPayment = async () => {
-    showLoader();
+    showLoader('Reporting payment...');
     try {
         await addDoc(collection(db, "admin_requests"), { ownerId: window.currentUserId, amount: window.selectedPlanAmount, plan: window.selectedPlanDesc, status: "Pending Verification", date: new Date().toISOString() });
         hideLoader(); window.closeAllModals();
@@ -946,7 +998,11 @@ async function loadDashboardData() {
     const hList = document.getElementById('housesList');
     const pList = document.getElementById('pendingRoomsList');
     if(!hList) return;
-    if(hList.innerHTML === '') hList.innerHTML=`<div class="flex flex-col items-center justify-center py-10 text-blue-500"><i class="fas fa-circle-notch fa-spin text-4xl mb-3"></i><p class="text-sm font-bold text-gray-500">Syncing...</p></div>`;
+
+    // Show skeleton in both lists
+    hList.innerHTML = `<div class="flex flex-col items-center justify-center py-10 text-blue-500"><i class="fas fa-circle-notch fa-spin text-4xl mb-3"></i><p class="text-sm font-bold text-gray-500">Syncing properties...</p></div>`;
+    if(pList) pList.innerHTML = `<div class="flex flex-col items-center justify-center py-6 text-red-400"><i class="fas fa-circle-notch fa-spin text-3xl mb-2"></i><p class="text-xs font-bold text-gray-500">Loading dues...</p></div>`;
+
     let tExp=0, tRec=0, tPen=0, tDep=0, vCount=0, occCount=0;
     let tempHouseCache = {}, tempVacantCache = {}, tempTrash = { houses: [], rooms: [] };
     let htmlBufferHouses = '', htmlBufferPending = '';
@@ -1050,7 +1106,7 @@ window.openDepositCollection = () => {
     if(rows.length === 0) {
         list.innerHTML = '<div class="text-center text-gray-400 py-10"><i class="fas fa-inbox text-4xl mb-2 text-gray-200"></i><p class="text-sm">No occupied rooms yet.</p></div>';
     } else {
-        rows.sort((a,b) => a.paid - b.paid); // pending first
+        rows.sort((a,b) => a.paid - b.paid);
         rows.forEach(({hId, h, r, expected, paid, status}) => {
             const size = r.configSize || '';
             const propType = r.propertyType || '';
@@ -1089,30 +1145,9 @@ window.openDepositEdit = (hId, rId) => {
     document.getElementById('deCurrentDeposit').innerText = '₹' + (r.deposit || 0);
     document.getElementById('deExpectedAmt').value = r.depositExpected || '';
     document.getElementById('deCustomAmt').value = '';
+    const prev = document.getElementById('dePreview'); if(prev) prev.classList.add('hidden');
     document.getElementById('depositEditModal').classList.remove('hidden');
 };
-
-async function processDepositChange(action, amt) {
-    const ctx = window.depositEditRoom; if(!ctx) return;
-    const { hId, rId, room, houseName } = ctx;
-    amt = Number(amt) || 0;
-    if(amt <= 0) return showAlert('error', 'Invalid', 'Amount must be greater than 0.');
-    const current = Number(room.deposit) || 0;
-    let newDeposit;
-    if(action === 'collect') newDeposit = current + amt;
-    else { if(amt > current) return showAlert('error', 'Invalid', `Cannot refund more than ₹${current}.`); newDeposit = current - amt; }
-    showLoader();
-    try {
-        await updateDoc(doc(db, "houses", hId, "rooms", rId), { deposit: newDeposit });
-        await logTransaction(houseName, room.roomNumber, room.tenantName || 'Tenant', amt, "Cash", action === 'collect' ? "Deposit Received" : "Deposit Refunded");
-        await loadDashboardData();
-        hideLoader();
-        // Reopen both modals with fresh data
-        window.openDepositCollection();
-        window.openDepositEdit(hId, rId);
-        showAlert('success', action === 'collect' ? 'Deposit Collected' : 'Deposit Refunded', `₹${amt} ${action === 'collect' ? 'added to' : 'refunded from'} Room ${room.roomNumber}.`);
-    } catch(e) { hideLoader(); showAlert('error', 'Error', e.message); }
-}
 
 window.updateDepositPreview = () => {
     const ctx = window.depositEditRoom;
@@ -1125,6 +1160,27 @@ window.updateDepositPreview = () => {
     document.getElementById('dePreviewCollect').innerText = (current + amt).toLocaleString('en-IN');
     document.getElementById('dePreviewRefund').innerText = Math.max(0, current - amt).toLocaleString('en-IN');
 };
+
+async function processDepositChange(action, amt) {
+    const ctx = window.depositEditRoom; if(!ctx) return;
+    const { hId, rId, room, houseName } = ctx;
+    amt = Number(amt) || 0;
+    if(amt <= 0) return showAlert('error', 'Invalid', 'Amount must be greater than 0.');
+    const current = Number(room.deposit) || 0;
+    let newDeposit;
+    if(action === 'collect') newDeposit = current + amt;
+    else { if(amt > current) return showAlert('error', 'Invalid', `Cannot refund more than ₹${current}.`); newDeposit = current - amt; }
+    showLoader(action === 'collect' ? 'Collecting deposit...' : 'Refunding deposit...');
+    try {
+        await updateDoc(doc(db, "houses", hId, "rooms", rId), { deposit: newDeposit });
+        await logTransaction(houseName, room.roomNumber, room.tenantName || 'Tenant', amt, "Cash", action === 'collect' ? "Deposit Received" : "Deposit Refunded");
+        await loadDashboardData();
+        hideLoader();
+        window.openDepositCollection();
+        window.openDepositEdit(hId, rId);
+        showAlert('success', action === 'collect' ? 'Deposit Collected' : 'Deposit Refunded', `₹${amt} ${action === 'collect' ? 'added to' : 'refunded from'} Room ${room.roomNumber}.`);
+    } catch(e) { hideLoader(); showAlert('error', 'Error', e.message); }
+}
 
 window.collectCustomDeposit = () => {
     const amt = document.getElementById('deCustomAmt').value;
@@ -1162,7 +1218,7 @@ window.quickHalfCollect = () => {
 window.saveExpectedDeposit = async () => {
     const ctx = window.depositEditRoom; if(!ctx) return;
     const expected = Number(document.getElementById('deExpectedAmt').value) || 0;
-    showLoader();
+    showLoader('Saving target...');
     try {
         await updateDoc(doc(db, "houses", ctx.hId, "rooms", ctx.rId), { depositExpected: expected });
         await loadDashboardData();
@@ -1173,7 +1229,7 @@ window.saveExpectedDeposit = async () => {
     } catch(e) { hideLoader(); showAlert('error', 'Error', e.message); }
 };
 
-// ===== VACANT EXPLORER (fixed mobile design) =====
+// ===== VACANT EXPLORER =====
 window.openVacantHousesModal = () => {
     const vt = document.getElementById('veTitle'); if(vt) vt.innerHTML = '<i class="fas fa-home text-blue-500 mr-2"></i> Vacant Properties';
     const body = document.getElementById('veBody'); if(!body) return;
@@ -1372,7 +1428,7 @@ window.saveVacantRoomInfo = async () => {
     const baseRent = Number(document.getElementById('vacRent').value) || 0;
     const waterBill = Number(document.getElementById('vacWater').value) || 0;
     const onlineRent = Number(document.getElementById('vacOnlineRent').value) || 0;
-    showLoader();
+    showLoader('Saving room info...');
     try {
         await updateDoc(doc(db, "houses", hId, "rooms", rId), { rentAmount: baseRent, waterBillFixed: waterBill, onlineListingRent: onlineRent });
         await loadDashboardData();
@@ -1387,7 +1443,7 @@ window.saveVacantRoomInfo = async () => {
 window.toggleEditTenantInfo = () => { const el = document.getElementById('editTenantInfoSection'); if(el) el.classList.toggle('hidden'); };
 
 window.saveTenantInfoUpdates = async (oldName) => {
-    showLoader();
+    showLoader('Saving tenant info...');
     const hId = document.getElementById('rmHouseId').value;
     const rId = document.getElementById('rmRoomIdVal').value;
     const rNo = document.getElementById('rmRoomName').innerText;
@@ -1421,7 +1477,7 @@ window.assignTenant = async (rNo) => {
     const uRate = Number(document.getElementById('tUnitRate').value)||0;
     if(!name || !mob) return showAlert('error', 'Incomplete', 'Name and Mobile mandatory.');
     if(mob.length !== 10) return showAlert('error', 'Invalid Mobile', '10 digits required.');
-    showLoader();
+    showLoader('Assigning tenant...');
     const hId = document.getElementById('rmHouseId').value, rId = document.getElementById('rmRoomIdVal').value;
     const hName = window.houseDataCache[hId].name;
     const prefix = hName.replace(/\s+/g, '').substring(0,2).toUpperCase();
@@ -1444,7 +1500,7 @@ window.assignTenant = async (rNo) => {
 };
 
 window.saveRoomUpdates = async (tName) => {
-    showLoader();
+    showLoader('Saving billing...');
     const hId = document.getElementById('rmHouseId').value, rId = document.getElementById('rmRoomIdVal').value, rNo = document.getElementById('rmRoomName').innerText;
     const hName = window.houseDataCache[hId].name;
     const rBase = Number(document.getElementById('editRent').value)||0, wBase = Number(document.getElementById('editWater').value)||0;
@@ -1466,7 +1522,7 @@ window.saveRoomUpdates = async (tName) => {
 window.vacateRoom = async (tName, dep) => {
     const refundAmt = Number(dep) || 0;
     if(!confirm(`Vacate ${tName}?\n\nDeposit ₹${refundAmt} will be auto-refunded and logged in History.`)) return;
-    showLoader();
+    showLoader('Vacating room...');
     const hId = document.getElementById('rmHouseId').value, rId = document.getElementById('rmRoomIdVal').value, rNo = document.getElementById('rmRoomName').innerText;
     const hName = window.houseDataCache[hId].name;
     const room = window.houseDataCache[hId].rooms.find(x => x.id === rId);
@@ -1482,7 +1538,7 @@ window.vacateRoom = async (tName, dep) => {
 
 window.startNewMonth = async () => {
     if(!confirm("Start New Month? Meters forward, bills reset, status Pending.")) return;
-    showLoader();
+    showLoader('Processing new month...');
     try {
         const hSnaps = await getDocs(query(collection(db, "houses"), where("ownerId", "==", window.currentUserId)));
         for (const hDoc of hSnaps.docs) {
@@ -1504,7 +1560,7 @@ window.startNewMonth = async () => {
 window.loadHistoryData = async () => {
     try {
         const hList = document.getElementById('historyList');
-        hList.innerHTML = `<div class="flex flex-col items-center justify-center py-20 text-gray-400"><i class="fas fa-circle-notch fa-spin text-5xl mb-4 text-blue-500"></i><p class="font-bold text-sm uppercase">Loading...</p></div>`;
+        hList.innerHTML = `<div class="flex flex-col items-center justify-center py-20 text-gray-400"><i class="fas fa-circle-notch fa-spin text-5xl mb-4 text-blue-500"></i><p class="font-bold text-sm uppercase">Loading history...</p></div>`;
         const snaps = await getDocs(query(collection(db, "transactions"), where("ownerId", "==", window.currentUserId)));
         if(snaps.empty) { hList.innerHTML = `<div class="text-center text-gray-400 mt-10"><i class="fas fa-file-invoice-dollar text-5xl mb-3 text-gray-200"></i><p>No transactions yet.</p></div>`; return; }
         let transactions = []; snaps.forEach(d => transactions.push({ id: d.id, ...d.data() }));
@@ -1588,7 +1644,7 @@ window.confirmSoftDelete = async () => {
     const type = document.getElementById('delType').value;
     const hId = document.getElementById('delHId').value;
     const rId = document.getElementById('delRId').value;
-    showLoader();
+    showLoader('Deleting...');
     try {
         if(type === 'house') await updateDoc(doc(db, "houses", hId), { isDeleted: true, deleteReason: reason, deletedAt: new Date().toISOString() });
         else if(type === 'room') await updateDoc(doc(db, "houses", hId, "rooms", rId), { isDeleted: true, deleteReason: reason, deletedAt: new Date().toISOString() });
@@ -1617,7 +1673,7 @@ window.openTrashModal = () => {
 };
 
 window.restoreItem = async (type, hId, rId) => {
-    showLoader();
+    showLoader('Restoring...');
     try {
         if(type === 'house') await updateDoc(doc(db, "houses", hId), { isDeleted: false, deleteReason: "" });
         else await updateDoc(doc(db, "houses", hId, "rooms", rId), { isDeleted: false, deleteReason: "" });
@@ -1630,7 +1686,7 @@ window.restoreItem = async (type, hId, rId) => {
 
 window.permDeleteItem = async (type, hId, rId) => {
     if(!confirm("Permanently delete? Cannot be undone.")) return;
-    showLoader();
+    showLoader('Deleting permanently...');
     try {
         if(type === 'house') await deleteDoc(doc(db, "houses", hId));
         else await deleteDoc(doc(db, "houses", hId, "rooms", rId));
@@ -1656,7 +1712,7 @@ window.saveProperty = async () => {
     const pin = document.getElementById('hPincode').value;
     if(!pin) return showAlert('error', 'Required', 'Pincode mandatory.');
     if(c>0) {
-        showLoader();
+        showLoader('Saving property...');
         try {
             const hRef = await addDoc(collection(db, "houses"), {
                 ownerId: window.currentUserId, houseName: document.getElementById('houseName').value,
@@ -1736,7 +1792,7 @@ window.checkAnrValidity = () => {
 };
 
 window.saveNewRoom = async () => {
-    showLoader();
+    showLoader('Adding room...');
     const hId = document.getElementById('anrHouseId').value;
     try {
         await addDoc(collection(db, "houses", hId, "rooms"), {
@@ -1784,7 +1840,7 @@ window.grantTenantAccess = async () => {
     const val = document.getElementById('taRoomSelect').value;
     const email = document.getElementById('taEmailInput').value;
     if(!val || !email) return showAlert('error', 'Required', 'Select room and email.');
-    showLoader();
+    showLoader('Granting access...');
     const [hId, rId] = val.split('|');
     try {
         await updateDoc(doc(db, "houses", hId, "rooms", rId), { accessEmail: email });
@@ -1798,7 +1854,7 @@ window.grantTenantAccess = async () => {
 
 window.removeTenantAccess = async (hId, rId) => {
     if(!confirm('Revoke access?')) return;
-    showLoader();
+    showLoader('Revoking...');
     try {
         await updateDoc(doc(db, "houses", hId, "rooms", rId), { accessEmail: "" });
         await loadDashboardData();
@@ -1808,15 +1864,16 @@ window.removeTenantAccess = async (hId, rId) => {
     } catch (e) { hideLoader(); showAlert('error', 'Error', e.message); }
 };
 
+// ===== LOGIN — loader stays until onAuthStateChanged finishes =====
 document.getElementById('loginBtn').addEventListener('click', async () => {
     const email = document.getElementById('loginEmail').value.trim();
     const pass = document.getElementById('loginPassword').value;
     if(!email || !pass) return showAlert('error', 'Required', 'Email aur password daalein.');
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showAlert('error', 'Invalid Email', 'Email format sahi nahi hai.');
-    showLoader();
+    showLoader('Signing in...');
     try {
         await signInWithEmailAndPassword(auth, email, pass);
-        hideLoader();
+        // DON'T hideLoader - onAuthStateChanged will hide it after full load
         document.getElementById('loginEmail').value = '';
         document.getElementById('loginPassword').value = '';
     } catch(e) {
@@ -1837,7 +1894,7 @@ document.getElementById('registerBtn').addEventListener('click', async () => {
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showAlert('error', 'Invalid Email', 'Email format check karein.');
     if(mob.length !== 10) return showAlert('error', 'Invalid Mobile', '10-digit mobile number daalein.');
     if(pass.length < 6) return showAlert('error', 'Weak Password', 'Password min 6 characters ka hona chahiye.');
-    showLoader();
+    showLoader('Creating account...');
     window.isRegistering = true;
     try {
         const cred = await createUserWithEmailAndPassword(auth, email, pass);
@@ -1868,7 +1925,7 @@ document.getElementById('registerBtn').addEventListener('click', async () => {
 });
 
 document.getElementById('saveProfileBtn').addEventListener('click', async () => {
-    showLoader();
+    showLoader('Saving profile...');
     try {
         await updateDoc(doc(db, "users", window.currentUserId), {
             state: document.getElementById('profState').value,
