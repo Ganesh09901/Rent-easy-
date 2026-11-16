@@ -12,7 +12,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <!-- Tesseract.js for AI Meter Photo Reading (OCR) -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
-    
+
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -52,11 +52,14 @@
     <!-- HEADER -->
     <header class="bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 p-4 sticky top-0 z-40 shadow-sm flex justify-between items-center border-b border-gray-100 dark:border-gray-700 transition-colors">
         <h1 class="text-lg sm:text-xl font-black tracking-wide flex items-center cursor-pointer" onclick="switchTab('explore')"><i class="fas fa-house-user mr-2"></i> Rent Easy Room</h1>
-        <div class="flex items-center gap-3">
-            <button onclick="toggleTheme()" class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-yellow-400 w-9 h-9 rounded-full flex items-center justify-center shadow-inner hover:scale-105 transition transform">
+        <div class="flex items-center gap-2">
+            <button onclick="toggleTheme()" class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-yellow-400 w-9 h-9 rounded-full flex items-center justify-center shadow-inner hover:scale-105 transition transform" title="Toggle Theme">
                 <i id="themeIcon" class="fas fa-moon"></i>
             </button>
-            <span id="headerUserName" class="hidden text-xs font-bold bg-blue-50 dark:bg-gray-700 text-blue-700 dark:text-blue-300 px-3 py-1.5 rounded-full border border-blue-100 dark:border-gray-600 truncate max-w-[120px]"></span>
+            <span id="headerUserName" class="hidden text-xs font-bold bg-blue-50 dark:bg-gray-700 text-blue-700 dark:text-blue-300 px-3 py-1.5 rounded-full border border-blue-100 dark:border-gray-600 truncate max-w-[110px]"></span>
+            <button id="headerLogoutBtn" onclick="logoutUser()" class="hidden bg-red-50 dark:bg-gray-700 text-red-500 dark:text-red-400 w-9 h-9 rounded-full flex items-center justify-center shadow-inner hover:scale-105 transition transform border border-red-100 dark:border-gray-600" title="Logout">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
         </div>
     </header>
 
@@ -66,24 +69,24 @@
             <div class="max-w-2xl mx-auto text-center">
                 <h2 class="text-3xl sm:text-4xl font-black mb-2 drop-shadow-md">Explore Rooms & Shops</h2>
                 <p class="text-blue-100 dark:text-gray-300 text-xs sm:text-sm mb-6 font-medium">Find properties tailored to your exact area or pincode</p>
-                
+
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white/10 dark:bg-black/20 p-3 rounded-2xl backdrop-blur-md border border-white/20">
                     <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-md flex items-center p-2">
                         <i class="fas fa-map-marker-alt text-red-500 text-base ml-2.5 mr-2"></i>
-                        <input type="text" id="searchAreaInput" placeholder="Search Area / Address..." class="w-full text-gray-800 dark:text-white p-2 outline-none font-medium bg-transparent text-xs sm:text-sm placeholder-gray-400">
+                        <input type="text" id="searchAreaInput" placeholder="Search Area / Address..." onkeydown="if(event.key==='Enter')searchRooms()" class="w-full text-gray-800 dark:text-white p-2 outline-none font-medium bg-transparent text-xs sm:text-sm placeholder-gray-400">
                     </div>
                     <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-md flex items-center p-2">
                         <i class="fas fa-thumbtack text-blue-500 text-base ml-2.5 mr-2"></i>
-                        <input type="text" id="searchPincodeInput" placeholder="Search by Pincode..." maxlength="6" class="w-full text-gray-800 dark:text-white p-2 outline-none font-medium bg-transparent text-xs sm:text-sm placeholder-gray-400">
+                        <input type="text" id="searchPincodeInput" placeholder="Search by Pincode..." maxlength="6" onkeydown="if(event.key==='Enter')searchRooms()" class="w-full text-gray-800 dark:text-white p-2 outline-none font-medium bg-transparent text-xs sm:text-sm placeholder-gray-400">
                     </div>
                 </div>
                 <div class="mt-4 flex justify-center gap-3">
                     <button onclick="searchRooms()" class="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-8 py-3 rounded-xl font-bold hover:bg-black dark:hover:bg-gray-100 transition shadow-lg text-sm flex items-center"><i class="fas fa-search mr-2"></i> Search</button>
-                    <button onclick="resetSearch()" class="bg-white/20 text-white px-5 py-3 rounded-xl font-bold hover:bg-white/30 transition text-sm">Reset</button>
+                    <button onclick="resetSearch()" class="bg-white/20 text-white px-5 py-3 rounded-xl font-bold hover:bg-white/30 transition text-sm"><i class="fas fa-rotate-left mr-2"></i>Reset</button>
                 </div>
             </div>
         </div>
-        
+
         <div class="max-w-2xl mx-auto px-4">
             <div class="flex justify-between items-center mb-5 px-1">
                 <h3 class="font-extrabold text-gray-800 dark:text-white text-xl flex items-center"><i class="fas fa-fire text-red-500 mr-2"></i> Available Properties</h3>
@@ -109,7 +112,7 @@
                 </div>
                 <input type="email" id="loginEmail" placeholder="Email ID" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-white p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400 transition text-sm">
                 <input type="password" id="loginPassword" placeholder="Password" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-white p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400 transition text-sm">
-                
+
                 <div class="text-right mb-5"><span onclick="alert('Forgot password feature coming soon.')" class="text-xs text-blue-500 cursor-pointer font-bold hover:underline">Forgot Password?</span></div>
 
                 <button id="loginBtn" class="w-full bg-blue-600 dark:bg-blue-500 text-white font-bold py-3.5 rounded-xl hover:bg-blue-700 transition shadow-lg text-sm">Secure Login</button>
@@ -123,18 +126,18 @@
                     <h2 class="text-2xl font-black text-gray-800 dark:text-white">Create ID</h2>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">City/State required for smart suggestions.</p>
                 </div>
-                
+
                 <input type="text" id="regName" placeholder="Full Name (Mandatory)" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-white p-3 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400 text-sm">
                 <input type="email" id="regEmail" placeholder="Email ID (Mandatory)" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-white p-3 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400 text-sm">
                 <input type="tel" id="regMobile" placeholder="Mobile Number" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-white p-3 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400 text-sm">
-                
+
                 <div class="grid grid-cols-2 gap-2 mb-3">
                     <input type="text" id="regCity" placeholder="City" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-400 text-sm font-bold">
                     <input type="text" id="regState" placeholder="State" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-400 text-sm font-bold">
                 </div>
 
                 <input type="password" id="regPassword" placeholder="Password (Min 6)" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-white p-3 rounded-xl mb-5 outline-none focus:ring-2 focus:ring-blue-400 text-sm">
-                
+
                 <button id="registerBtn" class="w-full bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 font-bold py-3.5 rounded-xl hover:bg-black transition shadow-lg text-sm">Register Now</button>
                 <p class="text-center text-xs text-gray-500 dark:text-gray-400 mt-5 cursor-pointer hover:text-blue-600 font-bold" onclick="toggleAuthModal('login')">Already have an ID? <span class="text-blue-600 dark:text-blue-400">Login here</span></p>
             </div>
@@ -150,7 +153,7 @@
         </div>
 
         <div class="max-w-2xl mx-auto w-full p-4 space-y-6">
-            
+
             <!-- DASHBOARD TAB -->
             <div id="innerTab-dashboard" class="space-y-6">
                 <!-- Link New Room Card -->
@@ -158,7 +161,7 @@
                     <h3 class="font-extrabold text-gray-800 dark:text-white text-sm mb-2 flex items-center"><i class="fas fa-link text-blue-500 mr-2"></i> Link Room ID</h3>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Enter Unit ID provided by owner (e.g. GH-123)</p>
                     <div class="flex gap-2">
-                        <input type="text" id="roomUnitIdInput" placeholder="Room Unit ID" class="w-full uppercase font-mono text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-400">
+                        <input type="text" id="roomUnitIdInput" placeholder="Room Unit ID" class="w-full uppercase font-mono text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-400">
                         <button onclick="linkNewRoom()" class="bg-blue-600 text-white font-bold px-5 py-3 rounded-xl hover:bg-blue-700 transition text-sm shadow-md">Connect</button>
                     </div>
                 </div>
@@ -184,12 +187,12 @@
                             <h3 class="font-extrabold text-gray-800 dark:text-white"><i class="fas fa-receipt text-blue-500 mr-2"></i> Current Month Bill</h3>
                             <span id="dashPaymentStatus" class="text-xs font-bold px-2.5 py-1 rounded">--</span>
                         </div>
-                        
+
                         <div class="space-y-3 text-sm font-medium text-gray-600 dark:text-gray-400">
                             <div class="flex justify-between"><span>Rent Amount</span><span class="font-bold text-gray-800 dark:text-white" id="dashRent">₹0</span></div>
                             <div class="flex justify-between"><span>Water / Maint.</span><span class="font-bold text-gray-800 dark:text-white" id="dashWater">₹0</span></div>
                             <div class="flex justify-between items-center"><span class="flex items-center"><i class="fas fa-bolt text-yellow-500 mr-1.5"></i> Light Bill</span><span class="font-bold text-gray-800 dark:text-white" id="dashLight">₹0</span></div>
-                            
+
                             <!-- OCR Meter Scanner -->
                             <div id="meterBox" class="bg-gray-50 dark:bg-gray-900 p-3 rounded-xl border border-gray-200 dark:border-gray-700 text-xs mt-1 hidden">
                                 <div class="flex justify-between text-gray-600 dark:text-gray-400 mb-2">
@@ -209,14 +212,8 @@
                                 <span class="font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest text-xs">Total Payable</span>
                                 <span class="text-3xl font-black text-blue-600 dark:text-blue-400" id="dashTotalDue">₹0</span>
                             </div>
-                            
-                            <div id="payActionDiv">
-                                <div class="grid grid-cols-2 gap-2 mb-2">
-                                    <button onclick="payViaUPIApp()" class="bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold py-3 rounded-xl shadow hover:bg-black transition text-xs"><i class="fas fa-mobile-alt mr-2"></i> Pay via UPI App</button>
-                                    <button onclick="showOwnerBankDetails()" class="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-bold py-3 rounded-xl hover:bg-gray-200 transition text-xs border border-gray-200"><i class="fas fa-qrcode mr-2"></i> View QR & Bank</button>
-                                </div>
-                                <button onclick="notifyOwnerPayment()" class="w-full bg-green-50 text-green-600 font-bold py-3 rounded-xl border border-green-200 hover:bg-green-100 transition text-xs"><i class="fas fa-check-double mr-2"></i> Notify Owner: Payment Done</button>
-                            </div>
+
+                            <div id="payActionDiv"></div>
                         </div>
                     </div>
                 </div>
@@ -240,16 +237,17 @@
             <!-- PROFILE TAB -->
             <div id="innerTab-profile" class="hidden space-y-4">
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 text-center">
-                    <div class="w-20 h-20 bg-blue-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-lg">
+                    <div class="w-20 h-20 bg-blue-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-white dark:border-gray-600 shadow-lg">
                         <i class="fas fa-user text-3xl text-blue-500"></i>
                     </div>
                     <h3 class="text-2xl font-black text-gray-800 dark:text-white mb-1" id="profName">Tenant Name</h3>
-                    <p class="text-sm font-bold text-gray-500 mb-4" id="profEmail">email@example.com</p>
+                    <p class="text-sm font-bold text-gray-500 dark:text-gray-400 mb-4" id="profEmail">email@example.com</p>
                     <div class="bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 text-left space-y-3 mb-6 border border-gray-100 dark:border-gray-700">
                         <div class="flex justify-between"><span class="text-xs text-gray-500 uppercase font-bold">Mobile</span><span class="font-bold text-gray-800 dark:text-white" id="profMobile">--</span></div>
-                        <div class="flex justify-between"><span class="text-xs text-gray-500 uppercase font-bold">City</span><span class="font-bold text-gray-800 dark:text-white" id="profCity">--</span></div>
+                        <div class="flex justify-between"><span class="text-xs text-gray-500 uppercase font-bold">City / State</span><span class="font-bold text-gray-800 dark:text-white" id="profCity">--</span></div>
+                        <div class="flex justify-between"><span class="text-xs text-gray-500 uppercase font-bold">Linked Rooms</span><span class="font-bold text-gray-800 dark:text-white" id="profRooms">0</span></div>
                     </div>
-                    <button onclick="logoutUser()" class="w-full bg-red-50 text-red-500 font-bold py-3.5 rounded-xl border border-red-100"><i class="fas fa-sign-out-alt mr-2"></i> Secure Logout</button>
+                    <button onclick="logoutUser()" class="w-full bg-red-50 dark:bg-red-500/10 text-red-500 font-bold py-3.5 rounded-xl border border-red-100 dark:border-red-500/30"><i class="fas fa-sign-out-alt mr-2"></i> Secure Logout</button>
                 </div>
             </div>
         </div>
@@ -261,19 +259,21 @@
             <button onclick="document.getElementById('paymentModal').classList.add('hidden')" class="absolute top-4 right-4 bg-gray-100 dark:bg-gray-700 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 transition"><i class="fas fa-times"></i></button>
             <div class="text-center mb-4 mt-2">
                 <h3 class="font-black text-xl text-gray-800 dark:text-white">Owner Bank Details</h3>
-                <p class="text-xs text-gray-500 mt-1">Scan QR or use account details to pay.</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Scan QR or use account details to pay.</p>
             </div>
-            
-            <div class="bg-gray-50 dark:bg-gray-900 p-4 rounded-2xl border border-gray-200 text-center mb-4">
+
+            <div class="bg-gray-50 dark:bg-gray-900 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 text-center mb-4">
                 <img id="ownerQRImage" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=UPI" alt="QR Code" class="mx-auto rounded-xl border p-2 bg-white mb-3 w-32 h-32">
                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">UPI ID</p>
                 <p class="font-black text-blue-600 dark:text-blue-400 text-sm tracking-wider" id="pmUpiId">Not Available</p>
             </div>
 
-            <div class="bg-gray-50 dark:bg-gray-900 p-4 rounded-2xl border border-gray-200 text-left space-y-2 mb-4">
+            <div class="bg-gray-50 dark:bg-gray-900 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 text-left space-y-2 mb-4">
                 <div class="flex justify-between"><span class="text-xs font-bold text-gray-500">A/C Number:</span><span class="font-bold text-gray-800 dark:text-white text-sm" id="pmAcc">--</span></div>
                 <div class="flex justify-between"><span class="text-xs font-bold text-gray-500">IFSC Code:</span><span class="font-bold text-gray-800 dark:text-white text-sm" id="pmIfsc">--</span></div>
             </div>
+
+            <button onclick="notifyOwnerPayment()" class="w-full bg-green-600 text-white font-bold py-3 rounded-xl shadow hover:bg-green-700 transition text-xs"><i class="fas fa-check-double mr-2"></i> Payment Done – Notify Owner</button>
         </div>
     </div>
 
@@ -288,25 +288,25 @@
                     <h3 class="font-black text-2xl text-gray-900 dark:text-white" id="rdHouseName">House Name</h3>
                 </div>
                 <p class="text-sm font-medium text-gray-600 dark:text-gray-300 leading-snug flex items-center mt-1"><i class="fas fa-map-marker-alt text-red-500 mr-2"></i> <span id="rdAddress">Full Address</span></p>
-                <p class="text-xs font-bold text-gray-400 mt-1.5 ml-5">Pincode: <span id="rdPincode" class="text-gray-700 font-mono">------</span></p>
+                <p class="text-xs font-bold text-gray-400 mt-1.5 ml-5">Pincode: <span id="rdPincode" class="text-gray-700 dark:text-gray-300 font-mono">------</span></p>
             </div>
 
             <div class="grid grid-cols-2 gap-3 mb-4">
-                <div class="bg-blue-50 dark:bg-gray-900 p-3.5 rounded-2xl border text-center">
+                <div class="bg-blue-50 dark:bg-gray-900 p-3.5 rounded-2xl border border-blue-100 dark:border-gray-700 text-center">
                     <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Expected Rent</p>
-                    <p class="text-2xl font-black text-blue-600" id="rdRent">₹0</p>
+                    <p class="text-2xl font-black text-blue-600 dark:text-blue-400" id="rdRent">₹0</p>
                 </div>
-                <div class="bg-gray-50 dark:bg-gray-900 p-3.5 rounded-2xl border text-center">
+                <div class="bg-gray-50 dark:bg-gray-900 p-3.5 rounded-2xl border border-gray-100 dark:border-gray-700 text-center">
                     <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Property Size</p>
                     <p class="text-sm font-black text-gray-800 dark:text-white mt-1" id="rdSize">Standard</p>
                 </div>
             </div>
 
-            <div class="bg-gray-50 dark:bg-gray-900 p-4 rounded-2xl border">
+            <div class="bg-gray-50 dark:bg-gray-900 p-4 rounded-2xl border border-gray-100 dark:border-gray-700">
                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Owner Details</p>
                 <p class="font-black text-gray-800 dark:text-white text-base mb-2"><i class="fas fa-user-circle mr-2 text-xl"></i> <span id="rdOwnerName">Loading...</span></p>
-                <div class="flex items-center justify-between mb-2.5 bg-white p-2.5 rounded-xl border shadow-sm">
-                    <p class="font-bold text-gray-700 text-sm"><i class="fas fa-headset text-blue-500 mr-2"></i> <span id="rdOwnerMobile">---</span></p>
+                <div class="flex items-center justify-between mb-2.5 bg-white dark:bg-gray-800 p-2.5 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
+                    <p class="font-bold text-gray-700 dark:text-gray-200 text-sm"><i class="fas fa-headset text-blue-500 mr-2"></i> <span id="rdOwnerMobile">---</span></p>
                     <a id="rdMobileLink" href="#" class="bg-green-500 text-white px-4 py-1.5 rounded-lg text-xs font-bold">Call</a>
                 </div>
             </div>
@@ -314,7 +314,7 @@
     </div>
 
     <!-- BOTTOM NAVIGATION -->
-    <nav class="fixed bottom-0 w-full bg-white dark:bg-gray-800 shadow-[0_-5px_20px_rgba(0,0,0,0.1)] border-t border-gray-100 flex justify-around items-center z-40 h-[72px] pb-2">
+    <nav class="fixed bottom-0 w-full bg-white dark:bg-gray-800 shadow-[0_-5px_20px_rgba(0,0,0,0.1)] border-t border-gray-100 dark:border-gray-700 flex justify-around items-center z-40 h-[72px] pb-2">
         <button class="nav-item active flex flex-col items-center justify-center w-full h-full pt-1 text-gray-400 transition" onclick="switchTab('explore')">
             <div class="nav-indicator"></div><i class="fas fa-search text-xl mb-1"></i><span class="text-[10px] font-bold uppercase tracking-wider">Explore</span>
         </button>
@@ -341,232 +341,652 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let currentUser = null, tenantProfile = null, activeRoomUnsubscribe = null, currentActiveRoomData = null, currentOwnerData = null;
+        /* ================= GLOBAL STATE ================= */
+        let currentUser = null;
+        let tenantProfile = null;
+        let activeRoomUnsubscribe = null;
+        let currentActiveRoomData = null;
+        let currentOwnerData = null;
+        let currentOwnerId = null;
+        let currentRoomPath = null;
+        let currentTab = 'explore';
+        let allVacantProps = [];
 
+        /* ================= THEME (DARK MODE) ================= */
+        function updateThemeIcon() {
+            const icon = document.getElementById('themeIcon');
+            if (!icon) return;
+            icon.className = document.documentElement.classList.contains('dark') ? 'fas fa-sun' : 'fas fa-moon';
+        }
+        window.toggleTheme = () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('rer-theme', isDark ? 'dark' : 'light');
+            updateThemeIcon();
+        };
+        (function initTheme() {
+            const saved = localStorage.getItem('rer-theme');
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (saved === 'dark' || (!saved && prefersDark)) document.documentElement.classList.add('dark');
+            updateThemeIcon();
+        })();
+
+        /* ================= UI HELPERS ================= */
         window.showToast = (msg, isError = false) => {
-            const sb = document.getElementById('snackbar'); document.getElementById('snackbarMsg').innerText = msg;
-            document.getElementById('snackbarIcon').className = isError ? "fas fa-exclamation-triangle text-red-400 mr-2 text-lg" : "fas fa-check-circle text-green-400 mr-2 text-lg";
-            sb.classList.remove('hidden'); setTimeout(() => { sb.classList.remove('opacity-0', 'translate-y-[-20px]'); }, 10);
-            setTimeout(() => { sb.classList.add('opacity-0', 'translate-y-[-20px]'); setTimeout(() => sb.classList.add('hidden'), 300); }, 3000);
+            const sb = document.getElementById('snackbar');
+            document.getElementById('snackbarMsg').innerText = msg;
+            document.getElementById('snackbarIcon').className = isError
+                ? "fas fa-exclamation-triangle text-red-400 mr-2 text-lg"
+                : "fas fa-check-circle text-green-400 mr-2 text-lg";
+            sb.classList.remove('hidden');
+            setTimeout(() => { sb.classList.remove('opacity-0', 'translate-y-[-20px]'); }, 10);
+            setTimeout(() => {
+                sb.classList.add('opacity-0', 'translate-y-[-20px]');
+                setTimeout(() => sb.classList.add('hidden'), 300);
+            }, 3000);
         };
         const showLoader = () => document.getElementById('globalLoader').classList.remove('hidden');
         const hideLoader = () => document.getElementById('globalLoader').classList.add('hidden');
 
-        // Nav & Tabs
-        window.switchTab = (tab) => {
+        const totalDue = (r) => (r?.rentAmount || 0) + (r?.waterBillFixed || 0) + (r?.currentLightBill || 0) + (r?.penalty || 0);
+
+        /* ================= NAVIGATION ================= */
+        window.switchTab = async (tab) => {
+            currentTab = tab;
             document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-            if(tab === 'explore') { document.querySelector("nav button:nth-child(1)").classList.add('active'); document.getElementById('homeView').classList.remove('hidden'); document.getElementById('myRoomView').classList.add('hidden'); loadAllVacantRooms(); }
-            else { 
-                if(!currentUser) { document.getElementById('loginModal').classList.remove('hidden'); }
-                else { document.querySelector("nav button:nth-child(2)").classList.add('active'); document.getElementById('myRoomView').classList.remove('hidden'); document.getElementById('homeView').classList.add('hidden'); switchInnerTab('dashboard'); loadTenantLinkedRooms(); loadTenantProfile(); }
+
+            if (tab === 'explore') {
+                document.querySelectorAll('.nav-item')[0].classList.add('active');
+                document.getElementById('homeView').classList.remove('hidden');
+                document.getElementById('myRoomView').classList.add('hidden');
+                loadAllVacantRooms();
+            } else {
+                if (!currentUser) {
+                    document.getElementById('loginModal').classList.remove('hidden');
+                    return;
+                }
+                document.querySelectorAll('.nav-item')[1].classList.add('active');
+                document.getElementById('myRoomView').classList.remove('hidden');
+                document.getElementById('homeView').classList.add('hidden');
+                switchInnerTab('dashboard');
+                await openMyAccount();
             }
         };
+
         window.switchInnerTab = (tName) => {
-            document.querySelectorAll('.inner-tab').forEach(b => { b.classList.remove('border-blue-600', 'text-blue-600'); b.classList.add('border-transparent', 'text-gray-500'); });
-            const btn = document.getElementById(`tabBtn-${tName}`); btn.classList.remove('border-transparent', 'text-gray-500'); btn.classList.add('border-blue-600', 'text-blue-600');
+            document.querySelectorAll('.inner-tab').forEach(b => {
+                b.classList.remove('border-blue-600', 'text-blue-600', 'dark:text-blue-400');
+                b.classList.add('border-transparent', 'text-gray-500');
+            });
+            const btn = document.getElementById(`tabBtn-${tName}`);
+            if (btn) {
+                btn.classList.remove('border-transparent', 'text-gray-500');
+                btn.classList.add('border-blue-600', 'text-blue-600', 'dark:text-blue-400');
+            }
             ['dashboard', 'history', 'profile'].forEach(id => document.getElementById(`innerTab-${id}`).classList.add('hidden'));
             document.getElementById(`innerTab-${tName}`).classList.remove('hidden');
-        };
-        window.closeAuthModal = () => document.getElementById('loginModal').classList.add('hidden');
-        window.toggleAuthModal = (t) => {
-            if(t==='login'){ document.getElementById('registerFormModal').classList.add('hidden'); document.getElementById('loginFormModal').classList.remove('hidden'); }
-            else { document.getElementById('loginFormModal').classList.add('hidden'); document.getElementById('registerFormModal').classList.remove('hidden'); }
+
+            if (tName === 'profile') loadTenantProfile();
+            if (tName === 'history') loadTransactionHistory();
         };
 
-        // Explore Rooms
+        window.closeAuthModal = () => document.getElementById('loginModal').classList.add('hidden');
+        window.toggleAuthModal = (t) => {
+            if (t === 'login') {
+                document.getElementById('registerFormModal').classList.add('hidden');
+                document.getElementById('loginFormModal').classList.remove('hidden');
+            } else {
+                document.getElementById('loginFormModal').classList.add('hidden');
+                document.getElementById('registerFormModal').classList.remove('hidden');
+            }
+        };
+
+        async function openMyAccount() {
+            await loadTenantProfile();
+            await loadTenantLinkedRooms();
+        }
+
+        /* ================= EXPLORE / SEARCH ================= */
         window.loadAllVacantRooms = async () => {
-            const list = document.getElementById('vacantRoomsList'); list.innerHTML = `<p class="text-center text-gray-400 py-10">Finding properties...</p>`;
+            const list = document.getElementById('vacantRoomsList');
+            list.innerHTML = `<p class="text-center text-gray-400 py-10 font-bold">Finding properties...</p>`;
             try {
-                const hSnaps = await getDocs(collection(db, "houses")); let allProps = [];
-                for(const hDoc of hSnaps.docs) {
+                const hSnaps = await getDocs(collection(db, "houses"));
+                let props = [];
+                for (const hDoc of hSnaps.docs) {
                     const house = hDoc.data();
                     const rSnaps = await getDocs(collection(db, `houses/${hDoc.id}/rooms`));
                     rSnaps.forEach(r => {
-                        if(r.data().occupancyStatus === "Vacant") allProps.push({houseId: hDoc.id, name: house.houseName, address: house.address||"", pin: house.pincode||"", city: (house.city||"").toLowerCase(), oId: house.ownerId, rId: r.id, rNum: r.data().roomNumber, rent: r.data().rentAmount, type: r.data().roomType||"Room", size: r.data().roomSize||"Standard"});
+                        const rd = r.data();
+                        if (rd.occupancyStatus === "Vacant") {
+                            props.push({
+                                houseId: hDoc.id,
+                                houseName: house.houseName || "Property",
+                                address: house.address || "",
+                                pincode: (house.pincode || "").toString(),
+                                city: (house.city || "").toLowerCase(),
+                                ownerId: house.ownerId || "",
+                                rId: r.id,
+                                roomNumber: rd.roomNumber ?? "--",
+                                rent: rd.rentAmount || 0,
+                                type: rd.roomType || "Room",
+                                size: rd.roomSize || "Standard"
+                            });
+                        }
                     });
                 }
-                
-                if(tenantProfile && tenantProfile.city) {
-                    // Smart Sort based on City
+
+                if (tenantProfile && tenantProfile.city) {
                     const tCity = tenantProfile.city.toLowerCase();
-                    const exact = allProps.filter(p => p.city === tCity);
-                    allProps = [...exact, ...allProps.filter(p => p.city !== tCity)];
+                    props = [...props.filter(p => p.city === tCity), ...props.filter(p => p.city !== tCity)];
                 }
 
-                if(allProps.length === 0) { list.innerHTML = `<p class="text-center text-gray-400 py-10 font-bold">No vacant properties found.</p>`; return; }
-                let html = ''; let map = {};
-                allProps.forEach(p => { if(!map[p.houseId]) map[p.houseId] = {name: p.name, addr: p.address, pin: p.pin, oId: p.oId, rooms: []}; map[p.houseId].rooms.push(p); });
-                Object.keys(map).forEach(hId => {
-                    const h = map[hId];
-                    html += `<div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border mb-4">
-                                <h4 class="font-black text-xl">${h.name}</h4><p class="text-xs text-gray-500 mt-1 mb-3">${h.addr}</p>
-                                <div class="flex gap-3 overflow-x-auto hide-scroll pb-2">`;
-                    h.rooms.forEach(vr => {
-                        const enc = encodeURIComponent(JSON.stringify(vr));
-                        html += `<div onclick="openRoomDetails('${hId}', '${h.oId}', '${enc}')" class="bg-gray-50 dark:bg-gray-900 border rounded-xl p-4 min-w-[140px] text-center cursor-pointer shadow-sm">
-                                    <p class="text-[10px] font-bold text-gray-400 uppercase">${vr.type} (${vr.size})</p>
-                                    <p class="font-black text-blue-600 text-lg">No. ${vr.rNum}</p>
-                                    <p class="text-[11px] font-bold uppercase mb-2">₹${vr.rent}</p>
-                                    <button class="w-full bg-white border text-blue-600 text-xs font-bold py-1.5 rounded-lg">View Details</button>
-                                 </div>`;
-                    }); html += `</div></div>`;
-                }); list.innerHTML = html;
-            } catch(e) { list.innerHTML = `<p class="text-red-500">Error.</p>`; }
+                allVacantProps = props;
+                renderVacantRooms(props);
+            } catch (e) {
+                console.error(e);
+                list.innerHTML = `<p class="text-center text-red-500 py-10 font-bold">Unable to load properties. Please retry.</p>`;
+            }
         };
 
-        window.openRoomDetails = async (houseId, ownerId, encodedRoom) => {
-            if(!currentUser) { document.getElementById('loginModal').classList.remove('hidden'); return; }
+        function renderVacantRooms(props) {
+            const list = document.getElementById('vacantRoomsList');
+            const badge = document.getElementById('resultCount');
+            badge.innerText = props.length ? `${props.length} Found` : 'No Results';
+
+            if (props.length === 0) {
+                list.innerHTML = `<div class="text-center py-12">
+                    <i class="fas fa-house-circle-xmark text-5xl text-gray-300 dark:text-gray-600 mb-3"></i>
+                    <p class="text-gray-400 font-bold">No vacant properties found.</p>
+                </div>`;
+                return;
+            }
+
+            const map = {};
+            props.forEach(p => {
+                if (!map[p.houseId]) map[p.houseId] = { houseName: p.houseName, address: p.address, pincode: p.pincode, rooms: [] };
+                map[p.houseId].rooms.push(p);
+            });
+
+            let html = '';
+            Object.keys(map).forEach(hId => {
+                const h = map[hId];
+                html += `<div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <h4 class="font-black text-xl text-gray-800 dark:text-white">${h.houseName}</h4>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3"><i class="fas fa-map-marker-alt text-red-400 mr-1"></i> ${h.address}${h.pincode ? ' - ' + h.pincode : ''}</p>
+                    <div class="flex gap-3 overflow-x-auto hide-scroll pb-2">`;
+                h.rooms.forEach(vr => {
+                    html += `<div onclick="openRoomDetails('${hId}','${vr.rId}')" class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 min-w-[140px] text-center cursor-pointer shadow-sm hover:border-blue-400 transition">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase">${vr.type} (${vr.size})</p>
+                        <p class="font-black text-blue-600 dark:text-blue-400 text-lg">No. ${vr.roomNumber}</p>
+                        <p class="text-[11px] font-bold uppercase mb-2 text-gray-700 dark:text-gray-300">₹${vr.rent}</p>
+                        <button class="w-full bg-white dark:bg-gray-800 border border-blue-200 dark:border-gray-600 text-blue-600 dark:text-blue-400 text-xs font-bold py-1.5 rounded-lg pointer-events-none">View Details</button>
+                    </div>`;
+                });
+                html += `</div></div>`;
+            });
+            list.innerHTML = html;
+        }
+
+        window.searchRooms = () => {
+            const area = document.getElementById('searchAreaInput').value.trim().toLowerCase();
+            const pin = document.getElementById('searchPincodeInput').value.trim();
+            if (!area && !pin) { showToast('Enter area or pincode to search', true); return; }
+
+            const filtered = allVacantProps.filter(p => {
+                const haystack = `${p.houseName} ${p.address} ${p.city}`.toLowerCase();
+                const matchArea = !area || haystack.includes(area);
+                const matchPin = !pin || p.pincode.includes(pin);
+                return matchArea && matchPin;
+            });
+            renderVacantRooms(filtered);
+            showToast(filtered.length + ' propert' + (filtered.length === 1 ? 'y' : 'ies') + ' found');
+        };
+
+        window.resetSearch = () => {
+            document.getElementById('searchAreaInput').value = '';
+            document.getElementById('searchPincodeInput').value = '';
+            renderVacantRooms(allVacantProps);
+            showToast('Search reset');
+        };
+
+        /* ================= ROOM DETAILS ================= */
+        window.openRoomDetails = async (houseId, roomId) => {
+            if (!currentUser) {
+                document.getElementById('loginModal').classList.remove('hidden');
+                showToast('Please login to view details', true);
+                return;
+            }
             showLoader();
             try {
-                const r = JSON.parse(decodeURIComponent(encodedRoom));
-                const hSnap = await getDoc(doc(db, "houses", houseId)); const oSnap = await getDoc(doc(db, "users", ownerId));
-                if(hSnap.exists() && oSnap.exists()) {
-                    const h = hSnap.data(); const o = oSnap.data();
-                    document.getElementById('rdTypeBadge').innerText = r.type; document.getElementById('rdHouseName').innerText = h.houseName;
-                    document.getElementById('rdAddress').innerText = h.address; document.getElementById('rdPincode').innerText = h.pincode||"N/A";
-                    document.getElementById('rdMapLink').href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(h.address)}`;
-                    document.getElementById('rdRent').innerText = "₹" + r.rent; document.getElementById('rdSize').innerText = r.size;
-                    document.getElementById('rdOwnerName').innerText = o.ownerName; document.getElementById('rdOwnerMobile').innerText = o.mobileNumber;
-                    document.getElementById('rdMobileLink').href = `tel:${o.mobileNumber}`; document.getElementById('roomDetailsModal').classList.remove('hidden');
+                const prop = allVacantProps.find(p => p.houseId === houseId && p.rId === roomId);
+                if (!prop) throw new Error('Property data missing');
+
+                const hSnap = await getDoc(doc(db, "houses", houseId));
+                if (!hSnap.exists()) throw new Error('House not found');
+                const house = hSnap.data();
+
+                let owner = {};
+                if (house.ownerId) {
+                    const oSnap = await getDoc(doc(db, "users", house.ownerId));
+                    if (oSnap.exists()) owner = oSnap.data();
                 }
-            } catch(e) { showToast("Error", true); } hideLoader();
+
+                document.getElementById('rdTypeBadge').innerText = prop.type;
+                document.getElementById('rdHouseName').innerText = house.houseName || prop.houseName;
+                document.getElementById('rdAddress').innerText = house.address || 'Address not available';
+                document.getElementById('rdPincode').innerText = house.pincode || 'N/A';
+                document.getElementById('rdRent').innerText = '₹' + (prop.rent || 0);
+                document.getElementById('rdSize').innerText = prop.size || 'Standard';
+                document.getElementById('rdOwnerName').innerText = owner.ownerName || owner.fullName || 'Owner';
+                document.getElementById('rdOwnerMobile').innerText = owner.mobileNumber || 'Not available';
+                document.getElementById('rdMobileLink').href = owner.mobileNumber ? `tel:${owner.mobileNumber}` : '#';
+
+                document.getElementById('roomDetailsModal').classList.remove('hidden');
+            } catch (e) {
+                console.error(e);
+                showToast('Details load nahi ho payi. Please retry.', true);
+            } finally {
+                hideLoader();
+            }
         };
 
-        // OCR METER READING (TESSERACT.JS)
+        /* ================= OCR METER ================= */
         window.processMeterImage = async (event) => {
             const file = event.target.files[0];
-            if(!file) return;
+            if (!file) return;
             const btn = document.getElementById('ocrBtnBtn');
             btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Analyzing Photo...';
             try {
                 const result = await Tesseract.recognize(file, 'eng');
-                const text = result.data.text;
-                const numbers = text.match(/\d+/g);
-                if(numbers && numbers.length > 0) {
-                    const reading = parseInt(numbers.join('')); 
+                const numbers = result.data.text.match(/\d+/g);
+                if (numbers && numbers.length > 0) {
+                    const reading = parseInt(numbers.join(''));
                     document.getElementById('dashMeterCurr').innerText = reading;
-                    const prev = parseInt(document.getElementById('dashMeterPrev').innerText);
-                    if(reading > prev) { document.getElementById('dashUnits').innerText = (reading - prev) + " Units"; }
+                    const prev = parseInt(document.getElementById('dashMeterPrev').innerText) || 0;
+                    if (reading > prev) document.getElementById('dashUnits').innerText = (reading - prev) + " Units";
                     showToast('Reading extracted: ' + reading);
-                } else { showToast('No numbers found in image.', true); }
-            } catch(e) { showToast('Image Scan Failed', true); }
+                } else {
+                    showToast('No numbers found in image.', true);
+                }
+            } catch (e) {
+                showToast('Image Scan Failed', true);
+            }
             btn.innerHTML = '<i class="fas fa-camera mr-2"></i> Auto-Read Meter Photo';
+            event.target.value = '';
         };
 
-        // Auth
+        /* ================= AUTH ================= */
         onAuthStateChanged(auth, async (user) => {
-            if(user) { currentUser = user; const tSnap = await getDoc(doc(db, "tenants", user.uid)); if(tSnap.exists()) tenantProfile = tSnap.data();
-                document.getElementById('headerUserName').innerText = "Hi, " + (tenantProfile?.fullName?.split(' ')[0] || user.email.split('@')[0]);
-                document.getElementById('headerUserName').classList.remove('hidden');
-                if(currentTab === 'myroom') { closeAuthModal(); switchTab('myroom'); }
-            } else { currentUser = null; tenantProfile = null; document.getElementById('headerUserName').classList.add('hidden'); }
+            if (user) {
+                currentUser = user;
+                try {
+                    const tSnap = await getDoc(doc(db, "tenants", user.uid));
+                    tenantProfile = tSnap.exists() ? tSnap.data() : null;
+                } catch (e) { tenantProfile = null; }
+
+                const displayName = tenantProfile?.fullName || (user.email ? user.email.split('@')[0] : 'Tenant');
+                const nameEl = document.getElementById('headerUserName');
+                nameEl.innerText = "Hi, " + displayName.split(' ')[0];
+                nameEl.classList.remove('hidden');
+                document.getElementById('headerLogoutBtn').classList.remove('hidden');
+
+                if (currentTab === 'myroom') {
+                    closeAuthModal();
+                    await openMyAccount();
+                }
+            } else {
+                currentUser = null;
+                tenantProfile = null;
+                document.getElementById('headerUserName').classList.add('hidden');
+                document.getElementById('headerLogoutBtn').classList.add('hidden');
+                if (currentTab === 'myroom') switchTab('explore');
+            }
+            updateThemeIcon();
         });
 
         document.getElementById('registerBtn').onclick = async () => {
-            const n = document.getElementById('regName').value.trim(); const e = document.getElementById('regEmail').value.trim();
-            const m = document.getElementById('regMobile').value.trim(); const city = document.getElementById('regCity').value.trim();
-            const state = document.getElementById('regState').value.trim(); const p = document.getElementById('regPassword').value;
-            if(!n || !e || !m || !city || !state || p.length < 6) return alert("Fill all fields. Password min 6 chars.");
+            const n = document.getElementById('regName').value.trim();
+            const e = document.getElementById('regEmail').value.trim();
+            const m = document.getElementById('regMobile').value.trim();
+            const city = document.getElementById('regCity').value.trim();
+            const state = document.getElementById('regState').value.trim();
+            const p = document.getElementById('regPassword').value;
+
+            if (!n || !e || !m || !city || !state || p.length < 6) {
+                return alert("Fill all fields. Password min 6 chars.");
+            }
             showLoader();
-            try { const cred = await createUserWithEmailAndPassword(auth, e, p); await setDoc(doc(db, "tenants", cred.user.uid), { fullName: n, email: e, mobile: m, city: city, state: state, linkedRooms: [] }); showToast('Account Created!'); closeAuthModal(); } catch(er) { alert(er.message); } hideLoader();
+            try {
+                const cred = await createUserWithEmailAndPassword(auth, e, p);
+                const profileData = { fullName: n, email: e, mobile: m, city: city, state: state, linkedRooms: [] };
+                await setDoc(doc(db, "tenants", cred.user.uid), profileData);
+                tenantProfile = profileData;
+                showToast('Account Created!');
+                closeAuthModal();
+            } catch (er) {
+                alert(er.message);
+            }
+            hideLoader();
         };
 
         document.getElementById('loginBtn').onclick = async () => {
-            showLoader(); try { await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPassword').value); closeAuthModal(); showToast('Login Successful'); } catch(e) { alert('Login Failed'); } hideLoader();
+            const email = document.getElementById('loginEmail').value.trim();
+            const pass = document.getElementById('loginPassword').value;
+            if (!email || !pass) return alert('Enter email & password.');
+            showLoader();
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
+                closeAuthModal();
+                showToast('Login Successful');
+            } catch (e) {
+                alert('Login Failed: ' + e.message);
+            }
+            hideLoader();
         };
-        window.logoutUser = () => { if(confirm("Are you sure you want to logout?")) { signOut(auth); switchTab('explore'); }};
 
-        function loadTenantProfile() {
-            if(!tenantProfile) return; document.getElementById('profName').innerText = tenantProfile.fullName; document.getElementById('profEmail').innerText = tenantProfile.email;
-            document.getElementById('profMobile').innerText = tenantProfile.mobile; document.getElementById('profCity').innerText = tenantProfile.city;
+        window.logoutUser = async () => {
+            if (!confirm("Are you sure you want to logout?")) return;
+            if (activeRoomUnsubscribe) { activeRoomUnsubscribe(); activeRoomUnsubscribe = null; }
+            currentActiveRoomData = null; currentOwnerData = null; currentRoomPath = null;
+            await signOut(auth);
+            showToast('Logged out');
+            switchTab('explore');
+        };
+
+        /* ================= PROFILE ================= */
+        async function loadTenantProfile() {
+            if (!currentUser) return;
+            try {
+                const snap = await getDoc(doc(db, "tenants", currentUser.uid));
+                if (snap.exists()) tenantProfile = snap.data();
+            } catch (e) { console.warn('profile fetch failed', e); }
+
+            const t = tenantProfile || {};
+            document.getElementById('profName').innerText = t.fullName || (currentUser.email ? currentUser.email.split('@')[0] : 'Tenant');
+            document.getElementById('profEmail').innerText = t.email || currentUser.email || '--';
+            document.getElementById('profMobile').innerText = t.mobile || t.mobileNumber || '--';
+            document.getElementById('profCity').innerText = [t.city, t.state].filter(Boolean).join(', ') || '--';
+            document.getElementById('profRooms').innerText = (t.linkedRooms || []).length;
         }
 
+        /* ================= LINK ROOM ================= */
         window.linkNewRoom = async () => {
-            const unitId = document.getElementById('roomUnitIdInput').value.trim(); if(!unitId) return showToast('Enter Unit ID.', true);
-            showLoader(); let foundPath = null;
+            if (!currentUser) { document.getElementById('loginModal').classList.remove('hidden'); return; }
+            const unitId = document.getElementById('roomUnitIdInput').value.trim();
+            if (!unitId) return showToast('Enter Unit ID.', true);
+
+            showLoader();
+            let foundPath = null;
             try {
                 const hSnaps = await getDocs(collection(db, "houses"));
-                for(const hDoc of hSnaps.docs) {
+                for (const hDoc of hSnaps.docs) {
                     const rSnaps = await getDocs(collection(db, `houses/${hDoc.id}/rooms`));
-                    for(const rDoc of rSnaps.docs) {
-                        const r = rDoc.data(); if(r.tenantUniqueId === unitId && (r.accessEmail||'').toLowerCase() === currentUser.email.toLowerCase()) { foundPath = `houses/${hDoc.id}/rooms/${rDoc.id}`; break; }
-                    } if(foundPath) break;
+                    for (const rDoc of rSnaps.docs) {
+                        const r = rDoc.data();
+                        if (r.tenantUniqueId === unitId && (r.accessEmail || '').toLowerCase() === currentUser.email.toLowerCase()) {
+                            foundPath = `houses/${hDoc.id}/rooms/${rDoc.id}`;
+                            break;
+                        }
+                    }
+                    if (foundPath) break;
                 }
-                if(foundPath) { await updateDoc(doc(db, "tenants", currentUser.uid), { linkedRooms: arrayUnion(foundPath) }); document.getElementById('roomUnitIdInput').value = ''; showToast('Linked Successfully!'); loadTenantLinkedRooms(); } 
-                else { alert('Access Denied!'); }
-            } catch(e) { showToast('Error linking.', true); } hideLoader();
+
+                if (foundPath) {
+                    await updateDoc(doc(db, "tenants", currentUser.uid), { linkedRooms: arrayUnion(foundPath) });
+                    document.getElementById('roomUnitIdInput').value = '';
+                    showToast('Linked Successfully!');
+                    await loadTenantLinkedRooms();
+                } else {
+                    alert('Access Denied! Unit ID / email mismatch.');
+                }
+            } catch (e) {
+                console.error(e);
+                showToast('Error linking.', true);
+            }
+            hideLoader();
         };
 
         async function loadTenantLinkedRooms() {
-            const tSnap = await getDoc(doc(db, "tenants", currentUser.uid)); if(tSnap.exists()) tenantProfile = tSnap.data();
-            const paths = tenantProfile.linkedRooms || [];
-            if(paths.length === 0) { document.getElementById('noRoomsState').classList.remove('hidden'); document.getElementById('activeDashboardCard').classList.add('hidden'); return; }
-            document.getElementById('noRoomsState').classList.add('hidden'); document.getElementById('activeDashboardCard').classList.remove('hidden');
-            subscribeToActiveRoom(paths[0]); // Load first room
+            if (!currentUser) return;
+            try {
+                const tSnap = await getDoc(doc(db, "tenants", currentUser.uid));
+                if (tSnap.exists()) tenantProfile = tSnap.data();
+            } catch (e) { /* ignore */ }
+
+            const paths = (tenantProfile && tenantProfile.linkedRooms) || [];
+            if (paths.length === 0) {
+                document.getElementById('noRoomsState').classList.remove('hidden');
+                document.getElementById('activeDashboardCard').classList.add('hidden');
+                return;
+            }
+            document.getElementById('noRoomsState').classList.add('hidden');
+            document.getElementById('activeDashboardCard').classList.remove('hidden');
+            subscribeToActiveRoom(paths[0]);
         }
 
+        /* ================= ACTIVE ROOM SUBSCRIPTION ================= */
         function subscribeToActiveRoom(roomPath) {
-            const roomRef = doc(db, roomPath); const houseId = roomPath.split('/rooms')[0].split('houses/')[1];
+            currentRoomPath = roomPath;
+            const roomRef = doc(db, roomPath);
+            const houseId = roomPath.split('/rooms')[0].replace('houses/', '');
+
             getDoc(doc(db, "houses", houseId)).then(async hSnap => {
-                if(hSnap.exists()) { document.getElementById('dashHouseName').innerText = hSnap.data().houseName;
-                    const oSnap = await getDoc(doc(db, "users", hSnap.data().ownerId)); if(oSnap.exists()) { currentOwnerData = oSnap.data(); document.getElementById('dashOwnerContact').innerText = currentOwnerData.mobileNumber; document.getElementById('dashOwnerCall').href = `tel:${currentOwnerData.mobileNumber}`; }
+                if (!hSnap.exists()) return;
+                const house = hSnap.data();
+                document.getElementById('dashHouseName').innerText = house.houseName || 'Property';
+                currentOwnerId = house.ownerId || null;
+                if (!currentOwnerId) return;
+
+                const oSnap = await getDoc(doc(db, "users", currentOwnerId));
+                if (oSnap.exists()) {
+                    currentOwnerData = { ...oSnap.data(), ownerId: currentOwnerId };
+                    document.getElementById('dashOwnerContact').innerText = currentOwnerData.mobileNumber || '--';
+                    document.getElementById('dashOwnerCall').href = currentOwnerData.mobileNumber ? `tel:${currentOwnerData.mobileNumber}` : '#';
                 }
             });
-            if(activeRoomUnsubscribe) activeRoomUnsubscribe();
+
+            if (activeRoomUnsubscribe) activeRoomUnsubscribe();
             activeRoomUnsubscribe = onSnapshot(roomRef, async (rSnap) => {
-                if(rSnap.exists()) {
-                    currentActiveRoomData = rSnap.data(); const r = currentActiveRoomData;
-                    document.getElementById('dashRoomNo').innerText = (r.roomType || 'Room') + " " + r.roomNumber;
-                    const tot = (r.rentAmount||0) + (r.waterBillFixed||0) + (r.currentLightBill||0) + (r.penalty||0);
-                    document.getElementById('dashRent').innerText = "₹" + (r.rentAmount||0); document.getElementById('dashWater').innerText = "₹" + (r.waterBillFixed||0); document.getElementById('dashLight').innerText = "₹" + (r.currentLightBill||0); document.getElementById('dashPenalty').innerText = "₹" + (r.penalty||0); document.getElementById('dashTotalDue').innerText = "₹" + tot;
-                    
-                    const meterBox = document.getElementById('meterBox');
-                    if(r.unitRate > 0) { meterBox.classList.remove('hidden'); document.getElementById('dashMeterPrev').innerText = r.meterPrev || 0; document.getElementById('dashMeterCurr').innerText = r.meterCurr || 0; document.getElementById('dashUnits').innerText = (r.meterCurr||0) - (r.meterPrev||0) + " Units"; } else { meterBox.classList.add('hidden'); }
-                    
-                    const payDiv = document.getElementById('payActionDiv');
-                    if(r.paymentStatus === "Paid") { document.getElementById('dashPaymentStatus').innerText = "✅ BILL PAID"; payDiv.innerHTML = `<button onclick="generatePDFReceipt()" class="w-full bg-green-600 text-white font-bold py-3.5 rounded-xl shadow hover:bg-green-700 transition flex justify-center items-center text-sm"><i class="fas fa-file-pdf mr-2 text-lg"></i> Download PDF Receipt</button>`; } 
-                    else { document.getElementById('dashPaymentStatus').innerText = "❌ PENDING"; payDiv.innerHTML = `<div class="grid grid-cols-2 gap-2 mb-2"><button onclick="payViaUPIApp()" class="bg-gray-900 text-white font-bold py-3 rounded-xl shadow transition text-xs"><i class="fas fa-mobile-alt mr-2"></i> UPI App (GPay)</button><button onclick="showOwnerBankDetails()" class="bg-gray-100 font-bold py-3 rounded-xl transition text-xs border"><i class="fas fa-qrcode mr-2"></i> View QR & Bank</button></div><button onclick="notifyOwnerPayment()" class="w-full bg-green-50 text-green-600 font-bold py-3 rounded-xl border border-green-200 transition text-xs"><i class="fas fa-check-double mr-2"></i> Notify Owner: Payment Done</button>`; }
-                    
-                    loadTransactionHistory(currentUser.uid, r.tenantUniqueId);
+                if (!rSnap.exists()) return;
+                currentActiveRoomData = rSnap.data();
+                const r = currentActiveRoomData;
+
+                document.getElementById('dashRoomNo').innerText = (r.roomType || 'Room') + " " + (r.roomNumber ?? '--');
+                document.getElementById('dashRent').innerText = "₹" + (r.rentAmount || 0);
+                document.getElementById('dashWater').innerText = "₹" + (r.waterBillFixed || 0);
+                document.getElementById('dashLight').innerText = "₹" + (r.currentLightBill || 0);
+                document.getElementById('dashPenalty').innerText = "₹" + (r.penalty || 0);
+                document.getElementById('dashTotalDue').innerText = "₹" + totalDue(r);
+
+                const meterBox = document.getElementById('meterBox');
+                if (r.unitRate > 0) {
+                    meterBox.classList.remove('hidden');
+                    document.getElementById('dashMeterPrev').innerText = r.meterPrev || 0;
+                    document.getElementById('dashMeterCurr').innerText = r.meterCurr || 0;
+                    document.getElementById('dashUnits').innerText = ((r.meterCurr || 0) - (r.meterPrev || 0)) + " Units";
+                } else {
+                    meterBox.classList.add('hidden');
                 }
+
+                const statusEl = document.getElementById('dashPaymentStatus');
+                const payDiv = document.getElementById('payActionDiv');
+
+                if (r.paymentStatus === "Paid") {
+                    statusEl.innerText = "✅ BILL PAID";
+                    statusEl.className = "text-xs font-bold px-2.5 py-1 rounded bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400";
+                    payDiv.innerHTML = `<button onclick="generatePDFReceipt()" class="w-full bg-green-600 text-white font-bold py-3.5 rounded-xl shadow hover:bg-green-700 transition flex justify-center items-center text-sm"><i class="fas fa-file-pdf mr-2 text-lg"></i> Download PDF Receipt</button>`;
+                } else {
+                    statusEl.innerText = "❌ PENDING";
+                    statusEl.className = "text-xs font-bold px-2.5 py-1 rounded bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400";
+                    renderPayActions();
+                }
+
+                loadTransactionHistory();
             });
         }
+
+        /* ================= PAYMENT FLOW ================= */
+        function payFlagKey() { return 'rer-paid-' + (currentRoomPath || 'na'); }
+
+        function renderPayActions() {
+            const payDiv = document.getElementById('payActionDiv');
+            const attempted = sessionStorage.getItem(payFlagKey()) === '1';
+            payDiv.innerHTML = `
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                    <button onclick="payViaUPIApp()" class="bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold py-3 rounded-xl shadow hover:bg-black dark:hover:bg-gray-100 transition text-xs"><i class="fas fa-mobile-alt mr-2"></i> Pay via UPI App</button>
+                    <button onclick="showOwnerBankDetails()" class="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-bold py-3 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition text-xs border border-gray-200 dark:border-gray-600"><i class="fas fa-qrcode mr-2"></i> View QR & Bank</button>
+                </div>
+                <p id="payHintText" class="${attempted ? 'hidden' : ''} text-[10px] text-center text-gray-400 mb-2 leading-snug">
+                    Payment complete karne ke baad hi "Payment Done" button dikhega.
+                </p>
+                <button id="notifyDoneBtn" onclick="notifyOwnerPayment()" class="${attempted ? '' : 'hidden'} w-full bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 font-bold py-3 rounded-xl border border-green-200 dark:border-green-500/30 hover:bg-green-100 transition text-xs">
+                    <i class="fas fa-check-double mr-2"></i> Payment Done – Notify Owner
+                </button>`;
+        }
+
+        function markPaymentAttempted() {
+            if (currentRoomPath) sessionStorage.setItem(payFlagKey(), '1');
+            const btn = document.getElementById('notifyDoneBtn');
+            const hint = document.getElementById('payHintText');
+            if (btn) btn.classList.remove('hidden');
+            if (hint) hint.classList.add('hidden');
+        }
+        window.markPaymentAttempted = markPaymentAttempted;
+
+        // Jab user UPI app se wapas aaye -> tab "Payment Done" button dikhao
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && sessionStorage.getItem('rer-returned-from-upi') === '1') {
+                sessionStorage.removeItem('rer-returned-from-upi');
+                markPaymentAttempted();
+                showToast('Payment ho gaya? "Payment Done" dabaiye.');
+            }
+        });
+
+        window.payViaUPIApp = () => {
+            if (!currentOwnerData || !currentOwnerData.upiId) {
+                return alert("Owner UPI ID not set. Please use 'View QR & Bank'.");
+            }
+            const amt = totalDue(currentActiveRoomData);
+            sessionStorage.setItem('rer-returned-from-upi', '1');
+            window.location.href = `upi://pay?pa=${currentOwnerData.upiId}&pn=${encodeURIComponent(currentOwnerData.ownerName || 'Owner')}&am=${amt}&cu=INR`;
+        };
 
         window.showOwnerBankDetails = () => {
-            if(!currentOwnerData) return alert("Details missing.");
-            document.getElementById('pmUpiId').innerText = currentOwnerData.upiId || "Not Set"; document.getElementById('pmAcc').innerText = currentOwnerData.bankAcc || "Not Set"; document.getElementById('pmIfsc').innerText = currentOwnerData.ifsc || "Not Set";
-            if(currentOwnerData.upiId) { const tot = (currentActiveRoomData.rentAmount||0) + (currentActiveRoomData.waterBillFixed||0) + (currentActiveRoomData.currentLightBill||0) + (currentActiveRoomData.penalty||0); const upiUrl = `upi://pay?pa=${currentOwnerData.upiId}&pn=${encodeURIComponent(currentOwnerData.ownerName)}&am=${tot}&cu=INR`; document.getElementById('ownerQRImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(upiUrl)}`; }
+            if (!currentOwnerData) return alert("Owner details missing.");
+            document.getElementById('pmUpiId').innerText = currentOwnerData.upiId || "Not Set";
+            document.getElementById('pmAcc').innerText = currentOwnerData.bankAcc || "Not Set";
+            document.getElementById('pmIfsc').innerText = currentOwnerData.ifsc || "Not Set";
+
+            if (currentOwnerData.upiId) {
+                const amt = totalDue(currentActiveRoomData);
+                const upiUrl = `upi://pay?pa=${currentOwnerData.upiId}&pn=${encodeURIComponent(currentOwnerData.ownerName || 'Owner')}&am=${amt}&cu=INR`;
+                document.getElementById('ownerQRImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(upiUrl)}`;
+            }
             document.getElementById('paymentModal').classList.remove('hidden');
         };
-        window.payViaUPIApp = () => {
-            if(!currentOwnerData?.upiId) return alert("Owner UPI ID not set.");
-            const tot = (currentActiveRoomData.rentAmount||0) + (currentActiveRoomData.waterBillFixed||0) + (currentActiveRoomData.currentLightBill||0) + (currentActiveRoomData.penalty||0);
-            window.location.href = `upi://pay?pa=${currentOwnerData.upiId}&pn=${encodeURIComponent(currentOwnerData.ownerName)}&am=${tot}&cu=INR`;
-        };
+
         window.notifyOwnerPayment = async () => {
-            if(!currentActiveRoomData || !currentOwnerData) return; showLoader();
-            try { await addDoc(collection(db, "admin_requests"), { type: "Rent Payment Approval", tenantId: currentUser.uid, tenantName: tenantProfile.fullName, roomNumber: currentActiveRoomData.roomNumber, amount: (currentActiveRoomData.rentAmount||0) + (currentActiveRoomData.waterBillFixed||0) + (currentActiveRoomData.currentLightBill||0) + (currentActiveRoomData.penalty||0), ownerId: currentOwnerData.ownerId || currentActiveRoomData.tenantUniqueId.split('-')[0], status: "Pending Verification", date: new Date().toISOString() }); showToast("Owner Notified!"); } catch(e) { showToast("Failed to notify.", true); } hideLoader();
-        };
-
-        async function loadTransactionHistory() {
-            const hList = document.getElementById('historyList'); hList.innerHTML = `<p class="text-center text-gray-400 py-5">Syncing...</p>`;
+            if (!currentActiveRoomData || !currentOwnerId) return showToast('Room data missing.', true);
+            document.getElementById('paymentModal').classList.add('hidden');
+            showLoader();
             try {
-                const snaps = await getDocs(collection(db, "transactions")); let html = ''; let found = 0;
-                snaps.forEach(doc => { const t = doc.data(); if(t.tenantName && tenantProfile && t.tenantName.toLowerCase() === tenantProfile.fullName.toLowerCase()) { found++; const dStr = new Date(t.date || 0).toLocaleDateString('en-GB'); html += `<div class="bg-white p-4 rounded-2xl shadow-sm border mb-3 flex justify-between items-center"><div><p class="font-bold text-sm">${t.type || 'Rent Paid'}</p><p class="text-[10px] text-gray-500 mt-0.5">${dStr}</p></div><div class="text-right"><p class="font-black text-lg text-green-500">₹${t.amount || 0}</p><p class="text-[9px] text-green-600 font-bold uppercase mt-1">Approved</p></div></div>`; }});
-                if(found === 0) hList.innerHTML = `<p class="text-center py-5 text-gray-400 font-bold">No transactions yet.</p>`; else hList.innerHTML = html;
-            } catch(e) {}
-        }
-        window.generatePDFReceipt = () => {
-            if(!currentActiveRoomData) return; const r = currentActiveRoomData; const dStr = new Date().toLocaleDateString('en-GB');
-            const tot = (r.rentAmount||0) + (r.waterBillFixed||0) + (r.currentLightBill||0) + (r.penalty||0);
-            const { jsPDF } = window.jspdf; const doc = new jsPDF();
-            doc.setFont("helvetica", "bold"); doc.setFontSize(22); doc.setTextColor(37, 99, 235); doc.text("RENT RECEIPT", 105, 25, null, null, "center");
-            doc.setFontSize(11); doc.setTextColor(80, 80, 80); doc.setFont("helvetica", "normal"); doc.text(`Date Paid: ${dStr}`, 20, 45); doc.text(`Tenant Name: ${tenantProfile.fullName}`, 20, 55); doc.text(`Status: Paid & Approved`, 20, 65);
-            doc.setDrawColor(200, 200, 200); doc.line(20, 75, 190, 75); doc.setFont("helvetica", "bold"); doc.setTextColor(0, 0, 0); doc.text("Description", 20, 85); doc.text("Amount (INR)", 150, 85); doc.setFont("helvetica", "normal"); doc.line(20, 90, 190, 90);
-            doc.text("Total Paid:", 20, 105); doc.text(`Rs. ${tot}`, 150, 105); doc.setFontSize(9); doc.setTextColor(150, 150, 150); doc.text("Digitally generated via Rent Easy Room", 105, 125, null, null, "center");
-            doc.save(`Receipt_Room${r.roomNumber}_${dStr.replace(/\//g,'-')}.pdf`); showToast("Receipt Downloaded!");
+                await addDoc(collection(db, "admin_requests"), {
+                    type: "Rent Payment Approval",
+                    tenantId: currentUser.uid,
+                    tenantName: tenantProfile?.fullName || currentUser.email,
+                    roomNumber: currentActiveRoomData.roomNumber ?? '--',
+                    amount: totalDue(currentActiveRoomData),
+                    ownerId: currentOwnerId,
+                    status: "Pending Verification",
+                    date: new Date().toISOString()
+                });
+                markPaymentAttempted();
+                showToast("Owner Notified!");
+            } catch (e) {
+                console.error(e);
+                showToast("Failed to notify.", true);
+            }
+            hideLoader();
         };
 
+        /* ================= HISTORY ================= */
+        async function loadTransactionHistory() {
+            const hList = document.getElementById('historyList');
+            if (!tenantProfile) return;
+            hList.innerHTML = `<p class="text-center text-gray-400 py-5">Syncing...</p>`;
+            try {
+                const snaps = await getDocs(collection(db, "transactions"));
+                let html = '', found = 0;
+                snaps.forEach(d => {
+                    const t = d.data();
+                    if (t.tenantName && t.tenantName.toLowerCase() === (tenantProfile.fullName || '').toLowerCase()) {
+                        found++;
+                        const dStr = new Date(t.date || 0).toLocaleDateString('en-GB');
+                        html += `<div class="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 mb-3 flex justify-between items-center">
+                            <div><p class="font-bold text-sm text-gray-800 dark:text-white">${t.type || 'Rent Paid'}</p>
+                            <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">${dStr}</p></div>
+                            <div class="text-right"><p class="font-black text-lg text-green-500">₹${t.amount || 0}</p>
+                            <p class="text-[9px] text-green-600 dark:text-green-400 font-bold uppercase mt-1">Approved</p></div>
+                        </div>`;
+                    }
+                });
+                hList.innerHTML = found === 0
+                    ? `<p class="text-center py-5 text-gray-400 font-bold">No transactions yet.</p>`
+                    : html;
+            } catch (e) {
+                hList.innerHTML = `<p class="text-center py-5 text-gray-400 font-bold">Unable to load history.</p>`;
+            }
+        }
+
+        /* ================= PDF RECEIPT ================= */
+        window.generatePDFReceipt = () => {
+            if (!currentActiveRoomData) return;
+            const r = currentActiveRoomData;
+            const dStr = new Date().toLocaleDateString('en-GB');
+            const tot = totalDue(r);
+            const { jsPDF } = window.jspdf;
+            const docPdf = new jsPDF();
+
+            docPdf.setFont("helvetica", "bold");
+            docPdf.setFontSize(22);
+            docPdf.setTextColor(37, 99, 235);
+            docPdf.text("RENT RECEIPT", 105, 25, null, null, "center");
+
+            docPdf.setFontSize(11);
+            docPdf.setTextColor(80, 80, 80);
+            docPdf.setFont("helvetica", "normal");
+            docPdf.text(`Date Paid: ${dStr}`, 20, 45);
+            docPdf.text(`Tenant Name: ${tenantProfile?.fullName || 'Tenant'}`, 20, 55);
+            docPdf.text(`Room: ${r.roomType || 'Room'} ${r.roomNumber ?? ''}`, 20, 65);
+            docPdf.text(`Status: Paid & Approved`, 20, 75);
+
+            docPdf.setDrawColor(200, 200, 200);
+            docPdf.line(20, 85, 190, 85);
+            docPdf.setFont("helvetica", "bold");
+            docPdf.setTextColor(0, 0, 0);
+            docPdf.text("Description", 20, 95);
+            docPdf.text("Amount (INR)", 150, 95);
+            docPdf.setFont("helvetica", "normal");
+            docPdf.line(20, 100, 190, 100);
+
+            docPdf.text("Rent", 20, 110); docPdf.text(`${r.rentAmount || 0}`, 150, 110);
+            docPdf.text("Water / Maintenance", 20, 118); docPdf.text(`${r.waterBillFixed || 0}`, 150, 118);
+            docPdf.text("Light Bill", 20, 126); docPdf.text(`${r.currentLightBill || 0}`, 150, 126);
+            docPdf.text("Penalty", 20, 134); docPdf.text(`${r.penalty || 0}`, 150, 134);
+
+            docPdf.setFont("helvetica", "bold");
+            docPdf.text("Total Paid:", 20, 148);
+            docPdf.text(`Rs. ${tot}`, 150, 148);
+
+            docPdf.setFontSize(9);
+            docPdf.setTextColor(150, 150, 150);
+            docPdf.text("Digitally generated via Rent Easy Room", 105, 170, null, null, "center");
+
+            docPdf.save(`Receipt_Room${r.roomNumber ?? 'NA'}_${dStr.replace(/\//g, '-')}.pdf`);
+            showToast("Receipt Downloaded!");
+        };
+
+        /* ================= INIT ================= */
         loadAllVacantRooms();
     </script>
 </body>
