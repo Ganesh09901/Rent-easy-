@@ -8,28 +8,24 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-    /* SCROLL FIX: Ensure vertical scroll works flawlessly on mobile */
-    html, body { 
-        margin: 0; 
-        padding: 0; 
-        width: 100%; 
-        overflow-x: hidden; 
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-    body { background-color: #f4f7fb; font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
-    
+    html, body { min-height: 100vh; }
+    body { background-color: #f4f7fb; font-family: 'Segoe UI', system-ui, sans-serif; overflow-x: hidden; }
     .hidden { display: none !important; }
     
-    /* SCROLL FIX: Added extra padding at the bottom so content easily scrolls above the mobile nav bar */
-    .tab-content { padding-bottom: 160px; }
+    /* SCROLL FIX: Ensures content scrolls properly above bottom nav */
+    .tab-content { 
+        padding-bottom: 120px; 
+        min-height: calc(100vh - 60px); 
+        overflow-y: auto; 
+        -webkit-overflow-scrolling: touch; 
+    }
     
     @media (min-width: 768px) {
         body { display: block; }
         .desktop-sidebar { display: flex !important; }
         .mobile-bottom-nav { display: none !important; }
         .main-wrapper { margin-left: 260px; width: calc(100% - 260px); min-height: 100vh; }
-        .tab-content { padding-bottom: 40px; padding-top: 24px; max-width: 1200px; margin: 0 auto; width: 100%; }
+        .tab-content { padding-bottom: 40px; padding-top: 24px; max-width: 1200px; margin: 0 auto; width: 100%; min-height: auto; }
         .fab { bottom: 30px !important; right: 30px !important; }
     }
     
@@ -39,8 +35,10 @@
     .nav-btn.active .nav-indicator { width: 100%; opacity: 1; }
     .nav-indicator { width: 0; height: 3px; background: #3b82f6; border-radius: 3px; transition: 0.3s; opacity: 0; margin-bottom: 4px; }
     .nav-btn { color: #9ca3af; transition: all 0.3s; }
-    .fab { box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); transition: transform 0.2s; }
+    
+    .fab { box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); transition: transform 0.2s; }
     .fab:active { transform: scale(0.95); }
+    
     .plan-card { cursor: pointer; transition: all 0.2s; }
     .plan-card.active { border-color: #3b82f6; background-color: #eff6ff; }
     .type-card { border: 2px solid #e5e7eb; border-radius: 1rem; padding: 1.25rem 1rem; text-align: center; cursor: pointer; transition: all 0.2s; background: white; }
@@ -106,7 +104,7 @@
     </div>
 </div>
 
-<div id="appContainer" class="hidden w-full">
+<div id="appContainer" class="hidden min-h-screen w-full">
     <aside class="desktop-sidebar hidden fixed left-0 top-0 h-screen w-[260px] bg-white border-r border-gray-200 flex-col shadow-sm z-40">
         <div class="p-6 border-b border-gray-100">
             <h1 class="text-xl font-black text-blue-600 flex items-center"><i class="fas fa-building mr-2"></i> Rent Easy</h1>
@@ -282,6 +280,14 @@
                 </div>
             </div>
         </main>
+
+        <!-- NEW SMALL ROUND FLOATING BUTTON FOR DUES -->
+        <button onclick="openOutstandingDuesModal()" id="duesFAB" class="fab hidden fixed bottom-24 right-6 bg-red-500 text-white w-14 h-14 rounded-full flex flex-col justify-center items-center z-40 hover:bg-red-600 transition shadow-lg">
+            <i class="fas fa-clock text-xl"></i>
+            <span class="text-[10px] font-bold mt-0.5">Dues</span>
+            <span id="fabDueCount" class="absolute -top-1 -right-1 bg-white text-red-600 text-xs font-black h-5 w-5 rounded-full flex items-center justify-center border border-red-600 shadow-sm">0</span>
+        </button>
+
         <nav class="mobile-bottom-nav fixed bottom-0 w-full bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.05)] border-t border-gray-100 flex justify-around items-center z-40 h-[72px] pb-2 md:hidden">
             <button class="nav-btn active flex flex-col items-center justify-center w-full h-full pt-1" onclick="switchTab('Analytics')"><div class="nav-indicator"></div><i class="fas fa-home text-xl mb-1"></i><span class="text-[10px] font-bold uppercase tracking-wider">Home</span></button>
             <button class="nav-btn flex flex-col items-center justify-center w-full h-full pt-1" onclick="switchTab('Properties')"><div class="nav-indicator"></div><i class="fas fa-building text-xl mb-1"></i><span class="text-[10px] font-bold uppercase tracking-wider">Rooms</span></button>
@@ -661,7 +667,7 @@ window.planExpiryDate = null;
 window.isRegistering = false;
 window.depositEditRoom = null;
 window.activeTab = 'Analytics';
-window.allPendingData = [];
+window.allPendingData = []; // Global cache for modal
 
 (function(){
     const d = new Date();
@@ -1286,6 +1292,16 @@ async function loadDashboardData() {
                 vBtn.classList.add('hidden');
             }
         }
+    }
+
+    // Handle FAB visibility and count
+    const duesFAB = document.getElementById('duesFAB');
+    const fabCount = document.getElementById('fabDueCount');
+    if(tempPendingData.length > 0) {
+        duesFAB.classList.remove('hidden');
+        fabCount.innerText = tempPendingData.length;
+    } else {
+        duesFAB.classList.add('hidden');
     }
 
     const se = document.getElementById('statExpected'); if(se) se.innerText = "₹" + tExp;
