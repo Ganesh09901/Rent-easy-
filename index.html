@@ -11,13 +11,14 @@
     html, body { min-height: 100vh; }
     body { background-color: #f4f7fb; font-family: 'Segoe UI', system-ui, sans-serif; overflow-x: hidden; }
     .hidden { display: none !important; }
-    .tab-content { padding-bottom: 85px; }
+    /* FIX: Increased bottom padding for mobile so content doesn't hide behind bottom nav */
+    .tab-content { padding-bottom: 120px; }
     @media (min-width: 768px) {
         body { display: block; }
         .desktop-sidebar { display: flex !important; }
         .mobile-bottom-nav { display: none !important; }
         .main-wrapper { margin-left: 260px; width: calc(100% - 260px); min-height: 100vh; }
-        .tab-content { padding-bottom: 30px; padding-top: 24px; max-width: 1200px; margin: 0 auto; width: 100%; }
+        .tab-content { padding-bottom: 40px; padding-top: 24px; max-width: 1200px; margin: 0 auto; width: 100%; }
         .fab { bottom: 30px !important; right: 30px !important; }
     }
     .modal-overlay { background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 50; transition: all 0.3s ease-in-out; }
@@ -170,7 +171,6 @@
                     </div>
                 </div>
 
-                <!-- Payment Notifications Card -->
                 <div class="bg-gradient-to-br from-purple-500 via-purple-600 to-indigo-700 p-4 md:p-6 rounded-2xl shadow-lg mb-5 border border-purple-600 relative overflow-hidden cursor-pointer hover:scale-[1.01] transition" onclick="openPaymentRequests()">
                     <div class="absolute -right-4 -top-4 opacity-20 pointer-events-none"><i class="fas fa-bell text-[120px] md:text-[150px] text-purple-200"></i></div>
                     <div class="flex justify-between items-center relative z-10 gap-3">
@@ -199,11 +199,18 @@
                     </div>
                 </div>
 
-                <div>
-                    <h3 class="text-lg font-bold mb-4 text-red-600 flex items-center"><i class="fas fa-clock mr-2"></i> Outstanding Dues</h3>
+                <!-- Outstanding Dues Section with View All Button -->
+                <div class="mt-2">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold text-red-600 flex items-center"><i class="fas fa-clock mr-2"></i> Outstanding Dues</h3>
+                        <button onclick="openOutstandingDuesModal()" id="viewAllDuesBtn" class="hidden bg-red-50 text-red-600 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm hover:bg-red-100 transition border border-red-200">
+                            <i class="fas fa-list mr-1"></i> View All
+                        </button>
+                    </div>
                     <div id="pendingRoomsList" class="space-y-3"></div>
                 </div>
             </div>
+
             <div id="tabProperties" class="hidden">
                 <div class="flex justify-between items-center mb-5 flex-wrap gap-2">
                     <div>
@@ -285,7 +292,17 @@
     </div>
 </div>
 
-<!-- PAYMENT REQUESTS MODAL -->
+<!-- OUTSTANDING DUES MODAL -->
+<div id="outstandingDuesModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-3 z-[71]">
+    <div class="bg-white rounded-2xl p-4 sm:p-5 w-full max-w-lg modal-content shadow-2xl border-t-4 border-red-500">
+        <div class="flex justify-between items-center border-b pb-3 mb-3">
+            <h3 class="text-lg font-bold text-gray-800 flex items-center"><i class="fas fa-clock mr-2 text-red-500"></i> All Outstanding Dues</h3>
+            <button onclick="closeModal('outstandingDuesModal')" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="allDuesList" class="space-y-2 max-h-[65vh] overflow-y-auto pr-1"></div>
+    </div>
+</div>
+
 <div id="paymentRequestsModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-3 z-[73]">
     <div class="bg-white rounded-2xl p-4 sm:p-5 w-full max-w-lg modal-content shadow-2xl border-t-4 border-purple-500">
         <div class="flex justify-between items-center border-b pb-3 mb-3">
@@ -632,6 +649,7 @@ window.planExpiryDate = null;
 window.isRegistering = false;
 window.depositEditRoom = null;
 window.activeTab = 'Analytics';
+window.allPendingData = []; // Global cache for modal
 
 (function(){
     const d = new Date();
@@ -696,7 +714,7 @@ window.switchTab = async (t) => {
 };
 
 window.closeAllModals = () => {
-    ['addHouseModal', 'addNewRoomModal', 'vacantExplorerModal', 'houseDetailsModal', 'roomManagerModal', 'transactionDetailsModal', 'forgotModal', 'tenantAccessModal', 'upgradeModal', 'onboardingModal', 'deleteReasonModal', 'trashModal', 'depositCollectionModal', 'depositEditModal', 'paymentRequestsModal'].forEach(m => {
+    ['addHouseModal', 'addNewRoomModal', 'vacantExplorerModal', 'houseDetailsModal', 'roomManagerModal', 'transactionDetailsModal', 'forgotModal', 'tenantAccessModal', 'upgradeModal', 'onboardingModal', 'deleteReasonModal', 'trashModal', 'depositCollectionModal', 'depositEditModal', 'paymentRequestsModal', 'outstandingDuesModal'].forEach(m => {
         const el = document.getElementById(m); if(el) el.classList.add('hidden');
     });
 };
@@ -1168,6 +1186,8 @@ async function loadDashboardData() {
     let tExp=0, tRec=0, tPen=0, tDep=0, vCount=0, occCount=0;
     let tempHouseCache = {}, tempVacantCache = {}, tempTrash = { houses: [], rooms: [] };
     let htmlBufferHouses = '', htmlBufferPending = '';
+    let tempPendingData = []; // Store all pending items
+
     const hSnaps = await getDocs(query(collection(db, "houses"), where("ownerId", "==", window.currentUserId)));
     if(hSnaps.empty) {
         hList.innerHTML = `<div class="text-center text-gray-400 mt-10"><p>No properties found.</p></div>`;
@@ -1195,7 +1215,10 @@ async function loadDashboardData() {
                 if(r.paymentStatus === "Paid") tRec += amt;
                 else {
                     tPen += amt;
-                    htmlBufferPending += `<div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-red-500 cursor-pointer hover:shadow-md transition mb-3 gap-2" onclick="openRoomManager('${hDoc.id}', '${encRoom}')"><div class="min-w-0 flex-1"><p class="font-bold text-gray-800 truncate">${hd.houseName} - Room ${r.roomNumber}</p><p class="text-xs text-gray-500 font-medium truncate">${r.tenantName}</p></div><div class="font-black text-red-600 text-lg shrink-0">₹${amt}</div></div>`;
+                    // Store in cache for modal
+                    tempPendingData.push({
+                        hId: hDoc.id, hName: hd.houseName, r, amt, encRoom
+                    });
                 }
             } else if(r.occupancyStatus === "Vacant") {
                 vCount++;
@@ -1221,21 +1244,68 @@ async function loadDashboardData() {
             <div class="bg-gray-50 h-10 w-10 rounded-full flex items-center justify-center border border-gray-200 shrink-0"><i class="fas fa-chevron-right text-gray-400"></i></div>
         </div>`;
     }
+    
     window.houseDataCache = tempHouseCache;
     window.vacantDataCache = tempVacantCache;
     window.trashCache = tempTrash;
+    window.allPendingData = tempPendingData; // Save globally
+
     hList.innerHTML = htmlBufferHouses;
-    if(pList) pList.innerHTML = htmlBufferPending;
+    
+    // Render only top 3 pending items on Dashboard
+    if(pList) {
+        if (tempPendingData.length === 0) {
+            pList.innerHTML = `<p class="text-green-600 font-bold bg-green-50 p-4 rounded-xl border border-green-200 shadow-sm flex items-center"><i class="fas fa-check-circle text-xl mr-2"></i> All collections complete!</p>`;
+            document.getElementById('viewAllDuesBtn').classList.add('hidden');
+        } else {
+            let renderLimit = Math.min(3, tempPendingData.length);
+            for(let i=0; i<renderLimit; i++) {
+                let p = tempPendingData[i];
+                htmlBufferPending += `<div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-red-500 cursor-pointer hover:shadow-md transition mb-3 gap-2" onclick="openRoomManager('${p.hId}', '${p.encRoom}')"><div class="min-w-0 flex-1"><p class="font-bold text-gray-800 truncate">${p.hName} - Room ${p.r.roomNumber}</p><p class="text-xs text-gray-500 font-medium truncate">${p.r.tenantName}</p></div><div class="font-black text-red-600 text-lg shrink-0">₹${p.amt}</div></div>`;
+            }
+            pList.innerHTML = htmlBufferPending;
+            
+            // Show "View All" button if more than 3 items
+            const vBtn = document.getElementById('viewAllDuesBtn');
+            if (tempPendingData.length > 3) {
+                vBtn.classList.remove('hidden');
+                vBtn.innerHTML = `<i class="fas fa-list mr-1"></i> View All (${tempPendingData.length})`;
+            } else {
+                vBtn.classList.add('hidden');
+            }
+        }
+    }
+
     const se = document.getElementById('statExpected'); if(se) se.innerText = "₹" + tExp;
     const sr = document.getElementById('statReceived'); if(sr) sr.innerText = "₹" + tRec;
     const sp = document.getElementById('statPending'); if(sp) sp.innerText = "₹" + tPen;
     const sd = document.getElementById('statDeposit'); if(sd) sd.innerText = "₹" + tDep;
     const sdc = document.getElementById('statDepositCount'); if(sdc) sdc.innerText = occCount + ' occupied';
     const vc = document.getElementById('vacantCountBadge'); if(vc) vc.innerText = vCount;
-    if(tPen === 0 && tExp > 0 && pList) pList.innerHTML = `<p class="text-green-600 font-bold bg-green-50 p-4 rounded-xl border border-green-200 shadow-sm flex items-center"><i class="fas fa-check-circle text-xl mr-2"></i> All collections complete!</p>`;
 
     await loadPaymentRequestsCount();
 }
+
+// ===== OUTSTANDING DUES MODAL LOGIC =====
+window.openOutstandingDuesModal = () => {
+    const list = document.getElementById('allDuesList');
+    list.innerHTML = '';
+    if (window.allPendingData.length === 0) {
+        list.innerHTML = '<div class="text-center text-gray-400 py-10"><i class="fas fa-check-circle text-4xl mb-2 text-green-400"></i><p class="text-sm">No pending dues.</p></div>';
+    } else {
+        window.allPendingData.forEach(p => {
+            list.innerHTML += `
+            <div class="flex justify-between items-center bg-white p-3 rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-red-500 cursor-pointer hover:shadow-md transition gap-2" onclick="closeModal('outstandingDuesModal'); openRoomManager('${p.hId}', '${p.encRoom}')">
+                <div class="min-w-0 flex-1">
+                    <p class="font-bold text-gray-800 text-sm truncate">${p.hName} - Room ${p.r.roomNumber}</p>
+                    <p class="text-xs text-gray-500 font-medium truncate">${p.r.tenantName}</p>
+                </div>
+                <div class="font-black text-red-600 text-base shrink-0">₹${p.amt}</div>
+            </div>`;
+        });
+    }
+    document.getElementById('outstandingDuesModal').classList.remove('hidden');
+};
 
 // ===== DEPOSIT =====
 window.openDepositCollection = () => {
