@@ -16,7 +16,7 @@
         .desktop-sidebar { display: flex !important; }
         .mobile-bottom-nav { display: none !important; }
         .main-wrapper { margin-left: 260px; width: calc(100% - 260px); }
-        .tab-content { padding-bottom: 20px; padding-top: 20px; max-width: 1100px; margin: 0 auto; }
+        .tab-content { padding-bottom: 30px; padding-top: 24px; max-width: 1200px; margin: 0 auto; width: 100%; }
         .fab { bottom: 30px !important; right: 30px !important; }
     }
     .modal-overlay { background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 50; transition: all 0.3s ease-in-out; }
@@ -42,6 +42,8 @@
     .sidebar-link:hover { background: #eff6ff; color: #3b82f6; }
     .sidebar-link.active { background: #dbeafe; color: #2563eb; }
     .sidebar-link i { width: 24px; margin-right: 12px; text-align: center; }
+    .stat-card { transition: transform 0.2s, box-shadow 0.2s; }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
 </style>
 </head>
 <body class="text-gray-800">
@@ -104,7 +106,10 @@
     <div class="main-wrapper w-full">
         <header class="bg-blue-600 text-white p-3 sm:p-4 sticky top-0 z-30 shadow-md flex justify-between items-center">
             <h1 class="text-lg sm:text-xl font-black tracking-wide flex items-center md:hidden"><i class="fas fa-building mr-2"></i> Rent Easy</h1>
-            <div class="hidden md:block text-lg font-bold text-blue-100">Welcome back 👋</div>
+            <div class="hidden md:block">
+                <div class="text-lg font-bold text-blue-100">Welcome back 👋</div>
+                <div class="text-xs text-blue-200 font-medium mt-0.5" id="headerDate">—</div>
+            </div>
             <div class="flex items-center gap-2">
                 <div class="flex flex-col items-end cursor-pointer hover:scale-105 transition" onclick="openUpgradeModal()">
                     <div id="headerPlanBadge" class="hidden bg-yellow-400 text-yellow-900 text-[9px] font-black px-1.5 py-0.5 rounded shadow-sm tracking-wider border border-yellow-500">FREE</div>
@@ -116,26 +121,79 @@
                 <button onclick="handleLogout()" class="md:hidden bg-blue-700 px-3 py-1.5 rounded-lg text-sm font-bold shadow hover:bg-red-500 transition ml-1"><i class="fas fa-power-off"></i></button>
             </div>
         </header>
-        <main class="p-4 tab-content max-w-3xl mx-auto md:max-w-5xl">
+        <main class="p-4 tab-content w-full">
             <div id="tabAnalytics">
-                <h2 class="text-2xl font-extrabold text-gray-800 mb-5">Dashboard Overview</h2>
-                <div class="bg-gray-900 text-white p-6 rounded-2xl shadow-xl mb-6 cursor-pointer transform hover:scale-[1.01] transition border border-gray-800 relative overflow-hidden" onclick="openVacantHousesModal()">
-                    <div class="absolute -right-4 -top-4 opacity-10"><i class="fas fa-key text-9xl"></i></div>
-                    <div class="flex justify-between items-center relative z-10">
-                        <div><h3 class="text-xl font-bold flex items-center"><i class="fas fa-key text-yellow-400 mr-2"></i> Available Rooms</h3><p class="text-sm text-gray-400 mt-1">Tap to view & assign</p></div>
-                        <div class="bg-yellow-400 text-gray-900 text-3xl font-black h-14 w-14 flex items-center justify-center rounded-full shadow-inner" id="vacantCountBadge">0</div>
+                <div class="flex justify-between items-end mb-5 flex-wrap gap-2">
+                    <div>
+                        <h2 class="text-2xl md:text-3xl font-extrabold text-gray-800">Dashboard Overview</h2>
+                        <p class="text-xs md:text-sm text-gray-500 font-medium mt-1">Complete snapshot of your rental business</p>
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-4 mb-6">
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-blue-500"><p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Total Expected</p><h3 class="text-2xl font-black text-blue-600" id="statExpected">₹0</h3></div>
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-green-500"><p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Received (Month)</p><h3 class="text-2xl font-black text-green-600" id="statReceived">₹0</h3></div>
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-red-500 col-span-2"><p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Pending Collections</p><h3 class="text-4xl font-black text-red-600" id="statPending">₹0</h3></div>
+
+                <!-- Vacant Hero Card -->
+                <div class="bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white p-5 md:p-6 rounded-2xl shadow-xl mb-4 cursor-pointer transform hover:scale-[1.005] transition border border-gray-800 relative overflow-hidden" onclick="openVacantHousesModal()">
+                    <div class="absolute -right-6 -top-6 opacity-10 pointer-events-none"><i class="fas fa-key text-[140px] md:text-[180px]"></i></div>
+                    <div class="flex justify-between items-center relative z-10">
+                        <div>
+                            <h3 class="text-lg md:text-xl font-bold flex items-center"><i class="fas fa-key text-yellow-400 mr-2"></i> Available Rooms</h3>
+                            <p class="text-xs md:text-sm text-gray-400 mt-1">Tap to view & assign tenants</p>
+                        </div>
+                        <div class="bg-gradient-to-br from-yellow-400 to-yellow-500 text-gray-900 text-3xl md:text-4xl font-black h-16 w-16 md:h-20 md:w-20 flex items-center justify-center rounded-full shadow-lg shrink-0" id="vacantCountBadge">0</div>
+                    </div>
                 </div>
-                <div><h3 class="text-lg font-bold mb-4 text-red-600 flex items-center"><i class="fas fa-clock mr-2"></i> Outstanding Dues</h3><div id="pendingRoomsList" class="space-y-3"></div></div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-4">
+                    <div class="stat-card bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-blue-500">
+                        <div class="flex items-center justify-between mb-1">
+                            <p class="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-wider">Expected</p>
+                            <i class="fas fa-rupee-sign text-blue-400 text-xs"></i>
+                        </div>
+                        <h3 class="text-xl md:text-2xl font-black text-blue-600" id="statExpected">₹0</h3>
+                    </div>
+                    <div class="stat-card bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-green-500">
+                        <div class="flex items-center justify-between mb-1">
+                            <p class="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-wider">Received</p>
+                            <i class="fas fa-check-circle text-green-400 text-xs"></i>
+                        </div>
+                        <h3 class="text-xl md:text-2xl font-black text-green-600" id="statReceived">₹0</h3>
+                    </div>
+                    <div class="stat-card bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-red-500 col-span-2 md:col-span-1">
+                        <div class="flex items-center justify-between mb-1">
+                            <p class="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-wider">Pending</p>
+                            <i class="fas fa-clock text-red-400 text-xs"></i>
+                        </div>
+                        <h3 class="text-xl md:text-2xl font-black text-red-600" id="statPending">₹0</h3>
+                    </div>
+                </div>
+
+                <!-- Deposit Collection Special Card -->
+                <div class="bg-gradient-to-br from-yellow-400 via-amber-400 to-yellow-500 p-4 md:p-6 rounded-2xl shadow-lg mb-5 border border-yellow-600 relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 opacity-20 pointer-events-none"><i class="fas fa-vault text-[120px] md:text-[150px] text-yellow-900"></i></div>
+                    <div class="flex justify-between items-center relative z-10">
+                        <div class="flex-1 min-w-0">
+                            <p class="text-[10px] md:text-xs font-black text-yellow-900 uppercase tracking-widest mb-1 flex items-center"><i class="fas fa-vault mr-1.5"></i> Deposit Collection</p>
+                            <p class="text-xs md:text-sm text-yellow-800 font-semibold truncate">Security deposits held from tenants</p>
+                        </div>
+                        <div class="text-right ml-3 shrink-0">
+                            <p class="text-2xl md:text-4xl font-black text-yellow-900 leading-tight" id="statDeposit">₹0</p>
+                            <p class="text-[10px] md:text-xs text-yellow-800 font-bold mt-0.5" id="statDepositCount">0 occupied</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Outstanding Dues -->
+                <div>
+                    <h3 class="text-lg font-bold mb-4 text-red-600 flex items-center"><i class="fas fa-clock mr-2"></i> Outstanding Dues</h3>
+                    <div id="pendingRoomsList" class="space-y-3"></div>
+                </div>
             </div>
             <div id="tabProperties" class="hidden">
-                <div class="flex justify-between items-center mb-5">
-                    <h2 class="text-2xl font-extrabold text-gray-800">My Houses</h2>
+                <div class="flex justify-between items-center mb-5 flex-wrap gap-2">
+                    <div>
+                        <h2 class="text-2xl md:text-3xl font-extrabold text-gray-800">My Houses</h2>
+                        <p class="text-xs md:text-sm text-gray-500 font-medium mt-1">Manage properties & units</p>
+                    </div>
                     <div class="flex gap-2">
                         <button onclick="openTrashModal()" class="bg-gray-100 text-red-500 px-3 py-2 rounded-xl text-sm font-bold shadow-sm hover:bg-red-50 transition border border-gray-200"><i class="fas fa-trash-alt"></i> Trash</button>
                         <button onclick="startNewMonth()" class="bg-gray-900 text-white px-3 py-2 rounded-xl text-sm font-bold shadow-lg hover:bg-black transition flex items-center"><i class="fas fa-calendar-plus mr-1"></i> New Month</button>
@@ -145,14 +203,17 @@
                 <button onclick="openAddHouseModal()" class="fab fixed bottom-24 right-6 bg-blue-600 text-white w-14 h-14 rounded-full flex justify-center items-center text-2xl z-40 hover:bg-blue-700 transition"><i class="fas fa-plus"></i></button>
             </div>
             <div id="tabHistory" class="hidden">
-                <div class="flex justify-between items-center mb-5">
-                    <h2 class="text-2xl font-extrabold text-gray-800">History</h2>
+                <div class="flex justify-between items-center mb-5 flex-wrap gap-2">
+                    <div>
+                        <h2 class="text-2xl md:text-3xl font-extrabold text-gray-800">History</h2>
+                        <p class="text-xs md:text-sm text-gray-500 font-medium mt-1">All past transactions</p>
+                    </div>
                     <button onclick="loadHistoryData()" class="bg-blue-50 text-blue-600 px-4 py-2 rounded-xl text-sm font-bold hover:bg-blue-100 transition shadow-sm border border-blue-100"><i class="fas fa-sync-alt mr-1"></i> Refresh</button>
                 </div>
                 <div id="historyList" class="space-y-3"><div class="text-center text-gray-400 mt-10"><i class="fas fa-receipt text-4xl mb-2"></i><p>Loading...</p></div></div>
             </div>
             <div id="tabProfile" class="hidden">
-                <h2 class="text-2xl font-extrabold text-gray-800 mb-5">My Profile</h2>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-gray-800 mb-5">My Profile</h2>
                 <div class="bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white p-6 rounded-3xl shadow-2xl mb-6 relative overflow-hidden border border-gray-700">
                     <div class="absolute -right-4 -bottom-4 opacity-10"><i class="fas fa-fingerprint text-9xl"></i></div>
                     <div class="relative z-10">
@@ -365,9 +426,13 @@
                 <button onclick="closeModal('roomManagerModal')" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500"><i class="fas fa-times"></i></button>
             </div>
         </div>
-        <div class="bg-gradient-to-r from-blue-50 to-blue-100 p-3 text-center rounded-xl mb-5 border border-blue-200">
+        <div class="bg-gradient-to-r from-blue-50 to-blue-100 p-4 text-center rounded-xl mb-5 border border-blue-200">
             <p id="rmRoomName" class="font-black text-2xl text-blue-900">Room 101</p>
-            <p id="rmRoomId" class="text-xs font-mono text-blue-600 font-bold mt-1 bg-white inline-block px-2 py-0.5 rounded-full border border-blue-200">ID: XXX</p>
+            <div class="flex justify-center gap-1.5 mt-2 flex-wrap">
+                <span id="rmRoomType" class="hidden text-[9px] font-black text-indigo-700 bg-indigo-100 border border-indigo-200 px-2 py-0.5 rounded-full uppercase tracking-wider"></span>
+                <span id="rmRoomSize" class="hidden text-[9px] font-black text-purple-700 bg-purple-100 border border-purple-200 px-2 py-0.5 rounded-full uppercase tracking-wider"></span>
+                <span id="rmRoomId" class="text-[9px] font-mono text-blue-600 font-bold bg-white inline-block px-2 py-0.5 rounded-full border border-blue-200">ID: XXX</span>
+            </div>
         </div>
         <input type="hidden" id="rmHouseId">
         <input type="hidden" id="rmRoomIdVal">
@@ -429,7 +494,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// ===== FIX AUTO-LOGIN: browser session only (close browser = logout) =====
 await setPersistence(auth, browserSessionPersistence);
 
 window.currentUserId = null;
@@ -437,6 +501,13 @@ window.currentUserPlan = 'free';
 window.currentUserWallet = 0;
 window.planExpiryDate = null;
 window.isRegistering = false;
+
+// Update header date
+(function(){
+    const d = new Date();
+    const el = document.getElementById('headerDate');
+    if(el) el.innerText = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+})();
 
 // ===== UI HELPERS =====
 window.showLoader = () => { const e = document.getElementById('globalLoader'); if(e) e.classList.remove('hidden'); };
@@ -501,7 +572,6 @@ window.handleLogout = async () => {
     catch(e) { hideLoader(); showAlert('error', 'Error', e.message); }
 };
 
-// ===== PINCODE AUTOFILL =====
 window.autoFillFromPincode = async (pincode, prefix) => {
     if(!pincode || pincode.length !== 6) return;
     try {
@@ -519,7 +589,6 @@ window.autoFillFromPincode = async (pincode, prefix) => {
     } catch(err) { console.error('Pincode error:', err); }
 };
 
-// ===== AUTH STATE (verification check - FIXED FOR OLD ACCOUNTS) =====
 onAuthStateChanged(auth, async (user) => {
     if (window.isRegistering) return;
     if (user) {
@@ -533,16 +602,12 @@ onAuthStateChanged(auth, async (user) => {
                 return;
             }
             const userData = userDoc.data();
-
-            // ===== FIX: purane accounts jisme isVerified field hi nahi hai, unhe auto-verify karo =====
             const vRaw = userData.isVerified;
             const isBlocked = (vRaw === false || vRaw === "false" || vRaw === 0 || vRaw === "0");
-
             if (vRaw === undefined || vRaw === null) {
                 try { await updateDoc(doc(db, "users", user.uid), { isVerified: true }); } catch(e) { console.warn('auto-verify failed', e); }
                 userData.isVerified = true;
             }
-
             if (isBlocked) {
                 await signOut(auth);
                 document.getElementById('authContainer').classList.remove('hidden');
@@ -550,7 +615,6 @@ onAuthStateChanged(auth, async (user) => {
                 showAlert('error', 'Not Verified', 'Aapka account verified nahi hai. Contact admin.');
                 return;
             }
-
             window.currentUserId = user.uid;
             document.getElementById('authContainer').classList.add('hidden');
             document.getElementById('appContainer').classList.remove('hidden');
@@ -569,7 +633,6 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-// ===== PROFILE =====
 async function loadProfileData() {
     const dSnap = await getDoc(doc(db, "users", window.currentUserId));
     if (dSnap.exists()) {
@@ -628,7 +691,6 @@ window.saveOnboarding = async () => {
     showAlert('success', 'Saved', 'Location saved.');
 };
 
-// ===== FORGOT PASSWORD =====
 window.openForgotModal = () => document.getElementById('forgotModal').classList.remove('hidden');
 window.sendPasswordReset = async () => {
     const email = document.getElementById('resetEmailInput').value;
@@ -641,7 +703,6 @@ window.sendPasswordReset = async () => {
     } catch(error) { showAlert('error', 'Error', error.message); }
 };
 
-// ===== UPGRADE / WALLET =====
 window.showUpgradeModalContent = () => {
     document.getElementById('qrCodeContainer').classList.add('hidden');
     document.getElementById('notifyPaymentBtn').classList.add('hidden');
@@ -776,13 +837,15 @@ async function loadDashboardData() {
     const pList = document.getElementById('pendingRoomsList');
     if(!hList) return;
     if(hList.innerHTML === '') hList.innerHTML=`<div class="flex flex-col items-center justify-center py-10 text-blue-500"><i class="fas fa-circle-notch fa-spin text-4xl mb-3"></i><p class="text-sm font-bold text-gray-500">Syncing...</p></div>`;
-    let tExp=0, tRec=0, tPen=0, vCount=0;
+    let tExp=0, tRec=0, tPen=0, tDep=0, vCount=0, occCount=0;
     let tempHouseCache = {}, tempVacantCache = {}, tempTrash = { houses: [], rooms: [] };
     let htmlBufferHouses = '', htmlBufferPending = '';
     const hSnaps = await getDocs(query(collection(db, "houses"), where("ownerId", "==", window.currentUserId)));
     if(hSnaps.empty) {
         hList.innerHTML = `<div class="text-center text-gray-400 mt-10"><p>No properties found.</p></div>`;
         if(pList) pList.innerHTML = `<p class="text-gray-400">No pending.</p>`;
+        const sd = document.getElementById('statDeposit'); if(sd) sd.innerText = "₹0";
+        const sdc = document.getElementById('statDepositCount'); if(sdc) sdc.innerText = '0 occupied';
         return;
     }
     for (const hDoc of hSnaps.docs) {
@@ -798,6 +861,8 @@ async function loadDashboardData() {
             if(r.occupancyStatus === "Occupied") {
                 const amt = r.rentAmount + r.waterBillFixed + (r.currentLightBill||0) + (r.penalty||0);
                 tExp += amt;
+                tDep += (r.deposit || 0);
+                occCount++;
                 if(r.paymentStatus === "Paid") tRec += amt;
                 else {
                     tPen += amt;
@@ -835,11 +900,12 @@ async function loadDashboardData() {
     const se = document.getElementById('statExpected'); if(se) se.innerText = "₹" + tExp;
     const sr = document.getElementById('statReceived'); if(sr) sr.innerText = "₹" + tRec;
     const sp = document.getElementById('statPending'); if(sp) sp.innerText = "₹" + tPen;
+    const sd = document.getElementById('statDeposit'); if(sd) sd.innerText = "₹" + tDep;
+    const sdc = document.getElementById('statDepositCount'); if(sdc) sdc.innerText = occCount + ' occupied';
     const vc = document.getElementById('vacantCountBadge'); if(vc) vc.innerText = vCount;
     if(tPen === 0 && tExp > 0 && pList) pList.innerHTML = `<p class="text-green-600 font-bold bg-green-50 p-4 rounded-xl border border-green-200 shadow-sm flex items-center"><i class="fas fa-check-circle text-xl mr-2"></i> All collections complete!</p>`;
 }
 
-// ===== VACANT EXPLORER =====
 window.openVacantHousesModal = () => {
     const vt = document.getElementById('veTitle'); if(vt) vt.innerHTML = "Vacant Properties";
     const body = document.getElementById('veBody'); if(!body) return;
@@ -863,7 +929,6 @@ window.openVacantRoomsView = (hId) => {
     });
 };
 
-// ===== HOUSE DETAILS =====
 window.openHouseDetailsModal = (hId) => {
     const d = window.houseDataCache[hId]; if(!d) return;
     const hn = document.getElementById('hdHouseName');
@@ -890,6 +955,15 @@ window.openRoomManager = (hId, rStringEnc) => {
     document.getElementById('rmRoomIdVal').value = r.id;
     document.getElementById('rmRoomName').innerText = "Room " + r.roomNumber;
     document.getElementById('rmRoomId').innerText = r.occupancyStatus === "Occupied" ? "ID: " + r.tenantUniqueId : "Unassigned";
+
+    // Show property type & config size badges
+    const rtEl = document.getElementById('rmRoomType');
+    if(r.propertyType) { rtEl.innerText = r.propertyType; rtEl.classList.remove('hidden'); }
+    else { rtEl.classList.add('hidden'); }
+    const rsEl = document.getElementById('rmRoomSize');
+    if(r.configSize) { rsEl.innerText = r.configSize; rsEl.classList.remove('hidden'); }
+    else { rsEl.classList.add('hidden'); }
+
     const drb = document.getElementById('deleteRoomBtn'); if(drb) drb.onclick = () => window.openDeleteModal('room', hId, r.id, r.roomNumber);
     const body = document.getElementById('roomManagerBody');
 
@@ -937,9 +1011,12 @@ window.openRoomManager = (hId, rStringEnc) => {
                 <button onclick="vacateRoom('${r.tenantName}', ${r.deposit || 0})" class="bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow hover:bg-red-600"><i class="fas fa-sign-out-alt mr-1"></i> Vacate</button>
             </div>
         </div>
-        <div class="bg-yellow-50 border border-yellow-200 p-3 rounded-xl mb-4 flex justify-between items-center">
-            <span class="text-xs font-black text-yellow-800 uppercase tracking-wide"><i class="fas fa-hand-holding-usd mr-1"></i> Deposit Jama</span>
-            <span class="font-black text-yellow-700 text-xl">₹${r.deposit || 0}</span>
+        <div class="bg-gradient-to-r from-yellow-50 to-amber-100 border border-yellow-300 p-3 rounded-xl mb-4 flex justify-between items-center">
+            <div>
+                <p class="text-[10px] font-black text-yellow-800 uppercase tracking-wide"><i class="fas fa-vault mr-1"></i> Deposit Jama</p>
+                <p class="text-[9px] text-yellow-700 font-semibold mt-0.5">Refund on vacate</p>
+            </div>
+            <span class="font-black text-yellow-800 text-xl">₹${r.deposit || 0}</span>
         </div>
         <div id="editTenantInfoSection" class="hidden bg-gray-100 border border-gray-300 p-4 rounded-xl mb-4">
             <h4 class="text-xs font-black text-gray-500 mb-3 uppercase">Edit Details</h4>
@@ -1099,7 +1176,6 @@ window.saveRoomUpdates = async (tName) => {
     } catch(e) { hideLoader(); showAlert('error', 'Error', e.message); }
 };
 
-// ===== VACATE: AUTO REFUND DEPOSIT + HISTORY ENTRY =====
 window.vacateRoom = async (tName, dep) => {
     const refundAmt = Number(dep) || 0;
     if(!confirm(`Vacate ${tName}?\n\nDeposit ₹${refundAmt} will be auto-refunded and logged in History.`)) return;
@@ -1138,7 +1214,6 @@ window.startNewMonth = async () => {
     } catch(e) { hideLoader(); showAlert('error', 'Error', e.message); }
 };
 
-// ===== HISTORY (refund shown as minus) =====
 window.loadHistoryData = async () => {
     try {
         const hList = document.getElementById('historyList');
@@ -1210,7 +1285,6 @@ window.downloadInvoiceAndSend = (type, mob, email, name, rNo, rent, water, light
     }, 800);
 };
 
-// ===== DELETE / TRASH =====
 window.openDeleteModal = (type, hId, rId, name) => {
     document.getElementById('delType').value = type;
     document.getElementById('delHId').value = hId;
@@ -1280,7 +1354,6 @@ window.permDeleteItem = async (type, hId, rId) => {
     } catch(e) { hideLoader(); showAlert('error', 'Error', e.message); }
 };
 
-// ===== ADD HOUSE / ROOM =====
 window.openAddHouseModal = () => document.getElementById('addHouseModal').classList.remove('hidden');
 
 window.generateRoomFields = (val) => {
@@ -1399,7 +1472,6 @@ window.saveNewRoom = async () => {
     } catch(e) { hideLoader(); showAlert('error', 'Error', e.message); }
 };
 
-// ===== TENANT ACCESS =====
 window.openTenantAccessModal = () => {
     const select = document.getElementById('taRoomSelect');
     const list = document.getElementById('taAccessList');
@@ -1448,7 +1520,6 @@ window.removeTenantAccess = async (hId, rId) => {
     } catch (e) { hideLoader(); showAlert('error', 'Error', e.message); }
 };
 
-// ===== LOGIN / REGISTER =====
 document.getElementById('loginBtn').addEventListener('click', async () => {
     const email = document.getElementById('loginEmail').value.trim();
     const pass = document.getElementById('loginPassword').value;
@@ -1508,7 +1579,6 @@ document.getElementById('registerBtn').addEventListener('click', async () => {
     }
 });
 
-// ===== PROFILE SAVE =====
 document.getElementById('saveProfileBtn').addEventListener('click', async () => {
     showLoader();
     try {
@@ -1527,11 +1597,8 @@ document.getElementById('saveProfileBtn').addEventListener('click', async () => 
     } catch(e) { hideLoader(); showAlert('error', 'Error', e.message); }
 });
 
-// ===== PINCODE LISTENERS =====
 document.getElementById('profPincode').addEventListener('input', (e) => window.autoFillFromPincode(e.target.value, 'prof'));
 document.getElementById('obPincode').addEventListener('input', (e) => window.autoFillFromPincode(e.target.value, 'ob'));
-
-// Enter key support on login
 document.getElementById('loginPassword').addEventListener('keypress', (e) => { if(e.key === 'Enter') document.getElementById('loginBtn').click(); });
 </script>
 </body>
