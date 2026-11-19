@@ -1,0 +1,1687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rent Easy - Owner & Tenant Portal</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+    html, body { min-height: 100vh; }
+    body { background-color: #f4f7fb; font-family: 'Segoe UI', system-ui, sans-serif; overflow-x: hidden; }
+    .hidden { display: none !important; }
+    .tab-content { padding-bottom: 120px; min-height: calc(100vh - 60px); }
+    @media (min-width: 768px) {
+        body { display: block; margin: 0; padding: 0; overflow: hidden; }
+        #appContainer { display: flex !important; width: 100% !important; height: 100vh; overflow: hidden; }
+        .desktop-sidebar { display: flex !important; position: relative !important; height: 100vh; width: 260px; flex-shrink: 0; z-index: 50; border-right: 1px solid #e5e7eb; }
+        .main-wrapper { margin-left: 0 !important; flex: 1; width: calc(100% - 260px); height: 100vh; overflow-y: auto; position: relative; }
+        .tab-content { padding-bottom: 40px; padding-top: 24px; max-width: 1200px; margin: 0 auto; width: 100%; min-height: auto; }
+        .fab { bottom: 30px !important; right: 30px !important; position: fixed !important; }
+    }
+    .modal-overlay { background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 50; }
+    .modal-content { max-height: 90vh; overflow-y: auto; animation: modalPop 0.3s ease-out; }
+    @keyframes modalPop { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    .nav-btn.active { color: #3b82f6; }
+    .nav-btn.active .nav-indicator { width: 100%; opacity: 1; }
+    .nav-indicator { width: 0; height: 3px; background: #3b82f6; border-radius: 3px; transition: 0.3s; opacity: 0; margin-bottom: 4px; }
+    .nav-btn { color: #9ca3af; transition: all 0.3s; }
+    .fab { box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); transition: transform 0.2s; }
+    .fab:active { transform: scale(0.95); }
+    .plan-card { cursor: pointer; transition: all 0.2s; }
+    .plan-card.active { border-color: #3b82f6; background-color: #eff6ff; }
+    .type-card { border: 2px solid #e5e7eb; border-radius: 1rem; padding: 1.25rem 1rem; text-align: center; cursor: pointer; transition: all 0.2s; background: white; }
+    .type-card.active { border-color: #3b82f6; background-color: #eff6ff; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15); }
+    .chip { display: inline-block; padding: 0.6rem 1.2rem; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 9999px; font-size: 0.85rem; font-weight: 700; color: #4b5563; cursor: pointer; transition: all 0.2s; margin-right: 0.5rem; margin-bottom: 0.5rem; white-space: nowrap; }
+    .chip.active { background: #3b82f6; color: white; border-color: #3b82f6; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); }
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .tab-fade-in { animation: fadeIn 0.35s ease-out; }
+    @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.6); } 70% { box-shadow: 0 0 0 10px rgba(168, 85, 247, 0); } 100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0); } }
+    .pulse-badge { animation: pulse-ring 2s infinite; }
+    .sidebar-link { display: flex; align-items: center; padding: 12px 20px; border-radius: 12px; color: #6b7280; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-bottom: 4px; }
+    .sidebar-link:hover { background: #eff6ff; color: #3b82f6; }
+    .sidebar-link.active { background: #dbeafe; color: #2563eb; }
+    .sidebar-link i { width: 24px; margin-right: 12px; text-align: center; }
+    .stat-card { transition: transform 0.2s, box-shadow 0.2s; }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
+    .role-toggle { display: flex; background: #f3f4f6; border-radius: 12px; padding: 4px; margin-bottom: 20px; }
+    .role-toggle button { flex: 1; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 14px; color: #6b7280; transition: all 0.2s; border: none; cursor: pointer; background: transparent; }
+    .role-toggle button.active { background: white; color: #3b82f6; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .notice-banner { background: linear-gradient(135deg, #fef3c7, #fde68a); border: 1px solid #fbbf24; border-radius: 12px; padding: 12px; margin-bottom: 16px; }
+</style>
+</head>
+<body class="text-gray-800">
+
+<!-- Loaders -->
+<div id="globalLoader" class="fixed inset-0 modal-overlay hidden flex flex-col justify-center items-center px-4" style="z-index: 99999;">
+    <i class="fas fa-circle-notch fa-spin text-6xl text-blue-500 mb-4 drop-shadow-lg"></i>
+    <p id="loaderText" class="text-white font-bold tracking-widest uppercase text-sm animate-pulse">Loading...</p>
+</div>
+
+<div id="customAlert" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4" style="z-index: 99999;">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl border-t-4 border-green-500">
+        <div id="alertIcon" class="text-6xl mb-4">✅</div>
+        <h3 id="alertTitle" class="text-2xl font-extrabold mb-2 text-gray-800">Updated</h3>
+        <p id="alertMessage" class="text-gray-500 text-sm mb-6 font-medium">Saved.</p>
+        <button id="closeAlertBtn" class="w-full bg-green-500 text-white font-bold py-3.5 rounded-xl hover:bg-green-600 shadow-lg text-lg">Continue</button>
+    </div>
+</div>
+
+<!-- ================= AUTH CONTAINER ================= -->
+<div id="authContainer" class="min-h-screen flex items-center justify-center p-4 w-full">
+    <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border border-gray-100">
+        <h2 class="text-4xl font-black text-center text-blue-600 mb-2 tracking-tight"><i class="fas fa-building mr-2"></i>Rent Easy</h2>
+        <p class="text-center text-gray-400 text-xs mb-6">Owner & Tenant Portal</p>
+        
+        <div class="role-toggle" id="roleToggle">
+            <button id="roleOwnerBtn" class="active" onclick="selectRole('owner')"><i class="fas fa-crown mr-1"></i> Owner</button>
+            <button id="roleTenantBtn" onclick="selectRole('tenant')"><i class="fas fa-user mr-1"></i> Tenant</button>
+        </div>
+
+        <div id="loginForm">
+            <input type="email" id="loginEmail" placeholder="Email ID" class="w-full bg-gray-50 border border-gray-200 p-4 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400" autocomplete="username">
+            <input type="password" id="loginPassword" placeholder="Password" class="w-full bg-gray-50 border border-gray-200 p-4 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400" autocomplete="current-password">
+            <div class="text-right mb-5"><span onclick="openForgotModal()" class="text-sm text-blue-500 cursor-pointer hover:text-blue-700 font-semibold"><i class="fas fa-key mr-1"></i> Forgot Password?</span></div>
+            <button id="loginBtn" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition shadow-lg text-lg">Login</button>
+            <div class="mt-5 p-3 bg-blue-50 border border-blue-100 rounded-xl text-center">
+                <p class="text-xs text-gray-600 font-medium">Naya account? <span onclick="toggleAuth('register')" class="text-blue-600 font-bold cursor-pointer underline">Register karein</span></p>
+            </div>
+        </div>
+        
+        <div id="registerForm" class="hidden">
+            <input type="text" id="regName" placeholder="Full Name" class="w-full bg-gray-50 border border-gray-200 p-4 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400" autocomplete="name">
+            <input type="tel" id="regMobile" placeholder="10-digit Mobile" maxlength="10" class="w-full bg-gray-50 border border-gray-200 p-4 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400" autocomplete="tel">
+            <input type="email" id="regEmail" placeholder="Email ID" class="w-full bg-gray-50 border border-gray-200 p-4 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400" autocomplete="email">
+            <input type="password" id="regPassword" placeholder="Password (min 6 chars)" class="w-full bg-gray-50 border border-gray-200 p-4 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400" autocomplete="new-password">
+            
+            <div id="tenantExtraFields" class="hidden">
+                <div class="flex gap-2 mb-3">
+                    <input type="text" id="regCity" placeholder="City" class="w-1/2 bg-gray-50 border border-gray-200 p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-400">
+                    <input type="text" id="regState" placeholder="State" class="w-1/2 bg-gray-50 border border-gray-200 p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-400">
+                </div>
+            </div>
+            
+            <button id="registerBtn" class="w-full bg-gray-900 text-white font-bold py-4 rounded-xl hover:bg-black transition shadow-lg text-lg">Create Account</button>
+            <p class="text-center text-sm text-gray-500 mt-5 cursor-pointer font-semibold" onclick="toggleAuth('login')">Already have account? <span class="text-blue-500">Login</span></p>
+        </div>
+    </div>
+</div>
+
+<!-- ================= MAIN APP CONTAINER ================= -->
+<div id="appContainer" class="hidden min-h-screen w-full">
+    <!-- Desktop Sidebar -->
+    <aside class="desktop-sidebar hidden fixed left-0 top-0 h-screen w-[260px] bg-white border-r border-gray-200 flex-col shadow-sm z-40">
+        <div class="p-6 border-b border-gray-100">
+            <h1 class="text-xl font-black text-blue-600 flex items-center"><i class="fas fa-building mr-2"></i> Rent Easy</h1>
+            <p id="sidebarRoleLabel" class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-1">Owner Portal</p>
+        </div>
+        <nav class="flex-1 p-4 space-y-1 overflow-y-auto" id="sidebarNav">
+            <!-- Owner nav -->
+            <div class="sidebar-link active" data-owner-tab="Analytics" onclick="switchTab('Analytics')"><i class="fas fa-home"></i> Dashboard</div>
+            <div class="sidebar-link" data-owner-tab="Properties" onclick="switchTab('Properties')"><i class="fas fa-building"></i> My Rooms</div>
+            <div class="sidebar-link" data-owner-tab="History" onclick="switchTab('History')"><i class="fas fa-history"></i> History</div>
+            <div class="sidebar-link" data-owner-tab="Profile" onclick="switchTab('Profile')"><i class="fas fa-user-circle"></i> Profile</div>
+            <!-- Tenant nav -->
+            <div class="sidebar-link hidden" data-tenant-tab="TDashboard" onclick="switchTab('TDashboard')"><i class="fas fa-home"></i> Dashboard</div>
+            <div class="sidebar-link hidden" data-tenant-tab="TRooms" onclick="switchTab('TRooms')"><i class="fas fa-door-open"></i> My Rooms</div>
+            <div class="sidebar-link hidden" data-tenant-tab="THistory" onclick="switchTab('THistory')"><i class="fas fa-history"></i> History</div>
+            <div class="sidebar-link hidden" data-tenant-tab="TProfile" onclick="switchTab('TProfile')"><i class="fas fa-user-circle"></i> Profile</div>
+        </nav>
+        <div class="p-4 border-t border-gray-100">
+            <button onclick="handleLogout()" class="w-full bg-gray-100 text-gray-600 font-bold py-3 rounded-xl hover:bg-red-50 hover:text-red-500 transition flex items-center justify-center"><i class="fas fa-power-off mr-2"></i> Logout</button>
+        </div>
+    </aside>
+    
+    <div class="main-wrapper w-full">
+        <header class="bg-blue-600 text-white p-3 sm:p-4 sticky top-0 z-30 shadow-md flex justify-between items-center">
+            <h1 class="text-lg sm:text-xl font-black tracking-wide flex items-center md:hidden"><i class="fas fa-building mr-2"></i> Rent Easy</h1>
+            <div class="hidden md:block">
+                <div class="text-lg font-bold text-blue-100">Welcome back 👋</div>
+                <div class="text-xs text-blue-200 font-medium mt-0.5" id="headerDate">—</div>
+            </div>
+            <div class="flex items-center gap-2">
+                <!-- Owner badges -->
+                <div id="ownerBadgeGroup" class="flex items-center gap-2">
+                    <div class="flex flex-col items-end cursor-pointer hover:scale-105 transition" onclick="openUpgradeModal()">
+                        <div id="headerPlanBadge" class="hidden bg-yellow-400 text-yellow-900 text-[9px] font-black px-1.5 py-0.5 rounded shadow-sm tracking-wider border border-yellow-500">FREE</div>
+                        <div id="headerValidityBadge" class="hidden text-[9px] font-bold text-blue-200 mt-0.5 uppercase">No Plan</div>
+                    </div>
+                    <div id="headerWalletBadge" onclick="openUpgradeModal()" class="hidden bg-green-500 text-white text-[10px] font-black px-2 py-1.5 rounded shadow-sm cursor-pointer hover:scale-105 transition border border-green-600 flex items-center">
+                        <i class="fas fa-wallet mr-1"></i> <span id="walletAmtText">₹0</span>
+                    </div>
+                </div>
+                
+                <!-- Tenant notification bell -->
+                <button id="tenantNotifBtn" class="hidden relative bg-blue-700 w-9 h-9 rounded-full flex items-center justify-center shadow hover:bg-blue-800 transition" onclick="openTenantNotifications()">
+                    <i class="fas fa-bell"></i>
+                    <span id="tenantNotifCount" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black h-5 w-5 rounded-full flex items-center justify-center border-2 border-blue-600">0</span>
+                </button>
+                
+                <!-- Three-dot menu -->
+                <button onclick="openEmergencyMenu()" class="bg-blue-700 w-9 h-9 rounded-full flex items-center justify-center shadow hover:bg-blue-800 transition" title="Menu & Helpline">
+                    <i class="fas fa-ellipsis-vertical"></i>
+                </button>
+                
+                <button onclick="handleLogout()" class="md:hidden bg-blue-700 px-3 py-1.5 rounded-lg text-sm font-bold shadow hover:bg-red-500 transition ml-1"><i class="fas fa-power-off"></i></button>
+            </div>
+        </header>
+        
+        <main class="p-3 sm:p-4 tab-content">
+            <!-- ========== OWNER TABS ========== -->
+            <div id="tabAnalytics">
+                <div class="flex justify-between items-end mb-5 flex-wrap gap-2">
+                    <div>
+                        <h2 class="text-2xl md:text-3xl font-extrabold text-gray-800">Dashboard Overview</h2>
+                        <p class="text-xs md:text-sm text-gray-500 font-medium mt-1">Complete snapshot of your rental business</p>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white p-5 md:p-6 rounded-2xl shadow-xl mb-4 cursor-pointer transform hover:scale-[1.005] transition border border-gray-800 relative overflow-hidden" onclick="openVacantHousesModal()">
+                    <div class="absolute -right-6 -top-6 opacity-10 pointer-events-none"><i class="fas fa-key text-[140px] md:text-[180px]"></i></div>
+                    <div class="flex justify-between items-center relative z-10 gap-3">
+                        <div class="min-w-0">
+                            <h3 class="text-lg md:text-xl font-bold flex items-center"><i class="fas fa-key text-yellow-400 mr-2"></i> Available Rooms</h3>
+                            <p class="text-xs md:text-sm text-gray-400 mt-1">Tap to view & assign tenants</p>
+                        </div>
+                        <div class="bg-gradient-to-br from-yellow-400 to-yellow-500 text-gray-900 text-3xl md:text-4xl font-black h-16 w-16 md:h-20 md:w-20 flex items-center justify-center rounded-full shadow-lg shrink-0" id="vacantCountBadge">0</div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-4">
+                    <div class="stat-card bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-blue-500">
+                        <div class="flex items-center justify-between mb-1"><p class="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-wider">Expected</p><i class="fas fa-rupee-sign text-blue-400 text-xs"></i></div>
+                        <h3 class="text-xl md:text-2xl font-black text-blue-600" id="statExpected">₹0</h3>
+                    </div>
+                    <div class="stat-card bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-green-500">
+                        <div class="flex items-center justify-between mb-1"><p class="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-wider">Received</p><i class="fas fa-check-circle text-green-400 text-xs"></i></div>
+                        <h3 class="text-xl md:text-2xl font-black text-green-600" id="statReceived">₹0</h3>
+                    </div>
+                    <div class="stat-card bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-red-500 col-span-2 md:col-span-1">
+                        <div class="flex items-center justify-between mb-1"><p class="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-wider">Pending</p><i class="fas fa-clock text-red-400 text-xs"></i></div>
+                        <h3 class="text-xl md:text-2xl font-black text-red-600" id="statPending">₹0</h3>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-br from-purple-500 via-purple-600 to-indigo-700 p-4 md:p-6 rounded-2xl shadow-lg mb-5 border border-purple-600 relative overflow-hidden cursor-pointer hover:scale-[1.01] transition" onclick="openPaymentRequests()">
+                    <div class="absolute -right-4 -top-4 opacity-20 pointer-events-none"><i class="fas fa-bell text-[120px] md:text-[150px] text-purple-200"></i></div>
+                    <div class="flex justify-between items-center relative z-10 gap-3">
+                        <div class="flex-1 min-w-0">
+                            <p class="text-[10px] md:text-xs font-black text-purple-100 uppercase tracking-widest mb-1 flex items-center"><i class="fas fa-bell mr-1.5"></i> Payment Notifications</p>
+                            <p class="text-xs md:text-sm text-purple-100 font-semibold truncate">Tenant payment requests awaiting approval</p>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <p class="text-2xl md:text-4xl font-black text-white leading-tight pulse-badge inline-block px-2 rounded-full" id="statPendingRequests">0</p>
+                            <p class="text-[10px] md:text-xs text-purple-200 font-bold mt-0.5" id="statPendingReqText">No pending</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-br from-yellow-400 via-amber-400 to-yellow-500 p-4 md:p-6 rounded-2xl shadow-lg mb-5 border border-yellow-600 relative overflow-hidden cursor-pointer hover:scale-[1.01] transition" onclick="openDepositCollection()">
+                    <div class="absolute -right-4 -top-4 opacity-20 pointer-events-none"><i class="fas fa-vault text-[120px] md:text-[150px] text-yellow-900"></i></div>
+                    <div class="flex justify-between items-center relative z-10 gap-3">
+                        <div class="flex-1 min-w-0">
+                            <p class="text-[10px] md:text-xs font-black text-yellow-900 uppercase tracking-widest mb-1 flex items-center"><i class="fas fa-vault mr-1.5"></i> Deposit Collection</p>
+                            <p class="text-xs md:text-sm text-yellow-800 font-semibold truncate">Tap to view room-wise deposit details</p>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <p class="text-2xl md:text-4xl font-black text-yellow-900 leading-tight" id="statDeposit">₹0</p>
+                            <p class="text-[10px] md:text-xs text-yellow-800 font-bold mt-0.5" id="statDepositCount">0 occupied</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tabProperties" class="hidden">
+                <div class="flex justify-between items-center mb-5 flex-wrap gap-2">
+                    <div>
+                        <h2 class="text-2xl md:text-3xl font-extrabold text-gray-800">My Houses</h2>
+                        <p class="text-xs md:text-sm text-gray-500 font-medium mt-1">Manage properties & units</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="openTrashModal()" class="bg-gray-100 text-red-500 px-3 py-2 rounded-xl text-sm font-bold shadow-sm hover:bg-red-50 transition border border-gray-200"><i class="fas fa-trash-alt"></i> Trash</button>
+                        <button onclick="startNewMonth()" class="bg-gray-900 text-white px-3 py-2 rounded-xl text-sm font-bold shadow-lg hover:bg-black transition flex items-center"><i class="fas fa-calendar-plus mr-1"></i> New Month</button>
+                    </div>
+                </div>
+                <div id="housesList" class="space-y-4"></div>
+                <button onclick="openAddHouseModal()" class="fab fixed bottom-24 right-6 bg-blue-600 text-white w-14 h-14 rounded-full flex justify-center items-center text-2xl z-40 hover:bg-blue-700 transition"><i class="fas fa-plus"></i></button>
+            </div>
+
+            <div id="tabHistory" class="hidden">
+                <div class="flex justify-between items-center mb-5 flex-wrap gap-2">
+                    <div>
+                        <h2 class="text-2xl md:text-3xl font-extrabold text-gray-800">History</h2>
+                        <p class="text-xs md:text-sm text-gray-500 font-medium mt-1">All past transactions</p>
+                    </div>
+                    <button onclick="loadHistoryData()" class="bg-blue-50 text-blue-600 px-4 py-2 rounded-xl text-sm font-bold hover:bg-blue-100 transition shadow-sm border border-blue-100"><i class="fas fa-sync-alt mr-1"></i> Refresh</button>
+                </div>
+                <div id="historyList" class="space-y-3"></div>
+            </div>
+
+            <div id="tabProfile" class="hidden">
+                <h2 class="text-2xl md:text-3xl font-extrabold text-gray-800 mb-5">My Profile</h2>
+                <div class="bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white p-6 rounded-3xl shadow-2xl mb-6 relative overflow-hidden border border-gray-700">
+                    <div class="absolute -right-4 -bottom-4 opacity-10"><i class="fas fa-fingerprint text-9xl"></i></div>
+                    <div class="relative z-10">
+                        <div class="flex justify-between items-start mb-4">
+                            <div><p class="text-xs text-blue-400 font-bold tracking-widest uppercase mb-1">Owner Asset ID</p><p class="text-lg font-mono font-bold bg-gray-800 px-3 py-1 rounded-lg border border-gray-600 inline-block shadow-inner" id="ownerAssetId">RE-OWN-XXXX</p></div>
+                            <button onclick="openUpgradeModal()" class="bg-yellow-500 hover:bg-yellow-400 text-yellow-900 font-black px-3 py-1 rounded-lg text-xs tracking-wider transition shadow"><i class="fas fa-crown mr-1"></i> UPGRADE</button>
+                        </div>
+                        <h3 class="text-3xl font-black uppercase tracking-wide mb-4" id="profileName">Loading...</h3>
+                        <div class="space-y-2">
+                            <p class="text-lg font-medium text-gray-200"><i class="fas fa-phone-alt mr-3 text-blue-400"></i><span id="profileMobile">...</span></p>
+                            <p class="text-sm font-medium text-gray-400"><i class="fas fa-envelope mr-3 text-blue-400"></i><span id="profileEmail">...</span></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 mb-6">
+                    <h3 class="font-bold text-gray-800 mb-4"><i class="fas fa-map-marked-alt mr-2 text-red-500"></i> Primary Location Setup</h3>
+                    <input type="text" id="profState" placeholder="State (auto)" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400 font-medium">
+                    <input type="text" id="profCity" placeholder="City (auto)" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400 font-medium">
+                    <input type="text" id="profArea" placeholder="Area (auto)" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400 font-medium">
+                    <input type="number" id="profPincode" placeholder="Pincode (Mandatory)*" maxlength="6" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-4 outline-none focus:ring-2 focus:ring-blue-400 font-bold text-blue-700">
+                </div>
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                    <h3 class="font-bold text-gray-800 mb-2"><i class="fas fa-users-cog mr-2 text-blue-500"></i> Tenant Portal Access</h3>
+                    <p class="text-xs text-gray-500 mb-4 font-medium">Grant tenants access to their bills & history.</p>
+                    <button id="tenantAccessBtn" onclick="openTenantAccessModal()" class="w-full bg-blue-50 text-blue-600 font-bold py-3.5 rounded-xl border border-blue-200 shadow-sm hover:bg-blue-100 transition mb-6 flex items-center justify-center text-sm"><i class="fas fa-envelope-open-text mr-2"></i> Manage Tenant Access</button>
+                    <h3 class="font-bold text-gray-800 mb-4 border-t pt-5"><i class="fas fa-university mr-2 text-green-500"></i> Payment Details</h3>
+                    <input type="text" id="upiIdInput" placeholder="UPI ID" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400 font-medium">
+                    <input type="text" id="bankAccInput" placeholder="Bank Account Number" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400 font-medium">
+                    <input type="text" id="ifscInput" placeholder="IFSC Code" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-6 outline-none focus:ring-2 focus:ring-blue-400 font-medium">
+                    <button id="saveProfileBtn" class="w-full bg-green-500 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-green-600 transition text-lg flex justify-center items-center"><i class="fas fa-save mr-2"></i> Save Profile</button>
+                </div>
+            </div>
+
+            <!-- ========== TENANT TABS ========== -->
+            <div id="tabTDashboard" class="hidden">
+                <div class="flex justify-between items-end mb-5 flex-wrap gap-2">
+                    <div>
+                        <h2 class="text-2xl md:text-3xl font-extrabold text-gray-800">My Dashboard</h2>
+                        <p class="text-xs md:text-sm text-gray-500 font-medium mt-1">Rent, bills & deposit at a glance</p>
+                    </div>
+                </div>
+                <!-- Summary cards -->
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
+                    <div class="stat-card bg-white p-4 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-blue-500">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase">Linked Rooms</p>
+                        <h3 class="text-2xl font-black text-blue-600" id="tStatRooms">0</h3>
+                    </div>
+                    <div class="stat-card bg-white p-4 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-red-500">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase">Total Due</p>
+                        <h3 class="text-2xl font-black text-red-600" id="tStatDue">₹0</h3>
+                    </div>
+                    <div class="stat-card bg-white p-4 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-yellow-500 col-span-2 md:col-span-1">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase">Deposit Paid</p>
+                        <h3 class="text-2xl font-black text-yellow-600" id="tStatDeposit">₹0</h3>
+                    </div>
+                </div>
+                <!-- Quick link room -->
+                <div class="bg-white p-5 rounded-3xl shadow-md border border-gray-100 mb-4">
+                    <h3 class="font-extrabold text-gray-800 text-sm mb-2 flex items-center"><i class="fas fa-link text-blue-500 mr-2"></i> Link New Room</h3>
+                    <p class="text-xs text-gray-500 mb-3">Enter Unit ID from owner (e.g. GH-123)</p>
+                    <div class="flex gap-2">
+                        <input type="text" id="tLinkRoomInput" placeholder="Room Unit ID" class="w-full uppercase font-mono text-sm bg-gray-50 border border-gray-200 p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-400">
+                        <button onclick="tenantLinkRoom()" class="bg-blue-600 text-white font-bold px-5 py-3 rounded-xl hover:bg-blue-700 transition text-sm shadow-md">Link</button>
+                    </div>
+                </div>
+                <!-- Rooms list -->
+                <h3 class="font-extrabold text-gray-800 text-lg mb-3">My Rooms</h3>
+                <div id="tRoomsDashboardList" class="space-y-3"></div>
+            </div>
+
+            <div id="tabTRooms" class="hidden">
+                <h2 class="text-2xl md:text-3xl font-extrabold text-gray-800 mb-5">My Rooms</h2>
+                <div id="tRoomsFullList" class="space-y-3"></div>
+            </div>
+
+            <div id="tabTHistory" class="hidden">
+                <div class="flex justify-between items-center mb-5 flex-wrap gap-2">
+                    <div>
+                        <h2 class="text-2xl md:text-3xl font-extrabold text-gray-800">Payment History</h2>
+                        <p class="text-xs md:text-sm text-gray-500 font-medium mt-1">All your rent payments</p>
+                    </div>
+                    <button onclick="loadTenantHistory()" class="bg-blue-50 text-blue-600 px-4 py-2 rounded-xl text-sm font-bold hover:bg-blue-100 transition shadow-sm border border-blue-100"><i class="fas fa-sync-alt mr-1"></i> Refresh</button>
+                </div>
+                <div id="tHistoryList" class="space-y-3"></div>
+            </div>
+
+            <div id="tabTProfile" class="hidden">
+                <h2 class="text-2xl md:text-3xl font-extrabold text-gray-800 mb-5">My Profile</h2>
+                <div class="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white p-6 rounded-3xl shadow-2xl mb-6 relative overflow-hidden border border-blue-700">
+                    <div class="absolute -right-4 -bottom-4 opacity-10"><i class="fas fa-user text-9xl"></i></div>
+                    <div class="relative z-10 text-center">
+                        <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3 border-4 border-white/30">
+                            <i class="fas fa-user text-3xl text-white"></i>
+                        </div>
+                        <h3 class="text-2xl font-black" id="tProfileName">Tenant</h3>
+                        <p class="text-sm text-blue-200 mt-1" id="tProfileEmail">email@example.com</p>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 mb-4">
+                    <h3 class="font-bold text-gray-800 mb-4"><i class="fas fa-id-card mr-2 text-blue-500"></i> Personal Details</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center border-b pb-2"><span class="text-xs text-gray-500 uppercase font-bold">Mobile</span><span class="font-bold text-gray-800" id="tProfileMobile">--</span></div>
+                        <div class="flex justify-between items-center border-b pb-2"><span class="text-xs text-gray-500 uppercase font-bold">City</span><span class="font-bold text-gray-800" id="tProfileCity">--</span></div>
+                        <div class="flex justify-between items-center border-b pb-2"><span class="text-xs text-gray-500 uppercase font-bold">State</span><span class="font-bold text-gray-800" id="tProfileState">--</span></div>
+                        <div class="flex justify-between items-center"><span class="text-xs text-gray-500 uppercase font-bold">Linked Rooms</span><span class="font-bold text-gray-800" id="tProfileLinkedRooms">0</span></div>
+                    </div>
+                </div>
+                <button onclick="handleLogout()" class="w-full bg-red-50 text-red-500 font-bold py-3.5 rounded-xl border border-red-100 hover:bg-red-100 transition"><i class="fas fa-sign-out-alt mr-2"></i> Logout</button>
+            </div>
+        </main>
+
+        <!-- Mobile bottom nav -->
+        <nav class="mobile-bottom-nav fixed bottom-0 w-full bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.05)] border-t border-gray-100 flex justify-around items-center z-40 h-[72px] pb-2 md:hidden" id="mobileNav">
+            <button class="nav-btn active flex flex-col items-center justify-center w-full h-full pt-1" data-mob="Analytics" onclick="switchTab('Analytics')"><div class="nav-indicator"></div><i class="fas fa-home text-xl mb-1"></i><span class="text-[10px] font-bold uppercase tracking-wider">Home</span></button>
+            <button class="nav-btn flex flex-col items-center justify-center w-full h-full pt-1" data-mob="Properties" onclick="switchTab('Properties')"><div class="nav-indicator"></div><i class="fas fa-building text-xl mb-1"></i><span class="text-[10px] font-bold uppercase tracking-wider">Rooms</span></button>
+            <button class="nav-btn flex flex-col items-center justify-center w-full h-full pt-1" data-mob="History" onclick="switchTab('History')"><div class="nav-indicator"></div><i class="fas fa-history text-xl mb-1"></i><span class="text-[10px] font-bold uppercase tracking-wider">History</span></button>
+            <button class="nav-btn flex flex-col items-center justify-center w-full h-full pt-1" data-mob="Profile" onclick="switchTab('Profile')"><div class="nav-indicator"></div><i class="fas fa-user-circle text-xl mb-1"></i><span class="text-[10px] font-bold uppercase tracking-wider">Profile</span></button>
+        </nav>
+    </div>
+</div>
+
+<!-- ================= EMERGENCY MENU MODAL ================= -->
+<div id="emergencyMenuModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[100]">
+    <div class="bg-white rounded-3xl p-6 w-full max-w-sm modal-content shadow-2xl border-t-4 border-red-500">
+        <div class="flex justify-between items-center mb-4 border-b pb-3">
+            <h3 class="font-black text-xl text-gray-800"><i class="fas fa-ellipsis-vertical mr-2 text-blue-600"></i> Menu & Help</h3>
+            <button onclick="closeModal('emergencyMenuModal')" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500"><i class="fas fa-times"></i></button>
+        </div>
+        <button onclick="closeModal('emergencyMenuModal'); openEmergencyNumbers()" class="w-full bg-red-50 text-red-600 font-bold py-4 rounded-xl border border-red-200 shadow-sm hover:bg-red-100 transition mb-3 flex items-center justify-center text-base">
+            <i class="fas fa-phone-volume mr-2 text-lg"></i> Emergency & Helpline
+        </button>
+        <button onclick="closeModal('emergencyMenuModal'); openCompanyContact()" class="w-full bg-blue-50 text-blue-600 font-bold py-4 rounded-xl border border-blue-200 shadow-sm hover:bg-blue-100 transition mb-3 flex items-center justify-center text-base">
+            <i class="fas fa-headset mr-2 text-lg"></i> Contact Rent Easy
+        </button>
+        <button onclick="closeModal('emergencyMenuModal'); openAboutApp()" class="w-full bg-gray-50 text-gray-700 font-bold py-4 rounded-xl border border-gray-200 shadow-sm hover:bg-gray-100 transition flex items-center justify-center text-base">
+            <i class="fas fa-info-circle mr-2 text-lg"></i> About This App
+        </button>
+    </div>
+</div>
+
+<!-- ================= EMERGENCY NUMBERS MODAL ================= -->
+<div id="emergencyNumbersModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[100]">
+    <div class="bg-white rounded-3xl p-6 w-full max-w-sm modal-content shadow-2xl border-t-4 border-red-500">
+        <div class="flex justify-between items-center mb-4 border-b pb-3">
+            <h3 class="font-black text-xl text-gray-800"><i class="fas fa-phone-volume mr-2 text-red-500"></i> Emergency Numbers</h3>
+            <button onclick="closeModal('emergencyNumbersModal')" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500"><i class="fas fa-times"></i></button>
+        </div>
+        <p class="text-xs text-gray-500 mb-4 font-medium">Tap any number to call immediately</p>
+        <div class="space-y-2">
+            <a href="tel:112" class="flex items-center justify-between bg-red-50 p-3 rounded-xl border border-red-200 hover:bg-red-100 transition">
+                <div class="flex items-center"><div class="bg-red-500 text-white w-10 h-10 rounded-full flex items-center justify-center mr-3"><i class="fas fa-exclamation-triangle"></i></div>
+                <div><p class="font-bold text-gray-800 text-sm">National Emergency</p><p class="text-xs text-gray-500">All emergencies</p></div></div>
+                <span class="font-black text-red-600 text-lg">112</span>
+            </a>
+            <a href="tel:100" class="flex items-center justify-between bg-blue-50 p-3 rounded-xl border border-blue-200 hover:bg-blue-100 transition">
+                <div class="flex items-center"><div class="bg-blue-500 text-white w-10 h-10 rounded-full flex items-center justify-center mr-3"><i class="fas fa-shield-alt"></i></div>
+                <div><p class="font-bold text-gray-800 text-sm">Police</p><p class="text-xs text-gray-500">Law & order</p></div></div>
+                <span class="font-black text-blue-600 text-lg">100</span>
+            </a>
+            <a href="tel:108" class="flex items-center justify-between bg-green-50 p-3 rounded-xl border border-green-200 hover:bg-green-100 transition">
+                <div class="flex items-center"><div class="bg-green-500 text-white w-10 h-10 rounded-full flex items-center justify-center mr-3"><i class="fas fa-ambulance"></i></div>
+                <div><p class="font-bold text-gray-800 text-sm">Ambulance</p><p class="text-xs text-gray-500">Medical emergency</p></div></div>
+                <span class="font-black text-green-600 text-lg">108</span>
+            </a>
+            <a href="tel:101" class="flex items-center justify-between bg-orange-50 p-3 rounded-xl border border-orange-200 hover:bg-orange-100 transition">
+                <div class="flex items-center"><div class="bg-orange-500 text-white w-10 h-10 rounded-full flex items-center justify-center mr-3"><i class="fas fa-fire-extinguisher"></i></div>
+                <div><p class="font-bold text-gray-800 text-sm">Fire Brigade</p><p class="text-xs text-gray-500">Fire emergency</p></div></div>
+                <span class="font-black text-orange-600 text-lg">101</span>
+            </a>
+            <a href="tel:1091" class="flex items-center justify-between bg-pink-50 p-3 rounded-xl border border-pink-200 hover:bg-pink-100 transition">
+                <div class="flex items-center"><div class="bg-pink-500 text-white w-10 h-10 rounded-full flex items-center justify-center mr-3"><i class="fas fa-female"></i></div>
+                <div><p class="font-bold text-gray-800 text-sm">Women Helpline</p><p class="text-xs text-gray-500">Women in distress</p></div></div>
+                <span class="font-black text-pink-600 text-lg">1091</span>
+            </a>
+            <a href="tel:1098" class="flex items-center justify-between bg-purple-50 p-3 rounded-xl border border-purple-200 hover:bg-purple-100 transition">
+                <div class="flex items-center"><div class="bg-purple-500 text-white w-10 h-10 rounded-full flex items-center justify-center mr-3"><i class="fas fa-child"></i></div>
+                <div><p class="font-bold text-gray-800 text-sm">Child Helpline</p><p class="text-xs text-gray-500">Children in need</p></div></div>
+                <span class="font-black text-purple-600 text-lg">1098</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- ================= COMPANY CONTACT MODAL ================= -->
+<div id="companyContactModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[100]">
+    <div class="bg-white rounded-3xl p-6 w-full max-w-sm modal-content shadow-2xl border-t-4 border-blue-500">
+        <div class="flex justify-between items-center mb-4 border-b pb-3">
+            <h3 class="font-black text-xl text-gray-800"><i class="fas fa-headset mr-2 text-blue-500"></i> Contact Us</h3>
+            <button onclick="closeModal('companyContactModal')" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="text-center mb-5">
+            <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3"><i class="fas fa-building text-3xl text-blue-600"></i></div>
+            <h4 class="font-black text-gray-800 text-lg">Rent Easy Support</h4>
+            <p class="text-xs text-gray-500 mt-1">We're here to help you</p>
+        </div>
+        <a href="tel:8866653002" class="flex items-center justify-between bg-blue-50 p-4 rounded-xl border border-blue-200 hover:bg-blue-100 transition mb-2">
+            <div class="flex items-center"><div class="bg-blue-500 text-white w-10 h-10 rounded-full flex items-center justify-center mr-3"><i class="fas fa-phone"></i></div>
+            <div class="text-left"><p class="font-bold text-gray-800 text-sm">Call Support</p><p class="text-xs text-gray-500">Mon-Sat, 9AM-8PM</p></div></div>
+            <span class="font-black text-blue-600 text-base">8866653002</span>
+        </a>
+        <a href="https://wa.me/918866653002" target="_blank" class="flex items-center justify-between bg-green-50 p-4 rounded-xl border border-green-200 hover:bg-green-100 transition">
+            <div class="flex items-center"><div class="bg-green-500 text-white w-10 h-10 rounded-full flex items-center justify-center mr-3"><i class="fab fa-whatsapp"></i></div>
+            <div class="text-left"><p class="font-bold text-gray-800 text-sm">WhatsApp</p><p class="text-xs text-gray-500">Chat with us</p></div></div>
+            <span class="font-black text-green-600 text-base">8866653002</span>
+        </a>
+    </div>
+</div>
+
+<!-- ================= ABOUT APP MODAL ================= -->
+<div id="aboutAppModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[100]">
+    <div class="bg-white rounded-3xl p-6 w-full max-w-sm modal-content shadow-2xl border-t-4 border-gray-600">
+        <div class="flex justify-between items-center mb-4 border-b pb-3">
+            <h3 class="font-black text-xl text-gray-800"><i class="fas fa-info-circle mr-2 text-gray-600"></i> About</h3>
+            <button onclick="closeModal('aboutAppModal')" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="text-center">
+            <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3"><i class="fas fa-building text-3xl text-blue-600"></i></div>
+            <h4 class="font-black text-gray-800 text-xl">Rent Easy</h4>
+            <p class="text-xs text-gray-500 mt-1 mb-4">Version 3.0.0</p>
+            <p class="text-sm text-gray-600 leading-relaxed">A complete rental management platform connecting owners and tenants. Manage properties, track bills, collect rent, and stay connected — all in one place.</p>
+            <div class="mt-4 pt-4 border-t">
+                <p class="text-[10px] text-gray-400 font-medium">© 2026 Rent Easy. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= FORGOT PASSWORD MODAL ================= -->
+<div id="forgotModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[105]">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-sm modal-content shadow-2xl border-t-4 border-blue-500">
+        <div class="flex justify-between items-center mb-4 border-b pb-3">
+            <h3 class="font-bold text-xl text-gray-800"><i class="fas fa-key text-blue-500 mr-2"></i>Reset Password</h3>
+            <button onclick="closeModal('forgotModal')" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500"><i class="fas fa-times"></i></button>
+        </div>
+        <p class="text-sm text-gray-600 mb-4 font-medium">Enter your registered email ID. We'll send a password reset link.</p>
+        <input type="email" id="resetEmailInput" placeholder="Email ID" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-4 outline-none focus:ring-2 focus:ring-blue-400">
+        <button onclick="sendPasswordReset()" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-lg hover:bg-blue-700 transition flex items-center justify-center"><i class="fas fa-paper-plane mr-2"></i> Send Reset Link</button>
+        <p class="text-center text-xs text-gray-400 mt-4">Check your inbox (and spam folder)</p>
+    </div>
+</div>
+
+<!-- ================= TENANT NOTIFICATIONS MODAL ================= -->
+<div id="tenantNotificationsModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[95]">
+    <div class="bg-white rounded-2xl p-5 w-full max-w-md modal-content shadow-2xl border-t-4 border-blue-500">
+        <div class="flex justify-between items-center border-b pb-3 mb-3">
+            <h3 class="font-bold text-gray-800 text-lg"><i class="fas fa-bell mr-2 text-blue-500"></i> Notifications</h3>
+            <button onclick="closeModal('tenantNotificationsModal')" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="tenantNotifList" class="space-y-2 max-h-[65vh] overflow-y-auto pr-1"></div>
+    </div>
+</div>
+
+<!-- ================= TENANT ROOM DETAIL MODAL ================= -->
+<div id="tenantRoomDetailModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-end sm:items-center px-4 z-[90]">
+    <div class="bg-white rounded-t-3xl sm:rounded-2xl p-5 w-full max-w-lg modal-content shadow-2xl border-t-4 border-blue-500 max-h-[92vh] overflow-y-auto">
+        <div class="flex justify-between items-center border-b pb-3 mb-3">
+            <h3 class="font-black text-gray-800 text-xl" id="trdRoomTitle">Room Details</h3>
+            <button onclick="closeModal('tenantRoomDetailModal')" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="tenantRoomDetailBody"></div>
+    </div>
+</div>
+
+<!-- ================= OWNER BADGES / EXISTING MODALS (simplified versions) ================= -->
+<div id="upgradeModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[90]">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-sm modal-content shadow-2xl border-t-4 border-yellow-500">
+        <div class="flex justify-between items-center mb-4 border-b pb-3">
+            <h3 class="font-black text-xl text-gray-800"><i class="fas fa-crown text-yellow-500 mr-2"></i>Upgrade</h3>
+            <button onclick="closeModal('upgradeModal')" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500"><i class="fas fa-times"></i></button>
+        </div>
+        <p class="text-sm text-gray-600 mb-4">Premium feature. Please contact support at <a href="tel:8866653002" class="text-blue-600 font-bold">8866653002</a> to upgrade.</p>
+        <button onclick="closeModal('upgradeModal')" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl">OK</button>
+    </div>
+</div>
+
+<div id="paymentRequestsModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-3 z-[73]">
+    <div class="bg-white rounded-2xl p-4 sm:p-5 w-full max-w-lg modal-content shadow-2xl border-t-4 border-purple-500">
+        <div class="flex justify-between items-center border-b pb-3 mb-3">
+            <h3 class="text-lg font-bold text-gray-800 flex items-center"><i class="fas fa-bell mr-2 text-purple-600"></i> Payment Notifications</h3>
+            <button onclick="closeModal('paymentRequestsModal')" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="prList" class="space-y-2 max-h-[65vh] overflow-y-auto pr-1"></div>
+    </div>
+</div>
+
+<div id="addHouseModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-50">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-md modal-content shadow-2xl">
+        <div class="flex justify-between items-center mb-5 border-b pb-3">
+            <h3 class="font-extrabold text-xl text-gray-800">Add Property</h3>
+            <button onclick="closeModal('addHouseModal')" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500"><i class="fas fa-times"></i></button>
+        </div>
+        <input type="text" id="houseName" placeholder="House Name" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400">
+        <input type="text" id="houseAddress" placeholder="Address Line" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400">
+        <input type="number" id="hPincode" placeholder="Pincode*" maxlength="6" class="w-full bg-blue-50 border border-blue-200 p-3.5 rounded-xl mb-3 font-bold">
+        <input type="number" id="roomCount" placeholder="Number of Rooms" class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl mb-3">
+        <button onclick="saveProperty()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl mt-2 shadow-lg hover:bg-blue-700">Save Property</button>
+    </div>
+</div>
+
+<div id="trashModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[55]">
+    <div class="bg-white rounded-2xl p-5 w-full max-w-md modal-content shadow-2xl">
+        <div class="flex justify-between items-center border-b pb-3 mb-4">
+            <h3 class="text-lg font-bold text-gray-800"><i class="fas fa-trash mr-2"></i> Trash</h3>
+            <button onclick="closeModal('trashModal')" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500"><i class="fas fa-times"></i></button>
+        </div>
+        <p class="text-sm text-gray-500 text-center py-6">Trash is empty.</p>
+    </div>
+</div>
+
+<div id="depositCollectionModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-3 z-[72]">
+    <div class="bg-white rounded-2xl p-5 w-full max-w-lg modal-content shadow-2xl border-t-4 border-yellow-500">
+        <div class="flex justify-between items-center border-b pb-3 mb-3">
+            <h3 class="text-lg font-bold text-gray-800"><i class="fas fa-vault mr-2 text-yellow-600"></i> Deposit</h3>
+            <button onclick="closeModal('depositCollectionModal')" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="dcList" class="space-y-2 max-h-[70vh] overflow-y-auto"></div>
+    </div>
+</div>
+
+<div id="vacantExplorerModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-3 z-[55]">
+    <div class="bg-white rounded-2xl p-4 w-full max-w-md modal-content shadow-2xl">
+        <div class="flex justify-between items-center border-b pb-3 mb-4">
+            <h3 class="text-base font-bold text-gray-800" id="veTitle">Vacant</h3>
+            <button onclick="closeModal('vacantExplorerModal')" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="veBody" class="space-y-2"></div>
+    </div>
+</div>
+
+<div id="tenantAccessModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[80]">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-md modal-content shadow-2xl border-t-4 border-blue-500">
+        <div class="flex justify-between items-center mb-4 border-b pb-3">
+            <h3 class="font-extrabold text-blue-600 text-xl"><i class="fas fa-users-cog mr-2"></i> Tenant Access</h3>
+            <button onclick="closeModal('tenantAccessModal')" class="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500"><i class="fas fa-times"></i></button>
+        </div>
+        <p class="text-sm text-gray-600 mb-4">Manage tenant access from your room settings.</p>
+        <button onclick="closeModal('tenantAccessModal')" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl">OK</button>
+    </div>
+</div>
+
+<!-- ================= SCRIPTS ================= -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, setPersistence, browserSessionPersistence, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, updateDoc, query, where, deleteDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBkvhFwXcd-UOatoJDXqmXO7m7W85Ir1FI",
+    authDomain: "rent-easy-web.firebaseapp.com",
+    projectId: "rent-easy-web",
+    storageBucket: "rent-easy-web.firebasestorage.app",
+    messagingSenderId: "441449420109",
+    appId: "1:441449420109:web:81c8c5293c0e7fe8795304"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+await setPersistence(auth, browserSessionPersistence);
+
+/* ============ GLOBAL STATE ============ */
+window.currentUserId = null;
+window.currentUserRole = 'owner';
+window.currentUserPlan = 'free';
+window.currentUserWallet = 0;
+window.planExpiryDate = null;
+window.isRegistering = false;
+window.selectedAuthRole = 'owner';
+window.activeTab = 'Analytics';
+window.allPendingData = [];
+window.houseDataCache = {};
+window.vacantDataCache = {};
+window.tenantLinkedRooms = [];
+window.tenantNotifications = [];
+
+/* ============ DATE ============ */
+(function(){
+    const d = new Date();
+    const el = document.getElementById('headerDate');
+    if(el) el.innerText = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+})();
+
+/* ============ LOADERS ============ */
+window.setLoaderText = (msg) => { const e = document.getElementById('loaderText'); if(e) e.innerText = msg; };
+window.showLoader = (msg) => { if(msg) window.setLoaderText(msg); const e = document.getElementById('globalLoader'); if(e) e.classList.remove('hidden'); };
+window.hideLoader = () => { const e = document.getElementById('globalLoader'); if(e) e.classList.add('hidden'); };
+window.closeModal = (id) => { const el = document.getElementById(id); if(el) el.classList.add('hidden'); };
+
+window.showAlert = (type, title, msg, cb) => {
+    const ab = document.getElementById('customAlert'); if(!ab) return;
+    const icon = document.getElementById('alertIcon');
+    const titleEl = document.getElementById('alertTitle');
+    const btn = document.getElementById('closeAlertBtn');
+    const box = ab.querySelector('.bg-white');
+    if(type === 'success') {
+        icon.innerHTML = '✅';
+        box.className = 'bg-white rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl border-t-4 border-green-500';
+        btn.className = 'w-full bg-green-500 text-white font-bold py-3.5 rounded-xl hover:bg-green-600 shadow-lg text-lg';
+    } else {
+        icon.innerHTML = '❌';
+        box.className = 'bg-white rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl border-t-4 border-red-500';
+        btn.className = 'w-full bg-red-500 text-white font-bold py-3.5 rounded-xl hover:bg-red-600 shadow-lg text-lg';
+    }
+    titleEl.innerText = title;
+    document.getElementById('alertMessage').innerText = msg;
+    ab.classList.remove('hidden');
+    btn.onclick = () => { ab.classList.add('hidden'); if(cb) cb(); };
+};
+
+/* ============ AUTH ROLE ============ */
+window.selectRole = (role) => {
+    window.selectedAuthRole = role;
+    document.getElementById('roleOwnerBtn').classList.toggle('active', role === 'owner');
+    document.getElementById('roleTenantBtn').classList.toggle('active', role === 'tenant');
+    document.getElementById('tenantExtraFields').classList.toggle('hidden', role !== 'tenant');
+};
+
+window.toggleAuth = (type) => {
+    if(type === 'register') { document.getElementById('loginForm').classList.add('hidden'); document.getElementById('registerForm').classList.remove('hidden'); }
+    else { document.getElementById('registerForm').classList.add('hidden'); document.getElementById('loginForm').classList.remove('hidden'); }
+};
+
+window.openForgotModal = () => document.getElementById('forgotModal').classList.remove('hidden');
+
+window.sendPasswordReset = async () => {
+    const email = document.getElementById('resetEmailInput').value.trim();
+    if(!email) return window.showAlert('error', 'Required', 'Email daalein.');
+    window.showLoader('Sending reset link...');
+    try {
+        await sendPasswordResetEmail(auth, email);
+        window.hideLoader();
+        window.closeModal('forgotModal');
+        document.getElementById('resetEmailInput').value = '';
+        window.showAlert('success', 'Email Sent!', 'Reset link aapke email par bheja gaya. Inbox check karein.');
+    } catch(error) {
+        window.hideLoader();
+        window.showAlert('error', 'Error', error.message);
+    }
+};
+
+/* ============ EMERGENCY MENU ============ */
+window.openEmergencyMenu = () => document.getElementById('emergencyMenuModal').classList.remove('hidden');
+window.openEmergencyNumbers = () => document.getElementById('emergencyNumbersModal').classList.remove('hidden');
+window.openCompanyContact = () => document.getElementById('companyContactModal').classList.remove('hidden');
+window.openAboutApp = () => document.getElementById('aboutAppModal').classList.remove('hidden');
+
+/* ============ LOGIN / REGISTER ============ */
+document.getElementById('loginBtn').onclick = async () => {
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass = document.getElementById('loginPassword').value;
+    if(!email || !pass) return window.showAlert('error', 'Required', 'Email & password daalein.');
+    window.showLoader('Logging in...');
+    try {
+        await signInWithEmailAndPassword(auth, email, pass);
+        window.hideLoader();
+    } catch(e) {
+        window.hideLoader();
+        window.showAlert('error', 'Login Failed', e.message);
+    }
+};
+
+document.getElementById('registerBtn').onclick = async () => {
+    const role = window.selectedAuthRole;
+    const n = document.getElementById('regName').value.trim();
+    const m = document.getElementById('regMobile').value.trim();
+    const e = document.getElementById('regEmail').value.trim();
+    const p = document.getElementById('regPassword').value;
+    
+    if(!n || !m || !e || p.length < 6) return window.showAlert('error', 'Required', 'Saare fields bharein. Password min 6 chars.');
+    
+    let city = '', state = '';
+    if(role === 'tenant') {
+        city = document.getElementById('regCity').value.trim();
+        state = document.getElementById('regState').value.trim();
+        if(!city || !state) return window.showAlert('error', 'Required', 'City & State zaroori hai tenant ke liye.');
+    }
+    
+    window.isRegistering = true;
+    window.showLoader('Creating account...');
+    try {
+        const cred = await createUserWithEmailAndPassword(auth, e, p);
+        if(role === 'owner') {
+            await setDoc(doc(db, "users", cred.user.uid), {
+                ownerName: n, mobileNumber: m, emailId: e, isVerified: true,
+                planType: 'free', walletBalance: 0, createdAt: new Date().toISOString()
+            });
+        } else {
+            await setDoc(doc(db, "tenants", cred.user.uid), {
+                fullName: n, mobile: m, email: e, city: city, state: state,
+                linkedRooms: [], createdAt: new Date().toISOString()
+            });
+        }
+        window.isRegistering = false;
+        window.hideLoader();
+        window.showAlert('success', 'Account Created!', `Aapka ${role} account ban gaya.`);
+    } catch(er) {
+        window.isRegistering = false;
+        window.hideLoader();
+        window.showAlert('error', 'Error', er.message);
+    }
+};
+
+/* ============ AUTH STATE ============ */
+onAuthStateChanged(auth, async (user) => {
+    if (window.isRegistering) return;
+    if (user) {
+        window.showLoader('Verifying account...');
+        try {
+            // Check owner first
+            const ownerDoc = await getDoc(doc(db, "users", user.uid));
+            if (ownerDoc.exists()) {
+                window.currentUserId = user.uid;
+                window.currentUserRole = 'owner';
+                await loadProfileData();
+                await loadDashboardData();
+                switchToApp('owner');
+                window.hideLoader();
+                return;
+            }
+            // Check tenant
+            const tenantDoc = await getDoc(doc(db, "tenants", user.uid));
+            if (tenantDoc.exists()) {
+                window.currentUserId = user.uid;
+                window.currentUserRole = 'tenant';
+                await loadTenantProfile();
+                await loadTenantRooms();
+                await loadTenantNotifications();
+                switchToApp('tenant');
+                window.hideLoader();
+                return;
+            }
+            // No profile found
+            await signOut(auth);
+            window.hideLoader();
+            window.showAlert('error', 'Profile Missing', 'User profile nahi mila.');
+        } catch(e) {
+            await signOut(auth);
+            window.hideLoader();
+            window.showAlert('error', 'Error', e.message);
+        }
+    } else {
+        window.currentUserId = null;
+        window.currentUserRole = 'owner';
+        document.getElementById('authContainer').classList.remove('hidden');
+        document.getElementById('appContainer').classList.add('hidden');
+        window.hideLoader();
+    }
+});
+
+/* ============ SWITCH TO APP ============ */
+function switchToApp(role) {
+    document.getElementById('authContainer').classList.add('hidden');
+    document.getElementById('appContainer').classList.remove('hidden');
+    
+    const sidebarLabel = document.getElementById('sidebarRoleLabel');
+    const ownerBadges = document.getElementById('ownerBadgeGroup');
+    const tenantNotifBtn = document.getElementById('tenantNotifBtn');
+    
+    // Sidebar navigation visibility
+    document.querySelectorAll('[data-owner-tab]').forEach(el => el.classList.toggle('hidden', role !== 'owner'));
+    document.querySelectorAll('[data-tenant-tab]').forEach(el => el.classList.toggle('hidden', role !== 'tenant'));
+    
+    // Header badges
+    ownerBadges.classList.toggle('hidden', role !== 'owner');
+    tenantNotifBtn.classList.toggle('hidden', role !== 'tenant');
+    
+    // Mobile nav
+    const mobBtns = document.querySelectorAll('#mobileNav .nav-btn');
+    if (role === 'owner') {
+        sidebarLabel.innerText = 'Owner Portal';
+        const tabs = ['Analytics', 'Properties', 'History', 'Profile'];
+        mobBtns.forEach((btn, i) => {
+            btn.setAttribute('onclick', `switchTab('${tabs[i]}')`);
+            btn.querySelector('span').innerText = ['Home', 'Rooms', 'History', 'Profile'][i];
+        });
+        switchTab('Analytics');
+    } else {
+        sidebarLabel.innerText = 'Tenant Portal';
+        const tabs = ['TDashboard', 'TRooms', 'THistory', 'TProfile'];
+        mobBtns.forEach((btn, i) => {
+            btn.setAttribute('onclick', `switchTab('${tabs[i]}')`);
+            btn.querySelector('span').innerText = ['Home', 'Rooms', 'History', 'Profile'][i];
+        });
+        switchTab('TDashboard');
+    }
+}
+
+/* ============ TAB SWITCHING ============ */
+window.switchTab = async (t) => {
+    window.activeTab = t;
+    window.showLoader('Loading ' + t + '...');
+    
+    ['Analytics', 'Properties', 'History', 'Profile', 'TDashboard', 'TRooms', 'THistory', 'TProfile'].forEach(x => {
+        const e = document.getElementById('tab' + x);
+        if (e) { e.classList.add('hidden'); e.classList.remove('tab-fade-in'); }
+    });
+    
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.sidebar-link').forEach(b => b.classList.remove('active'));
+    
+    // Activate sidebar link
+    const sidebarLink = document.querySelector(`[data-owner-tab="${t}"], [data-tenant-tab="${t}"]`);
+    if (sidebarLink) sidebarLink.classList.add('active');
+    
+    // Activate mobile nav
+    const tabToMobMap = {
+        'Analytics': 0, 'Properties': 1, 'History': 2, 'Profile': 3,
+        'TDashboard': 0, 'TRooms': 1, 'THistory': 2, 'TProfile': 3
+    };
+    const mobBtns = document.querySelectorAll('#mobileNav .nav-btn');
+    if (tabToMobMap[t] !== undefined && mobBtns[tabToMobMap[t]]) mobBtns[tabToMobMap[t]].classList.add('active');
+    
+    try {
+        if (t === 'Analytics' || t === 'Properties') await loadDashboardData();
+        if (t === 'History') await loadHistoryData();
+        if (t === 'Profile') await loadProfileData();
+        if (t === 'TDashboard') { await loadTenantRooms(); await loadTenantNotifications(); renderTenantDashboard(); }
+        if (t === 'TRooms') { await loadTenantRooms(); renderTenantRoomsList(); }
+        if (t === 'THistory') await loadTenantHistory();
+        if (t === 'TProfile') await loadTenantProfile();
+    } catch(err) { console.error('Tab load error:', err); }
+    
+    const act = document.getElementById('tab' + t);
+    if (act) { act.classList.remove('hidden'); act.classList.add('tab-fade-in'); }
+    window.hideLoader();
+};
+
+/* ============ LOGOUT ============ */
+window.handleLogout = async () => {
+    if(!confirm('Logout karna chahte hain?')) return;
+    window.showLoader('Logging out...');
+    try {
+        await signOut(auth);
+        window.hideLoader();
+        window.showAlert('success', 'Logged Out', 'Aap successfully logout ho gaye.');
+    } catch(e) {
+        window.hideLoader();
+        window.showAlert('error', 'Error', e.message);
+    }
+};
+
+/* ================== OWNER CODE (Dashboard, Properties, etc.) ================== */
+async function loadProfileData() {
+    if(!window.currentUserId) return;
+    const dSnap = await getDoc(doc(db, "users", window.currentUserId));
+    if (dSnap.exists()) {
+        const d = dSnap.data();
+        window.currentUserPlan = d.planType || 'free';
+        window.currentUserWallet = d.walletBalance || 0;
+        window.planExpiryDate = d.planExpiry || null;
+        
+        const pb = document.getElementById('headerPlanBadge');
+        const vb = document.getElementById('headerValidityBadge');
+        const wb = document.getElementById('headerWalletBadge');
+        if(pb) { pb.innerText = window.currentUserPlan.toUpperCase(); pb.classList.remove('hidden'); }
+        if(vb) {
+            vb.classList.remove('hidden');
+            if(window.currentUserPlan === 'pro' && window.planExpiryDate) {
+                const exp = new Date(window.planExpiryDate);
+                const diffDays = Math.ceil(Math.abs(exp - new Date()) / (1000*60*60*24));
+                vb.innerText = exp > new Date() ? `${diffDays} Days Left` : "EXPIRED";
+            } else vb.innerText = "No Plan";
+        }
+        const wTxt = document.getElementById('walletAmtText'); if(wTxt) wTxt.innerText = '₹' + window.currentUserWallet;
+        if(wb) wb.classList.remove('hidden');
+        
+        if(document.getElementById('profileName')) document.getElementById('profileName').innerText = d.ownerName || 'Owner';
+        if(document.getElementById('profileMobile')) document.getElementById('profileMobile').innerText = d.mobileNumber || '--';
+        if(document.getElementById('profileEmail')) document.getElementById('profileEmail').innerText = d.emailId || '--';
+        if(document.getElementById('ownerAssetId')) document.getElementById('ownerAssetId').innerText = "RE-OWN-" + window.currentUserId.substring(0, 6).toUpperCase();
+        if(d.upiId) document.getElementById('upiIdInput').value = d.upiId;
+        if(d.bankAcc) document.getElementById('bankAccInput').value = d.bankAcc;
+        if(d.ifsc) document.getElementById('ifscInput').value = d.ifsc;
+        if(d.state) document.getElementById('profState').value = d.state;
+        if(d.city) document.getElementById('profCity').value = d.city;
+        if(d.area) document.getElementById('profArea').value = d.area;
+        if(d.pincode) document.getElementById('profPincode').value = d.pincode;
+    }
+}
+
+async function loadDashboardData() {
+    if(!window.currentUserId || window.currentUserRole !== 'owner') return;
+    const hList = document.getElementById('housesList');
+    if(!hList) return;
+    hList.innerHTML = `<div class="text-center py-10 text-blue-500"><i class="fas fa-circle-notch fa-spin text-4xl mb-3"></i><p class="text-sm font-bold text-gray-500">Syncing properties...</p></div>`;
+    
+    let tExp=0, tRec=0, tPen=0, tDep=0, vCount=0, occCount=0;
+    let tempHouseCache = {}, tempVacantCache = {}, tempPendingData = [];
+    let htmlBufferHouses = '';
+    
+    const hSnaps = await getDocs(query(collection(db, "houses"), where("ownerId", "==", window.currentUserId)));
+    if(hSnaps.empty) {
+        hList.innerHTML = `<div class="text-center text-gray-400 mt-10"><p>No properties found. Add your first property!</p></div>`;
+        const sd = document.getElementById('statDeposit'); if(sd) sd.innerText = "₹0";
+        const sdc = document.getElementById('statDepositCount'); if(sdc) sdc.innerText = '0 occupied';
+        return;
+    }
+    
+    for (const hDoc of hSnaps.docs) {
+        const hd = hDoc.data(); hd.id = hDoc.id;
+        if(hd.isDeleted) continue;
+        const rSnaps = await getDocs(collection(db, "houses", hDoc.id, "rooms"));
+        let roomsData = [];
+        rSnaps.forEach(rDoc => {
+            const r = rDoc.data(); r.id = rDoc.id; r.houseId = hDoc.id; r.houseName = hd.houseName;
+            if(r.isDeleted) return;
+            roomsData.push(r);
+            if(r.occupancyStatus === "Occupied") {
+                const amt = (r.rentAmount||0) + (r.waterBillFixed||0) + (r.currentLightBill||0) + (r.penalty||0);
+                tExp += amt;
+                tDep += (r.deposit || 0);
+                occCount++;
+                if(r.paymentStatus === "Paid") tRec += amt;
+                else {
+                    tPen += amt;
+                    tempPendingData.push({ hId: hDoc.id, hName: hd.houseName, r, amt });
+                }
+            } else if(r.occupancyStatus === "Vacant") {
+                vCount++;
+                if(!tempVacantCache[hDoc.id]) tempVacantCache[hDoc.id] = { name: hd.houseName, address: hd.address, rooms: [] };
+                tempVacantCache[hDoc.id].rooms.push(r);
+            }
+        });
+        tempHouseCache[hDoc.id] = { name: hd.houseName, address: hd.address, pincode: hd.pincode || '', rooms: roomsData };
+        htmlBufferHouses += `
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 flex justify-between items-center cursor-pointer border-l-4 border-l-blue-500 mb-4 hover:shadow-md transition gap-3" onclick="openHouseDetailsModal('${hDoc.id}')">
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <h3 class="font-extrabold text-gray-800 text-base sm:text-lg truncate">${hd.houseName}</h3>
+                    <span class="text-[10px] font-black text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full shadow-sm tracking-wide shrink-0"><i class="fas fa-map-pin mr-1 text-red-500"></i>${hd.pincode || 'NO PIN'}</span>
+                </div>
+                <div class="text-xs text-gray-500 mt-1.5 flex items-center bg-gray-50 px-2 py-1 rounded border border-gray-100">
+                    <i class="fas fa-map-marker-alt text-red-400 mr-1.5 shrink-0"></i>
+                    <span class="truncate">${hd.address}</span>
+                </div>
+            </div>
+            <div class="bg-gray-50 h-10 w-10 rounded-full flex items-center justify-center border border-gray-200 shrink-0"><i class="fas fa-chevron-right text-gray-400"></i></div>
+        </div>`;
+    }
+    
+    window.houseDataCache = tempHouseCache;
+    window.vacantDataCache = tempVacantCache;
+    window.allPendingData = tempPendingData;
+    hList.innerHTML = htmlBufferHouses;
+    
+    const se = document.getElementById('statExpected'); if(se) se.innerText = "₹" + tExp;
+    const sr = document.getElementById('statReceived'); if(sr) sr.innerText = "₹" + tRec;
+    const sp = document.getElementById('statPending'); if(sp) sp.innerText = "₹" + tPen;
+    const sd = document.getElementById('statDeposit'); if(sd) sd.innerText = "₹" + tDep;
+    const sdc = document.getElementById('statDepositCount'); if(sdc) sdc.innerText = occCount + ' occupied';
+    const vc = document.getElementById('vacantCountBadge'); if(vc) vc.innerText = vCount;
+    
+    await loadPaymentRequestsCount();
+}
+
+async function loadPaymentRequestsCount() {
+    try {
+        const q = query(collection(db, "payment_requests"), where("ownerId", "==", window.currentUserId), where("status", "==", "Pending"));
+        const snap = await getDocs(q);
+        const el = document.getElementById('statPendingRequests');
+        if(el) el.innerText = snap.size;
+        const txt = document.getElementById('statPendingReqText');
+        if(txt) txt.innerText = snap.size === 0 ? 'No pending' : `${snap.size} awaiting approval`;
+    } catch(e) { console.warn(e); }
+}
+
+async function loadHistoryData() {
+    const hList = document.getElementById('historyList');
+    if(!hList) return;
+    hList.innerHTML = `<div class="text-center py-8 text-gray-400"><i class="fas fa-circle-notch fa-spin text-3xl mb-2"></i><p>Loading...</p></div>`;
+    try {
+        const q = query(collection(db, "transactions"), where("ownerId", "==", window.currentUserId));
+        const snaps = await getDocs(q);
+        if(snaps.empty) {
+            hList.innerHTML = `<p class="text-center py-8 text-gray-400 font-bold">No transactions yet.</p>`;
+            return;
+        }
+        const arr = [];
+        snaps.forEach(d => arr.push(d.data()));
+        arr.sort((a,b) => new Date(b.date||0) - new Date(a.date||0));
+        let html = '';
+        arr.forEach(t => {
+            const dStr = new Date(t.date || 0).toLocaleDateString('en-GB');
+            html += `<div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center gap-2">
+                <div class="min-w-0 flex-1">
+                    <p class="font-bold text-sm text-gray-800 truncate">${t.type || 'Transaction'}</p>
+                    <p class="text-xs text-gray-500 truncate">${t.houseName || ''} • ${t.roomName || ''} • ${t.tenantName || ''}</p>
+                    <p class="text-[10px] text-gray-400 mt-0.5">${dStr}</p>
+                </div>
+                <div class="text-right shrink-0"><p class="font-black text-lg text-green-600">₹${t.amount || 0}</p><p class="text-[9px] text-gray-500">${t.mode || ''}</p></div>
+            </div>`;
+        });
+        hList.innerHTML = html;
+    } catch(e) { hList.innerHTML = `<p class="text-center py-8 text-gray-400">Error loading.</p>`; }
+}
+
+window.openPaymentRequests = async () => {
+    window.showLoader('Loading...');
+    const list = document.getElementById('prList');
+    list.innerHTML = '<div class="text-center py-8 text-gray-400"><i class="fas fa-circle-notch fa-spin text-4xl text-purple-500 mb-2"></i><p>Loading...</p></div>';
+    try {
+        const q = query(collection(db, "payment_requests"), where("ownerId", "==", window.currentUserId));
+        const snap = await getDocs(q);
+        if(snap.empty) {
+            list.innerHTML = '<div class="text-center text-gray-400 py-10"><i class="fas fa-bell-slash text-4xl mb-2 text-gray-200"></i><p class="text-sm">No payment notifications.</p></div>';
+        } else {
+            const reqs = [];
+            snap.forEach(d => reqs.push({ id: d.id, ...d.data() }));
+            reqs.sort((a,b) => {
+                if(a.status==='Pending' && b.status!=='Pending') return -1;
+                if(a.status!=='Pending' && b.status==='Pending') return 1;
+                return new Date(b.requestedAt||0) - new Date(a.requestedAt||0);
+            });
+            list.innerHTML = '';
+            reqs.forEach(r => {
+                const isPending = r.status === 'Pending';
+                const badgeColor = isPending ? 'bg-yellow-100 text-yellow-700 border-yellow-300' :
+                                  (r.status === 'Approved' ? 'bg-green-100 text-green-700 border-green-300' : 'bg-red-100 text-red-700 border-red-300');
+                const dateStr = new Date(r.requestedAt || 0).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+                list.innerHTML += `
+                <div class="bg-white border border-gray-200 rounded-xl p-3 shadow-sm ${isPending ? 'border-l-4 border-l-purple-500' : ''}">
+                    <div class="flex justify-between items-start mb-2 gap-2">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <p class="font-black text-gray-800 text-sm">Room ${r.roomNumber}</p>
+                                <span class="text-[9px] font-black px-1.5 py-0.5 rounded border ${badgeColor}">${r.status.toUpperCase()}</span>
+                            </div>
+                            <p class="text-[10px] text-gray-500 truncate mt-0.5">${r.houseName} • ${r.tenantName}</p>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <p class="font-black text-base text-purple-600">₹${r.amount}</p>
+                            <p class="text-[9px] text-gray-400">${dateStr}</p>
+                        </div>
+                    </div>
+                    <div class="bg-purple-50 border border-purple-100 rounded-lg p-2 mb-2">
+                        <div class="grid grid-cols-2 gap-1 text-[10px]">
+                            <div><span class="text-gray-500 font-bold">Month:</span> <span class="font-black text-purple-700">${r.month}</span></div>
+                            <div class="text-right"><span class="text-gray-500 font-bold">Mode:</span> <span class="font-bold text-gray-700">${r.mode}</span></div>
+                        </div>
+                    </div>
+                    ${isPending ? `
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="approvePaymentRequest('${r.id}')" class="bg-green-500 text-white font-bold py-2 rounded-lg text-xs shadow hover:bg-green-600"><i class="fas fa-check-circle mr-1"></i> Approve</button>
+                        <button onclick="rejectPaymentRequest('${r.id}')" class="bg-red-500 text-white font-bold py-2 rounded-lg text-xs shadow hover:bg-red-600"><i class="fas fa-times-circle mr-1"></i> Reject</button>
+                    </div>` : ''}
+                </div>`;
+            });
+        }
+        window.hideLoader();
+        document.getElementById('paymentRequestsModal').classList.remove('hidden');
+    } catch(e) { window.hideLoader(); window.showAlert('error', 'Error', e.message); }
+};
+
+window.approvePaymentRequest = async (reqId) => {
+    window.showLoader('Approving...');
+    try {
+        const reqDoc = await getDoc(doc(db, "payment_requests", reqId));
+        if(!reqDoc.exists()) { window.hideLoader(); return window.showAlert('error', 'Not Found', 'Request missing.'); }
+        const req = reqDoc.data();
+        if(req.status !== 'Pending') { window.hideLoader(); return window.showAlert('error', 'Already Processed', 'Already processed.'); }
+        
+        await updateDoc(doc(db, "houses", req.houseId, "rooms", req.roomId), { paymentStatus: "Paid" });
+        await addDoc(collection(db, "transactions"), {
+            ownerId: window.currentUserId,
+            houseName: req.houseName,
+            roomName: req.roomNumber,
+            tenantName: req.tenantName,
+            amount: req.amount,
+            mode: req.mode,
+            type: "Rent Received",
+            month: req.month,
+            status: 'Active',
+            date: new Date().toISOString()
+        });
+        await updateDoc(doc(db, "payment_requests", reqId), { status: "Approved", approvedAt: new Date().toISOString() });
+        
+        await loadDashboardData();
+        await loadPaymentRequestsCount();
+        window.hideLoader();
+        window.closeModal('paymentRequestsModal');
+        window.showAlert('success', 'Payment Approved', `₹${req.amount} for ${req.month} added to History.`);
+    } catch(e) { window.hideLoader(); window.showAlert('error', 'Error', e.message); }
+};
+
+window.rejectPaymentRequest = async (reqId) => {
+    const reason = prompt('Reason for rejection:', 'Amount mismatch');
+    if(reason === null) return;
+    window.showLoader('Rejecting...');
+    try {
+        await updateDoc(doc(db, "payment_requests", reqId), {
+            status: "Rejected",
+            rejectedAt: new Date().toISOString(),
+            rejectionReason: reason || 'No reason'
+        });
+        await loadPaymentRequestsCount();
+        window.hideLoader();
+        window.closeModal('paymentRequestsModal');
+        window.showAlert('success', 'Rejected', 'Request rejected.');
+    } catch(e) { window.hideLoader(); window.showAlert('error', 'Error', e.message); }
+};
+
+window.openUpgradeModal = () => document.getElementById('upgradeModal').classList.remove('hidden');
+window.openAddHouseModal = () => document.getElementById('addHouseModal').classList.remove('hidden');
+window.openTrashModal = () => document.getElementById('trashModal').classList.remove('hidden');
+window.openTenantAccessModal = () => document.getElementById('tenantAccessModal').classList.remove('hidden');
+window.openVacantHousesModal = () => {
+    const body = document.getElementById('veBody');
+    body.innerHTML = '';
+    const houseIds = Object.keys(window.vacantDataCache);
+    if(houseIds.length === 0) {
+        body.innerHTML = `<div class="text-center text-gray-500 py-8"><i class="fas fa-home text-5xl mb-3 text-gray-300"></i><p>All rooms occupied.</p></div>`;
+    } else {
+        houseIds.forEach(hId => {
+            const h = window.vacantDataCache[hId];
+            body.innerHTML += `<div class="bg-white border border-gray-200 rounded-xl p-3 flex justify-between items-center shadow-sm">
+                <div><h4 class="font-extrabold text-blue-700 text-sm">${h.name}</h4><p class="text-[10px] text-gray-500">${h.address}</p></div>
+                <div class="bg-blue-100 text-blue-800 font-black px-2 py-1 rounded-lg text-[10px]">${h.rooms.length} Khali</div>
+            </div>`;
+        });
+    }
+    document.getElementById('vacantExplorerModal').classList.remove('hidden');
+};
+window.openDepositCollection = () => {
+    const list = document.getElementById('dcList');
+    list.innerHTML = '';
+    let rows = [];
+    Object.keys(window.houseDataCache || {}).forEach(hId => {
+        const h = window.houseDataCache[hId];
+        h.rooms.forEach(r => {
+            if(r.occupancyStatus !== 'Occupied') return;
+            rows.push({ hId, h, r });
+        });
+    });
+    if(rows.length === 0) {
+        list.innerHTML = '<div class="text-center text-gray-400 py-10"><p>No occupied rooms.</p></div>';
+    } else {
+        rows.forEach(({hId, h, r}) => {
+            list.innerHTML += `<div class="bg-white border rounded-xl p-3 flex justify-between items-center mb-2">
+                <div><p class="font-bold text-sm">Room ${r.roomNumber}</p><p class="text-[10px] text-gray-500">${h.name} • ${r.tenantName || 'Unknown'}</p></div>
+                <div class="text-right"><p class="font-black text-yellow-600">₹${r.deposit || 0}</p>${r.depositExpected?`<p class="text-[9px] text-gray-400">of ₹${r.depositExpected}</p>`:''}</div>
+            </div>`;
+        });
+    }
+    document.getElementById('depositCollectionModal').classList.remove('hidden');
+};
+window.openHouseDetailsModal = (hId) => {
+    const d = window.houseDataCache[hId];
+    if(!d) return;
+    window.showAlert('success', d.name, `Pincode: ${d.pincode || 'N/A'}\nAddress: ${d.address}\n${d.rooms.length} rooms`);
+};
+window.saveProperty = async () => {
+    const name = document.getElementById('houseName').value.trim();
+    const address = document.getElementById('houseAddress').value.trim();
+    const pincode = document.getElementById('hPincode').value.trim();
+    if(!name || !address || !pincode) return window.showAlert('error', 'Required', 'Saare fields bharein.');
+    window.showLoader('Saving...');
+    try {
+        await addDoc(collection(db, "houses"), {
+            houseName: name, address: address, pincode: pincode,
+            ownerId: window.currentUserId, city: '', state: '',
+            propertyType: 'Residential', createdAt: new Date().toISOString()
+        });
+        await loadDashboardData();
+        window.hideLoader();
+        window.closeModal('addHouseModal');
+        window.showAlert('success', 'Property Added', 'Property successfully add ho gayi.');
+    } catch(e) { window.hideLoader(); window.showAlert('error', 'Error', e.message); }
+};
+window.startNewMonth = () => window.showAlert('success', 'New Month', 'Feature coming soon.');
+
+/* ================== TENANT CODE ================== */
+
+async function loadTenantProfile() {
+    if(!window.currentUserId) return;
+    try {
+        const snap = await getDoc(doc(db, "tenants", window.currentUserId));
+        if (snap.exists()) {
+            window.tenantProfile = snap.data();
+            const t = window.tenantProfile;
+            document.getElementById('tProfileName').innerText = t.fullName || 'Tenant';
+            document.getElementById('tProfileEmail').innerText = t.email || '--';
+            document.getElementById('tProfileMobile').innerText = t.mobile || '--';
+            document.getElementById('tProfileCity').innerText = t.city || '--';
+            document.getElementById('tProfileState').innerText = t.state || '--';
+            document.getElementById('tProfileLinkedRooms').innerText = (t.linkedRooms || []).length;
+        }
+    } catch(e) { console.error(e); }
+}
+
+async function loadTenantRooms() {
+    if(!window.currentUserId) return;
+    window.tenantLinkedRooms = [];
+    try {
+        const tSnap = await getDoc(doc(db, "tenants", window.currentUserId));
+        if(!tSnap.exists()) return;
+        const t = tSnap.data();
+        const paths = t.linkedRooms || [];
+        
+        for (const p of paths) {
+            try {
+                const parts = p.split('/');
+                const houseId = parts[1];
+                const roomId = parts[3];
+                const rSnap = await getDoc(doc(db, "houses", houseId, "rooms", roomId));
+                if(!rSnap.exists()) continue;
+                const r = rSnap.data(); r.id = roomId; r.houseId = houseId;
+                const hSnap = await getDoc(doc(db, "houses", houseId));
+                let house = {}; 
+                if(hSnap.exists()) house = hSnap.data();
+                
+                let owner = {};
+                if(house.ownerId) {
+                    const oSnap = await getDoc(doc(db, "users", house.ownerId));
+                    if(oSnap.exists()) owner = { ...oSnap.data(), ownerId: house.ownerId };
+                }
+                
+                window.tenantLinkedRooms.push({
+                    path: p, room: r, house, owner
+                });
+            } catch(err) { console.warn('Room load failed:', err); }
+        }
+    } catch(e) { console.error(e); }
+}
+
+function renderTenantDashboard() {
+    const rooms = window.tenantLinkedRooms;
+    let totalDue = 0, totalDeposit = 0;
+    rooms.forEach(({room}) => {
+        totalDue += (room.rentAmount||0) + (room.waterBillFixed||0) + (room.currentLightBill||0) + (room.penalty||0);
+        totalDeposit += (room.deposit || 0);
+    });
+    document.getElementById('tStatRooms').innerText = rooms.length;
+    document.getElementById('tStatDue').innerText = '₹' + totalDue;
+    document.getElementById('tStatDeposit').innerText = '₹' + totalDeposit;
+    
+    const list = document.getElementById('tRoomsDashboardList');
+    if(rooms.length === 0) {
+        list.innerHTML = `<div class="text-center py-10 bg-white rounded-3xl border border-gray-100"><i class="fas fa-key text-5xl text-gray-300 mb-3"></i><p class="text-gray-500 font-bold">No rooms linked yet.</p><p class="text-xs text-gray-400 mt-1">Use the "Link New Room" box above.</p></div>`;
+        return;
+    }
+    list.innerHTML = '';
+    rooms.forEach((item, idx) => {
+        list.innerHTML += tenantRoomCardHTML(item, idx);
+    });
+}
+
+function renderTenantRoomsList() {
+    const list = document.getElementById('tRoomsFullList');
+    const rooms = window.tenantLinkedRooms;
+    if(rooms.length === 0) {
+        list.innerHTML = `<div class="text-center py-10 bg-white rounded-3xl border border-gray-100"><i class="fas fa-door-open text-5xl text-gray-300 mb-3"></i><p class="text-gray-500 font-bold">No rooms linked.</p></div>`;
+        return;
+    }
+    list.innerHTML = '';
+    rooms.forEach((item, idx) => {
+        list.innerHTML += tenantRoomCardHTML(item, idx);
+    });
+}
+
+function tenantRoomCardHTML(item, idx) {
+    const r = item.room, h = item.house, o = item.owner;
+    const total = (r.rentAmount||0) + (r.waterBillFixed||0) + (r.currentLightBill||0) + (r.penalty||0);
+    const isPaid = r.paymentStatus === 'Paid';
+    const propType = r.propertyType || 'Residential';
+    const size = r.configSize || r.roomSize || 'Standard';
+    return `
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-3">
+        <div class="p-4 border-l-4 ${isPaid ? 'border-l-green-500' : 'border-l-red-500'}">
+            <div class="flex justify-between items-start gap-2 mb-2">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <h4 class="font-black text-gray-800 text-lg">${r.roomType || 'Room'} ${r.roomNumber}</h4>
+                        <span class="text-[9px] font-black bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded uppercase">${propType}</span>
+                        <span class="text-[9px] font-black bg-purple-100 text-purple-700 px-2 py-0.5 rounded uppercase">${size}</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1"><i class="fas fa-building text-blue-400 mr-1"></i>${h.houseName || 'House'}</p>
+                    <p class="text-[10px] text-gray-400 mt-0.5 truncate"><i class="fas fa-map-marker-alt text-red-400 mr-1"></i>${h.address || ''}</p>
+                </div>
+                <span class="text-[10px] font-black px-2.5 py-1 rounded-full shrink-0 ${isPaid ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}">${isPaid ? 'PAID' : 'PENDING'}</span>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-2 my-3 text-xs">
+                <div class="bg-gray-50 rounded-lg p-2">
+                    <p class="text-[9px] text-gray-400 uppercase font-bold">Rent</p>
+                    <p class="font-black text-gray-800">₹${r.rentAmount||0}</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-2">
+                    <p class="text-[9px] text-gray-400 uppercase font-bold">Water/Maint</p>
+                    <p class="font-black text-gray-800">₹${r.waterBillFixed||0}</p>
+                </div>
+                <div class="bg-yellow-50 rounded-lg p-2">
+                    <p class="text-[9px] text-gray-400 uppercase font-bold"><i class="fas fa-bolt text-yellow-500"></i> Light</p>
+                    <p class="font-black text-gray-800">₹${r.currentLightBill||0}</p>
+                </div>
+                <div class="bg-red-50 rounded-lg p-2">
+                    <p class="text-[9px] text-gray-400 uppercase font-bold">Penalty</p>
+                    <p class="font-black text-red-600">₹${r.penalty||0}</p>
+                </div>
+            </div>
+            
+            ${r.unitRate > 0 ? `
+            <div class="bg-blue-50 rounded-lg p-2 mb-2 text-[10px]">
+                <p class="font-bold text-blue-700">Meter: ${r.meterPrev||0} → ${r.meterCurr||0} (${(r.meterCurr||0)-(r.meterPrev||0)} units @ ₹${r.unitRate}/unit)</p>
+            </div>` : ''}
+            
+            <div class="bg-yellow-50 rounded-lg p-2 mb-3 flex justify-between items-center">
+                <span class="text-[10px] font-bold text-yellow-800 uppercase"><i class="fas fa-vault mr-1"></i> Deposit</span>
+                <span class="font-black text-yellow-800">₹${r.deposit||0} ${r.depositExpected?'/ ₹'+r.depositExpected:''}</span>
+            </div>
+            
+            <div class="bg-gradient-to-r from-gray-900 to-black text-white rounded-lg p-3 mb-3">
+                <div class="flex justify-between items-center">
+                    <span class="text-[10px] font-bold uppercase text-gray-300">Total Payable</span>
+                    <span class="text-2xl font-black">₹${total}</span>
+                </div>
+            </div>
+            
+            <div class="flex gap-2">
+                <button onclick="openTenantRoomDetail(${idx})" class="flex-1 bg-blue-50 text-blue-700 font-bold py-2 rounded-lg text-xs border border-blue-200 hover:bg-blue-100 transition">
+                    <i class="fas fa-eye mr-1"></i> Details
+                </button>
+                ${!isPaid ? `<button onclick="openTenantPayFlow(${idx})" class="flex-1 bg-green-500 text-white font-bold py-2 rounded-lg text-xs hover:bg-green-600 shadow"><i class="fas fa-rupee-sign mr-1"></i> Pay Now</button>` : `<button onclick="downloadTenantReceipt(${idx})" class="flex-1 bg-gray-100 text-gray-700 font-bold py-2 rounded-lg text-xs hover:bg-gray-200"><i class="fas fa-file-pdf mr-1"></i> Receipt</button>`}
+                <button onclick="tenantUnlinkRoom(${idx})" class="bg-red-50 text-red-600 font-bold py-2 px-3 rounded-lg text-xs border border-red-200 hover:bg-red-100" title="Unlink"><i class="fas fa-unlink"></i></button>
+            </div>
+        </div>
+    </div>`;
+}
+
+window.openTenantRoomDetail = (idx) => {
+    const item = window.tenantLinkedRooms[idx];
+    if(!item) return;
+    const r = item.room, h = item.house, o = item.owner;
+    const total = (r.rentAmount||0) + (r.waterBillFixed||0) + (r.currentLightBill||0) + (r.penalty||0);
+    
+    document.getElementById('trdRoomTitle').innerText = `${r.roomType || 'Room'} ${r.roomNumber}`;
+    document.getElementById('tenantRoomDetailBody').innerHTML = `
+        <div class="bg-gradient-to-br from-blue-600 to-blue-800 text-white rounded-2xl p-4 mb-3">
+            <p class="text-[10px] uppercase font-bold text-blue-200">Property</p>
+            <p class="font-black text-lg">${h.houseName || 'House'}</p>
+            <p class="text-xs text-blue-100 mt-1"><i class="fas fa-map-marker-alt mr-1"></i>${h.address || ''}</p>
+            <p class="text-xs text-blue-100 mt-1">Pincode: ${h.pincode || '--'}</p>
+            <div class="flex gap-1 mt-2 flex-wrap">
+                <span class="text-[9px] bg-white/20 px-2 py-0.5 rounded font-bold uppercase">${r.propertyType || 'Residential'}</span>
+                <span class="text-[9px] bg-white/20 px-2 py-0.5 rounded font-bold uppercase">${r.configSize || r.roomSize || 'Standard'}</span>
+                <span class="text-[9px] bg-white/20 px-2 py-0.5 rounded font-bold uppercase">${r.roomType || 'Room'}</span>
+            </div>
+        </div>
+        
+        <div class="bg-gray-50 rounded-2xl p-4 mb-3 border border-gray-200">
+            <p class="text-[10px] font-bold text-gray-400 uppercase mb-2">Owner Details</p>
+            <p class="font-black text-gray-800 text-base mb-1"><i class="fas fa-user-circle text-blue-500 mr-2"></i>${o.ownerName || 'Owner'}</p>
+            <p class="text-xs text-gray-600 mb-1"><i class="fas fa-phone text-green-500 mr-2"></i>${o.mobileNumber || '--'}</p>
+            <p class="text-xs text-gray-600 mb-1"><i class="fas fa-map-marker text-red-500 mr-2"></i>${[o.city, o.state].filter(Boolean).join(', ') || '--'}</p>
+            ${o.emailId ? `<p class="text-xs text-gray-600"><i class="fas fa-envelope text-blue-400 mr-2"></i>${o.emailId}</p>` : ''}
+        </div>
+        
+        <div class="bg-white rounded-2xl p-4 mb-3 border border-gray-200">
+            <p class="text-[10px] font-bold text-gray-400 uppercase mb-2">Bill Breakdown</p>
+            <div class="space-y-2 text-sm">
+                <div class="flex justify-between"><span class="text-gray-600">Rent</span><span class="font-bold">₹${r.rentAmount||0}</span></div>
+                <div class="flex justify-between"><span class="text-gray-600">Water / Maintenance</span><span class="font-bold">₹${r.waterBillFixed||0}</span></div>
+                <div class="flex justify-between"><span class="text-gray-600"><i class="fas fa-bolt text-yellow-500 mr-1"></i>Light Bill</span><span class="font-bold">₹${r.currentLightBill||0}</span></div>
+                ${r.unitRate > 0 ? `<div class="bg-blue-50 rounded p-2 text-[10px] text-blue-800 font-bold">Meter: ${r.meterPrev||0} → ${r.meterCurr||0} | ${(r.meterCurr||0)-(r.meterPrev||0)} units × ₹${r.unitRate}/unit</div>` : ''}
+                <div class="flex justify-between text-red-600"><span>Penalty</span><span class="font-bold">₹${r.penalty||0}</span></div>
+                <div class="flex justify-between border-t pt-2 text-lg"><span class="font-black text-gray-800">Total</span><span class="font-black text-blue-600">₹${total}</span></div>
+            </div>
+        </div>
+        
+        <div class="bg-yellow-50 rounded-2xl p-4 mb-3 border border-yellow-200">
+            <p class="text-[10px] font-bold text-yellow-800 uppercase mb-1">Deposit Status</p>
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="text-xs text-yellow-700">Paid: <strong class="text-lg font-black text-yellow-800">₹${r.deposit||0}</strong></p>
+                    ${r.depositExpected?`<p class="text-[10px] text-yellow-600">Expected: ₹${r.depositExpected}</p>`:''}
+                </div>
+                <i class="fas fa-vault text-yellow-500 text-3xl"></i>
+            </div>
+        </div>
+        
+        <div class="flex gap-2">
+            <button onclick="openTenantPayFlow(${idx})" class="flex-1 bg-green-500 text-white font-bold py-3 rounded-xl shadow hover:bg-green-600"><i class="fas fa-rupee-sign mr-2"></i> Pay</button>
+            <button onclick="closeModal('tenantRoomDetailModal')" class="flex-1 bg-gray-100 text-gray-700 font-bold py-3 rounded-xl">Close</button>
+        </div>
+    `;
+    document.getElementById('tenantRoomDetailModal').classList.remove('hidden');
+};
+
+window.openTenantPayFlow = (idx) => {
+    const item = window.tenantLinkedRooms[idx];
+    if(!item) return;
+    const r = item.room, o = item.owner;
+    const total = (r.rentAmount||0) + (r.waterBillFixed||0) + (r.currentLightBill||0) + (r.penalty||0);
+    
+    if(total <= 0) return window.showAlert('error', 'No Dues', 'Koi bill pending nahi hai.');
+    if(!o.upiId) {
+        return window.showAlert('error', 'No Payment Info', 'Owner ne UPI ID nahi dali hai. Contact owner.');
+    }
+    
+    const upiUrl = `upi://pay?pa=${o.upiId}&pn=${encodeURIComponent(o.ownerName||'Owner')}&am=${total}&cu=INR&tn=${encodeURIComponent('Rent for Room ' + r.roomNumber)}`;
+    sessionStorage.setItem('rer-tenant-returned-from-upi', idx.toString());
+    
+    if(confirm(`Pay ₹${total} to ${o.ownerName}?\n\nUPI: ${o.upiId}\nRoom: ${r.roomNumber}\n\nClick OK to open UPI app.`)) {
+        window.location.href = upiUrl;
+        setTimeout(() => {
+            const arrived = sessionStorage.getItem('rer-tenant-returned-from-upi');
+            if (arrived === idx.toString()) {
+                sessionStorage.removeItem('rer-tenant-returned-from-upi');
+                window.showAlert('success', 'Payment Complete?', 'Agar payment ho gaya hai, "Notify Owner" click karein.', () => {
+                    notifyTenantPayment(idx);
+                });
+            }
+        }, 1500);
+    }
+};
+
+async function notifyTenantPayment(idx) {
+    const item = window.tenantLinkedRooms[idx];
+    if(!item) return;
+    const r = item.room, h = item.house, o = item.owner;
+    const total = (r.rentAmount||0) + (r.waterBillFixed||0) + (r.currentLightBill||0) + (r.penalty||0);
+    
+    const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const now = new Date();
+    const defaultMonth = monthNames[now.getMonth()] + ' ' + now.getFullYear();
+    const month = prompt('Kis month ki payment hai?', defaultMonth);
+    if(!month) return;
+    
+    window.showLoader('Notifying owner...');
+    try {
+        await addDoc(collection(db, "payment_requests"), {
+            ownerId: o.ownerId,
+            houseId: h.id || r.houseId,
+            roomId: r.id,
+            houseName: h.houseName || 'House',
+            roomNumber: r.roomNumber,
+            tenantName: window.tenantProfile?.fullName || 'Tenant',
+            tenantMobile: window.tenantProfile?.mobile || '',
+            tenantUniqueId: r.tenantUniqueId || '',
+            amount: total,
+            month: month,
+            mode: 'UPI',
+            note: `Tenant notified for ${month}`,
+            status: 'Pending',
+            requestedAt: new Date().toISOString()
+        });
+        await loadTenantNotifications();
+        window.hideLoader();
+        window.showAlert('success', 'Owner Notified!', 'Owner approval ke baad bill paid ho jayega.');
+    } catch(e) { window.hideLoader(); window.showAlert('error', 'Error', e.message); }
+}
+
+window.tenantUnlinkRoom = async (idx) => {
+    const item = window.tenantLinkedRooms[idx];
+    if(!item) return;
+    if(!confirm(`Room ${item.room.roomNumber} unlink karna chahte hain?`)) return;
+    window.showLoader('Unlinking...');
+    try {
+        await updateDoc(doc(db, "tenants", window.currentUserId), {
+            linkedRooms: arrayRemove(item.path)
+        });
+        await loadTenantRooms();
+        renderTenantRoomsList();
+        renderTenantDashboard();
+        window.hideLoader();
+        window.showAlert('success', 'Unlinked', 'Room unlink ho gaya.');
+    } catch(e) { window.hideLoader(); window.showAlert('error', 'Error', e.message); }
+};
+
+window.tenantLinkRoom = async () => {
+    if(!window.currentUserId) return;
+    const unitId = document.getElementById('tLinkRoomInput').value.trim();
+    if(!unitId) return window.showAlert('error', 'Required', 'Room Unit ID daalein.');
+    
+    window.showLoader('Searching room...');
+    let foundPath = null;
+    try {
+        const email = window.tenantProfile?.email || '';
+        const hSnaps = await getDocs(collection(db, "houses"));
+        for(const hDoc of hSnaps.docs) {
+            const rSnaps = await getDocs(collection(db, `houses/${hDoc.id}/rooms`));
+            for(const rDoc of rSnaps.docs) {
+                const r = rDoc.data();
+                if(r.tenantUniqueId === unitId && (r.accessEmail||'').toLowerCase() === email.toLowerCase()) {
+                    foundPath = `houses/${hDoc.id}/rooms/${rDoc.id}`;
+                    break;
+                }
+            }
+            if(foundPath) break;
+        }
+        
+        if(foundPath) {
+            await updateDoc(doc(db, "tenants", window.currentUserId), {
+                linkedRooms: arrayUnion(foundPath)
+            });
+            document.getElementById('tLinkRoomInput').value = '';
+            await loadTenantRooms();
+            renderTenantDashboard();
+            window.hideLoader();
+            window.showAlert('success', 'Room Linked!', 'Room successfully link ho gaya.');
+        } else {
+            window.hideLoader();
+            window.showAlert('error', 'Not Found', 'Room ID nahi mila ya email match nahi hua. Owner se contact karein.');
+        }
+    } catch(e) { window.hideLoader(); window.showAlert('error', 'Error', e.message); }
+};
+
+async function loadTenantNotifications() {
+    if(!window.currentUserId) return;
+    try {
+        const snaps = await getDocs(collection(db, "transactions"));
+        const myName = (window.tenantProfile?.fullName || '').toLowerCase();
+        const notifs = [];
+        snaps.forEach(d => {
+            const t = d.data();
+            if((t.tenantName||'').toLowerCase() === myName) {
+                notifs.push(t);
+            }
+        });
+        notifs.sort((a,b) => new Date(b.date||0) - new Date(a.date||0));
+        window.tenantNotifications = notifs;
+        
+        const count = notifs.filter(n => {
+            const diff = Date.now() - new Date(n.date||0).getTime();
+            return diff < 7*24*60*60*1000;
+        }).length;
+        const badge = document.getElementById('tenantNotifCount');
+        if(badge) {
+            badge.innerText = count;
+            badge.classList.toggle('hidden', count === 0);
+        }
+    } catch(e) { console.error(e); }
+}
+
+window.openTenantNotifications = () => {
+    const list = document.getElementById('tenantNotifList');
+    list.innerHTML = '';
+    if(window.tenantNotifications.length === 0) {
+        list.innerHTML = `<div class="text-center py-10 text-gray-400"><i class="fas fa-bell-slash text-4xl mb-2 text-gray-200"></i><p class="text-sm">No notifications yet.</p></div>`;
+    } else {
+        window.tenantNotifications.forEach(n => {
+            const dStr = new Date(n.date||0).toLocaleDateString('en-GB');
+            list.innerHTML += `<div class="bg-white border border-gray-200 rounded-xl p-3 shadow-sm">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="font-bold text-sm text-gray-800">💰 ${n.type || 'Payment Approved'}</p>
+                        <p class="text-[10px] text-gray-500 mt-0.5">${n.houseName || ''} • Room ${n.roomName || ''}</p>
+                        <p class="text-[10px] text-gray-400 mt-1">${dStr}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-black text-green-600">₹${n.amount || 0}</p>
+                        <p class="text-[9px] font-bold text-green-500 uppercase">Received</p>
+                    </div>
+                </div>
+            </div>`;
+        });
+    }
+    document.getElementById('tenantNotificationsModal').classList.remove('hidden');
+};
+
+async function loadTenantHistory() {
+    const hList = document.getElementById('tHistoryList');
+    hList.innerHTML = `<div class="text-center py-8 text-gray-400"><i class="fas fa-circle-notch fa-spin text-3xl mb-2"></i><p>Loading...</p></div>`;
+    try {
+        const snaps = await getDocs(collection(db, "transactions"));
+        const myName = (window.tenantProfile?.fullName || '').toLowerCase();
+        const list = [];
+        snaps.forEach(d => {
+            const t = d.data();
+            if((t.tenantName||'').toLowerCase() === myName) {
+                list.push(t);
+            }
+        });
+        if(list.length === 0) {
+            hList.innerHTML = `<p class="text-center py-8 text-gray-400 font-bold">No payment history yet.</p>`;
+            return;
+        }
+        list.sort((a,b) => new Date(b.date||0) - new Date(a.date||0));
+        hList.innerHTML = '';
+        list.forEach(t => {
+            const dStr = new Date(t.date||0).toLocaleDateString('en-GB');
+            hList.innerHTML += `<div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center">
+                <div class="min-w-0 flex-1">
+                    <p class="font-bold text-sm text-gray-800">${t.type || 'Rent Paid'}</p>
+                    <p class="text-[10px] text-gray-500 mt-0.5">${t.houseName || ''} • ${t.roomName || ''}</p>
+                    <p class="text-[10px] text-gray-400">${dStr} • ${t.month || ''}</p>
+                </div>
+                <div class="text-right"><p class="font-black text-lg text-green-600">₹${t.amount||0}</p><p class="text-[9px] text-green-500 font-bold uppercase">Approved</p></div>
+            </div>`;
+        });
+    } catch(e) { hList.innerHTML = `<p class="text-center py-8 text-gray-400">Error loading.</p>`; }
+}
+
+window.downloadTenantReceipt = (idx) => {
+    const item = window.tenantLinkedRooms[idx];
+    if(!item) return;
+    const r = item.room, h = item.house, o = item.owner;
+    const total = (r.rentAmount||0) + (r.waterBillFixed||0) + (r.currentLightBill||0) + (r.penalty||0);
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFont("helvetica", "bold"); doc.setFontSize(22); doc.setTextColor(37,99,235);
+    doc.text("RENT RECEIPT", 105, 25, null, null, "center");
+    doc.setFontSize(11); doc.setTextColor(80,80,80); doc.setFont("helvetica", "normal");
+    doc.text(`Date: ${new Date().toLocaleDateString('en-GB')}`, 20, 45);
+    doc.text(`Tenant: ${window.tenantProfile?.fullName || 'Tenant'}`, 20, 55);
+    doc.text(`Room: ${r.roomType || 'Room'} ${r.roomNumber}`, 20, 65);
+    doc.text(`Property: ${h.houseName || ''}`, 20, 75);
+    doc.text(`Owner: ${o.ownerName || ''}`, 20, 85);
+    doc.setDrawColor(200,200,200); doc.line(20, 95, 190, 95);
+    doc.setFont("helvetica", "bold"); doc.text("Description", 20, 105); doc.text("Amount (INR)", 150, 105);
+    doc.setFont("helvetica", "normal"); doc.line(20, 110, 190, 110);
+    doc.text("Rent", 20, 120); doc.text(`${r.rentAmount||0}`, 150, 120);
+    doc.text("Water/Maintenance", 20, 128); doc.text(`${r.waterBillFixed||0}`, 150, 128);
+    doc.text("Light Bill", 20, 136); doc.text(`${r.currentLightBill||0}`, 150, 136);
+    doc.text("Penalty", 20, 144); doc.text(`${r.penalty||0}`, 150, 144);
+    doc.setFont("helvetica", "bold"); doc.text("Total Paid:", 20, 158); doc.text(`Rs. ${total}`, 150, 158);
+    doc.setFontSize(9); doc.setTextColor(150,150,150);
+    doc.text("Digitally generated via Rent Easy", 105, 175, null, null, "center");
+    doc.save(`Receipt_Room${r.roomNumber}_${new Date().toISOString().split('T')[0]}.pdf`);
+    window.showAlert('success', 'Downloaded', 'Receipt PDF download ho gaya.');
+};
+
+/* ============ INITIAL ============ */
+// Setup emergency menu on any page
+console.log('Rent Easy loaded');
+</script>
+</body>
+</html>
