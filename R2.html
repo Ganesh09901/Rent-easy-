@@ -48,8 +48,8 @@
 </div>
 
 <!-- SNACKBAR -->
-<div id="snackbar" class="fixed top-20 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-xl shadow-2xl z-[100] hidden flex items-center transition-all duration-300 opacity-0 translate-y-[-20px]">
-    <i id="snackbarIcon" class="fas fa-check-circle text-green-400 mr-2 text-lg"></i>
+<div id="snackbar" class="fixed top-20 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-xl shadow-2xl z-[100] hidden flex items-center transition-all duration-300 opacity-0 translate-y-[-20px] max-w-[90vw]">
+    <i id="snackbarIcon" class="fas fa-check-circle text-green-400 mr-2 text-lg shrink-0"></i>
     <span id="snackbarMsg" class="font-bold text-sm">Action Successful</span>
 </div>
 
@@ -90,7 +90,7 @@
                     <span id="notifBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center hidden">0</span>
                 </button>
                 <span id="headerUserName" class="hidden md:inline text-xs font-bold bg-blue-50 dark:bg-gray-700 text-blue-700 dark:text-blue-300 px-3 py-1.5 rounded-full border border-blue-100 dark:border-gray-600 truncate max-w-[120px]"></span>
-                <button id="headerLogoutBtn" onclick="logoutUser()" class="md:hidden bg-red-50 dark:bg-gray-700 text-red-500 dark:text-red-400 w-9 h-9 rounded-full flex items-center justify-center shadow-inner hover:scale-105 transition transform border border-red-100 dark:border-gray-600" title="Logout">
+                <button id="headerLogoutBtn" onclick="logoutUser()" class="hidden md:hidden bg-red-50 dark:bg-gray-700 text-red-500 dark:text-red-400 w-9 h-9 rounded-full flex items-center justify-center shadow-inner hover:scale-105 transition transform border border-red-100 dark:border-gray-600" title="Logout">
                     <i class="fas fa-sign-out-alt"></i>
                 </button>
             </div>
@@ -130,10 +130,13 @@
 
             <!-- MY ACCOUNT VIEW -->
             <div id="myRoomView" class="hidden tab-content">
-                <!-- Account room switcher (if multiple) -->
+                <!-- Room switcher (if multiple linked rooms) -->
                 <div id="roomSwitcherBar" class="hidden bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-[65px] z-20 px-4 py-3 shadow-sm">
                     <div class="max-w-2xl mx-auto">
-                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Your Active Rooms</p>
+                        <div class="flex justify-between items-center mb-2">
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Your Active Rooms (Tap to Switch)</p>
+                            <span id="roomSwitcherCount" class="text-[10px] font-bold text-blue-600 dark:text-blue-400"></span>
+                        </div>
                         <div id="roomSwitcherList" class="flex gap-2 overflow-x-auto hide-scroll pb-1"></div>
                     </div>
                 </div>
@@ -151,10 +154,10 @@
                         <!-- Link Room Card -->
                         <div class="bg-white dark:bg-gray-800 p-5 rounded-3xl shadow-md border border-gray-100 dark:border-gray-700">
                             <h3 class="font-extrabold text-gray-800 dark:text-white text-sm mb-2 flex items-center"><i class="fas fa-link text-blue-500 mr-2"></i> Link New Room</h3>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Enter Unit ID provided by owner</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Enter Unit ID provided by owner (Multiple rooms supported)</p>
                             <div class="flex gap-2">
                                 <input type="text" id="roomUnitIdInput" placeholder="Room Unit ID (e.g. GH-123)" class="w-full uppercase font-mono text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-white p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-400">
-                                <button onclick="linkNewRoom()" class="bg-blue-600 text-white font-bold px-5 py-3 rounded-xl hover:bg-blue-700 transition text-sm shadow-md">Connect</button>
+                                <button onclick="linkNewRoom()" class="bg-blue-600 text-white font-bold px-5 py-3 rounded-xl hover:bg-blue-700 transition text-sm shadow-md shrink-0">Connect</button>
                             </div>
                         </div>
 
@@ -163,12 +166,21 @@
                             <div class="bg-gradient-to-br from-gray-900 to-black text-white p-5 rounded-3xl shadow-xl relative overflow-hidden border border-gray-800">
                                 <div class="absolute -right-4 -top-4 opacity-10"><i class="fas fa-building text-8xl"></i></div>
                                 <div class="relative z-10">
-                                    <div class="flex gap-2 flex-wrap mb-2">
-                                        <span class="bg-green-500 text-white text-[9px] font-black px-2 py-1 rounded uppercase shadow">Active Lease</span>
-                                        <span id="dashPropTypeBadge" class="bg-blue-500 text-white text-[9px] font-black px-2 py-1 rounded uppercase shadow">Residential</span>
+                                    <div class="flex justify-between items-start gap-2 mb-2">
+                                        <div class="flex gap-2 flex-wrap">
+                                            <span class="bg-green-500 text-white text-[9px] font-black px-2 py-1 rounded uppercase shadow">Active Lease</span>
+                                            <span id="dashPropTypeBadge" class="bg-blue-500 text-white text-[9px] font-black px-2 py-1 rounded uppercase shadow">Residential</span>
+                                        </div>
+                                        <button onclick="unlinkCurrentRoom()" class="bg-red-500/20 hover:bg-red-500/40 text-red-300 border border-red-500/30 text-[10px] font-bold px-2.5 py-1 rounded-lg transition flex items-center shrink-0" title="Unlink Room (Clear all dues first)">
+                                            <i class="fas fa-unlink mr-1"></i> Unlink Room
+                                        </button>
                                     </div>
                                     <h2 class="text-2xl font-black mb-1 mt-1" id="dashRoomNo">Room --</h2>
-                                    <p class="text-xs font-medium text-gray-300 flex items-start mt-1 leading-snug"><i class="fas fa-map-marker-alt text-red-400 mr-2 mt-0.5"></i> <span id="dashHouseName">Loading...</span></p>
+                                    <p class="text-sm font-bold text-white/90" id="dashHouseName">Loading...</p>
+                                    <button type="button" id="dashAddressBtn" onclick="openInMaps(this.dataset.map)" data-map="" class="text-left text-xs font-medium text-blue-300 hover:text-blue-200 underline decoration-dotted flex items-start mt-1 leading-snug cursor-pointer">
+                                        <i class="fas fa-map-marker-alt text-red-400 mr-2 mt-0.5 shrink-0"></i>
+                                        <span id="dashHouseAddress">Tap to open in Google Maps</span>
+                                    </button>
                                     <div class="mt-3 flex gap-2 flex-wrap">
                                         <span id="dashConfigSize" class="bg-white/20 text-white text-[10px] font-black px-2 py-0.5 rounded uppercase">--</span>
                                         <span id="dashRoomUniqueId" class="bg-white/20 text-white text-[10px] font-mono font-bold px-2 py-0.5 rounded">ID: --</span>
@@ -251,7 +263,7 @@
                     <div id="innerTab-history" class="hidden space-y-4">
                         <div class="bg-blue-50 dark:bg-gray-800 border border-blue-100 dark:border-gray-700 p-4 rounded-2xl flex items-start shadow-sm">
                             <i class="fas fa-info-circle text-blue-500 mt-0.5 mr-3 text-lg"></i>
-                            <p class="text-xs text-blue-800 dark:text-blue-300 font-medium">Approved payments appear here. Pending notifications are with your owner.</p>
+                            <p class="text-xs text-blue-800 dark:text-blue-300 font-medium">Owner jaise hi payment approve karta hai, automatic entry yahan show ho jati hai.</p>
                         </div>
                         <div id="historyList" class="space-y-3"></div>
                     </div>
@@ -265,9 +277,12 @@
                             <h3 class="text-2xl font-black text-gray-800 dark:text-white mb-1" id="profName">Tenant Name</h3>
                             <p class="text-sm font-bold text-gray-500 dark:text-gray-400 mb-4" id="profEmail">email@example.com</p>
                             <div class="bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 text-left space-y-3 mb-6 border border-gray-100 dark:border-gray-700">
-                                <div class="flex justify-between"><span class="text-xs text-gray-500 uppercase font-bold">Mobile</span><span class="font-bold text-gray-800 dark:text-white" id="profMobile">--</span></div>
-                                <div class="flex justify-between"><span class="text-xs text-gray-500 uppercase font-bold">City / State</span><span class="font-bold text-gray-800 dark:text-white" id="profCity">--</span></div>
-                                <div class="flex justify-between"><span class="text-xs text-gray-500 uppercase font-bold">Linked Rooms</span><span class="font-bold text-gray-800 dark:text-white" id="profRooms">0</span></div>
+                                <div class="flex justify-between"><span class="text-xs text-gray-500 uppercase font-bold">Full Name</span><span class="font-bold text-gray-800 dark:text-white" id="profFullNameRow">--</span></div>
+                                <div class="flex justify-between"><span class="text-xs text-gray-500 uppercase font-bold">Email ID</span><span class="font-bold text-gray-800 dark:text-white text-xs sm:text-sm truncate max-w-[60%]" id="profEmailRow">--</span></div>
+                                <div class="flex justify-between"><span class="text-xs text-gray-500 uppercase font-bold">Mobile Number</span><span class="font-bold text-gray-800 dark:text-white" id="profMobile">--</span></div>
+                                <div class="flex justify-between"><span class="text-xs text-gray-500 uppercase font-bold">City</span><span class="font-bold text-gray-800 dark:text-white" id="profCityOnly">--</span></div>
+                                <div class="flex justify-between"><span class="text-xs text-gray-500 uppercase font-bold">State</span><span class="font-bold text-gray-800 dark:text-white" id="profStateOnly">--</span></div>
+                                <div class="flex justify-between"><span class="text-xs text-gray-500 uppercase font-bold">Linked Rooms</span><span class="font-bold text-blue-600 dark:text-blue-400" id="profRooms">0</span></div>
                             </div>
                             <button onclick="logoutUser()" class="w-full bg-red-50 dark:bg-red-500/10 text-red-500 font-bold py-3.5 rounded-xl border border-red-100 dark:border-red-500/30"><i class="fas fa-sign-out-alt mr-2"></i> Secure Logout</button>
                         </div>
@@ -278,21 +293,28 @@
     </div>
 </div>
 
-<!-- LOGIN MODAL -->
+<!-- LOGIN / REGISTER MODAL -->
 <div id="loginModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[99]">
     <div class="bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-2xl w-full max-w-sm modal-content border border-gray-100 dark:border-gray-700 relative">
         <button onclick="closeAuthModal()" class="absolute top-4 right-4 bg-gray-100 dark:bg-gray-700 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 transition"><i class="fas fa-times"></i></button>
+
+        <!-- LOGIN FORM -->
         <div id="loginFormModal">
             <div class="text-center mb-6">
                 <i class="fas fa-user-lock text-4xl text-blue-500 mb-3"></i>
                 <h2 class="text-2xl font-black text-gray-800 dark:text-white">Tenant Login</h2>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Login to view bills & pay rent</p>
             </div>
-            <input type="email" id="loginEmail" placeholder="Email ID" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-white p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400 text-sm">
-            <input type="password" id="loginPassword" placeholder="Password" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-white p-3.5 rounded-xl mb-5 outline-none focus:ring-2 focus:ring-blue-400 text-sm">
+            <input type="email" id="loginEmail" placeholder="Email ID" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-white p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400 text-sm" autocomplete="username">
+            <input type="password" id="loginPassword" placeholder="Password" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-white p-3.5 rounded-xl mb-3 outline-none focus:ring-2 focus:ring-blue-400 text-sm" autocomplete="current-password">
+            <div class="text-right mb-5">
+                <span onclick="openForgotModal()" class="text-xs text-blue-500 cursor-pointer font-bold hover:underline"><i class="fas fa-key mr-1"></i> Forgot Password?</span>
+            </div>
             <button id="loginBtn" class="w-full bg-blue-600 dark:bg-blue-500 text-white font-bold py-3.5 rounded-xl hover:bg-blue-700 transition shadow-lg text-sm">Secure Login</button>
             <p class="text-center text-xs text-gray-500 dark:text-gray-400 mt-5 cursor-pointer hover:text-blue-600 font-bold" onclick="toggleAuthModal('register')">New user? <span class="text-blue-600 dark:text-blue-400">Create Account</span></p>
         </div>
+
+        <!-- REGISTER FORM -->
         <div id="registerFormModal" class="hidden">
             <div class="text-center mb-5">
                 <i class="fas fa-user-plus text-4xl text-blue-500 mb-3"></i>
@@ -312,6 +334,22 @@
     </div>
 </div>
 
+<!-- FORGOT PASSWORD MODAL -->
+<div id="forgotModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-center px-4 z-[105]">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-sm modal-content shadow-2xl border-t-4 border-blue-500 relative">
+        <button onclick="closeForgotModal()" class="absolute top-4 right-4 bg-gray-100 dark:bg-gray-700 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 transition"><i class="fas fa-times"></i></button>
+        <div class="text-center mb-4 mt-2">
+            <i class="fas fa-key text-4xl text-blue-500 mb-2"></i>
+            <h3 class="font-black text-xl text-gray-800 dark:text-white">Reset Password</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Email par reset link bhejenge</p>
+        </div>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 font-medium">Apna registered email ID enter karein:</p>
+        <input type="email" id="resetEmailInput" placeholder="Email ID" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-white p-3.5 rounded-xl mb-4 outline-none focus:ring-2 focus:ring-blue-400 text-sm" autocomplete="email">
+        <button onclick="sendPasswordReset()" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-lg hover:bg-blue-700 transition flex items-center justify-center text-sm"><i class="fas fa-paper-plane mr-2"></i> Send Reset Link</button>
+        <p class="text-center text-[10px] text-gray-400 mt-4">Inbox aur spam folder check karein</p>
+    </div>
+</div>
+
 <!-- ROOM DETAILS MODAL -->
 <div id="roomDetailsModal" class="fixed inset-0 modal-overlay hidden flex justify-center items-end sm:items-center px-4 z-[80]">
     <div class="bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-md modal-content shadow-2xl relative border-t-4 border-blue-500">
@@ -322,7 +360,11 @@
                 <span id="rdTypeBadge" class="bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider">1BHK</span>
                 <h3 class="font-black text-2xl text-gray-900 dark:text-white" id="rdHouseName">House Name</h3>
             </div>
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-300 leading-snug flex items-center mt-1"><i class="fas fa-map-marker-alt text-red-500 mr-2"></i> <span id="rdAddress">Address</span></p>
+            <button type="button" id="rdAddressBtn" onclick="openInMaps(this.dataset.map)" data-map="" class="text-left text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline leading-snug flex items-start mt-1.5 cursor-pointer">
+                <i class="fas fa-map-marker-alt text-red-500 mr-2 mt-1 shrink-0"></i>
+                <span id="rdAddress">Address</span>
+                <i class="fas fa-external-link-alt text-[10px] ml-1.5 mt-1 opacity-70 shrink-0"></i>
+            </button>
             <p class="text-xs font-bold text-gray-400 mt-1.5 ml-5">City / State: <span id="rdCityState" class="text-gray-700 dark:text-gray-300">--</span></p>
             <p class="text-xs font-bold text-gray-400 mt-1 ml-5">Pincode: <span id="rdPincode" class="text-gray-700 dark:text-gray-300 font-mono">------</span></p>
         </div>
@@ -390,7 +432,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, collection, getDocs, updateDoc, onSnapshot, arrayUnion, arrayRemove, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -410,6 +452,7 @@ let currentUser = null;
 let tenantProfile = null;
 let activeRoomUnsubscribe = null;
 let currentActiveRoomData = null;
+let currentHouseData = null;
 let currentOwnerData = null;
 let currentOwnerId = null;
 let currentHouseId = null;
@@ -418,7 +461,8 @@ let currentRoomPath = null;
 let currentTab = 'explore';
 let allVacantProps = [];
 let linkedRoomPaths = [];
-let previousRoomStatus = {}; // Track status changes for notifications
+let linkedRoomsCache = [];
+let previousRoomStatus = {};
 let notifications = [];
 
 /* ================= THEME ================= */
@@ -444,18 +488,39 @@ window.showToast = (msg, isError = false) => {
     const sb = document.getElementById('snackbar');
     document.getElementById('snackbarMsg').innerText = msg;
     document.getElementById('snackbarIcon').className = isError
-        ? "fas fa-exclamation-triangle text-red-400 mr-2 text-lg"
-        : "fas fa-check-circle text-green-400 mr-2 text-lg";
+        ? "fas fa-exclamation-triangle text-red-400 mr-2 text-lg shrink-0"
+        : "fas fa-check-circle text-green-400 mr-2 text-lg shrink-0";
     sb.classList.remove('hidden');
     setTimeout(() => { sb.classList.remove('opacity-0', 'translate-y-[-20px]'); }, 10);
     setTimeout(() => {
         sb.classList.add('opacity-0', 'translate-y-[-20px]');
         setTimeout(() => sb.classList.add('hidden'), 300);
-    }, 3000);
+    }, 3500);
 };
 const showLoader = () => document.getElementById('globalLoader').classList.remove('hidden');
 const hideLoader = () => document.getElementById('globalLoader').classList.add('hidden');
-const totalDue = (r) => (r?.rentAmount || 0) + (r?.waterBillFixed || 0) + (r?.currentLightBill || 0) + (r?.penalty || 0);
+const totalDue = (r) => (Number(r?.rentAmount) || 0) + (Number(r?.waterBillFixed) || 0) + (Number(r?.currentLightBill) || 0) + (Number(r?.penalty) || 0);
+
+function escapeAttr(str) {
+    return String(str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function getCurrentMonthLabel() {
+    const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const now = new Date();
+    return {
+        label: monthNames[now.getMonth()] + ' ' + now.getFullYear(),
+        key: `${now.getFullYear()}_${String(now.getMonth() + 1).padStart(2, '0')}`
+    };
+}
+
+/* ================= GOOGLE MAPS REDIRECT ================= */
+window.openInMaps = (queryStr) => {
+    const q = (queryStr || '').trim();
+    if (!q) return showToast('Address available nahi hai', true);
+    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+};
 
 /* ================= NOTIFICATIONS ================= */
 function loadNotificationsFromStorage() {
@@ -510,7 +575,6 @@ window.toggleNotifications = () => {
     if (modal.classList.contains('hidden')) {
         renderNotifList();
         modal.classList.remove('hidden');
-        // Mark all as read
         notifications.forEach(n => n.read = true);
         saveNotificationsToStorage();
         updateNotifBadge();
@@ -583,12 +647,31 @@ window.toggleAuthModal = (t) => {
     }
 };
 
+/* ================= FORGOT PASSWORD ================= */
+window.openForgotModal = () => document.getElementById('forgotModal').classList.remove('hidden');
+window.closeForgotModal = () => document.getElementById('forgotModal').classList.add('hidden');
+window.sendPasswordReset = async () => {
+    const email = document.getElementById('resetEmailInput').value.trim();
+    if (!email) return showToast('Email daalein', true);
+    showLoader();
+    try {
+        await sendPasswordResetEmail(auth, email);
+        hideLoader();
+        closeForgotModal();
+        document.getElementById('resetEmailInput').value = '';
+        showToast('Reset link aapke email par bheja gaya!');
+    } catch (e) {
+        hideLoader();
+        showToast('Error: ' + e.message, true);
+    }
+};
+
 async function openMyAccount() {
     await loadTenantProfile();
     await loadTenantLinkedRooms();
 }
 
-/* ================= EXPLORE / SEARCH ================= */
+/* ================= EXPLORE / SEARCH (NO LOGIN NEEDED) ================= */
 window.loadAllVacantRooms = async () => {
     const list = document.getElementById('vacantRoomsList');
     list.innerHTML = `<p class="text-center text-gray-400 py-10 font-bold">Finding properties...</p>`;
@@ -609,6 +692,7 @@ window.loadAllVacantRooms = async () => {
                         address: house.address || "",
                         pincode: (house.pincode || "").toString(),
                         city: (house.city || "").toLowerCase(),
+                        cityRaw: house.city || "",
                         state: house.state || "",
                         propertyType: house.propertyType || house.type || "Residential",
                         ownerId: house.ownerId || "",
@@ -646,18 +730,22 @@ function renderVacantRooms(props) {
     }
     const map = {};
     props.forEach(p => {
-        if (!map[p.houseId]) map[p.houseId] = { houseName: p.houseName, address: p.address, pincode: p.pincode, propertyType: p.propertyType, rooms: [] };
+        if (!map[p.houseId]) map[p.houseId] = { houseName: p.houseName, address: p.address, cityRaw: p.cityRaw, state: p.state, pincode: p.pincode, propertyType: p.propertyType, rooms: [] };
         map[p.houseId].rooms.push(p);
     });
     let html = '';
     Object.keys(map).forEach(hId => {
         const h = map[hId];
+        const fullMapQuery = [h.address, h.cityRaw, h.state, h.pincode].filter(Boolean).join(', ');
         html += `<div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
             <div class="flex items-center gap-2 mb-1 flex-wrap">
                 <span class="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-wider">${h.propertyType}</span>
                 <h4 class="font-black text-xl text-gray-800 dark:text-white">${h.houseName}</h4>
             </div>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3"><i class="fas fa-map-marker-alt text-red-400 mr-1"></i> ${h.address}${h.pincode ? ' - ' + h.pincode : ''}</p>
+            <button type="button" onclick="openInMaps(this.dataset.map)" data-map="${escapeAttr(fullMapQuery)}" class="text-left text-xs text-blue-600 dark:text-blue-400 hover:underline mt-1 mb-3 flex items-start cursor-pointer">
+                <i class="fas fa-map-marker-alt text-red-500 mr-1.5 mt-0.5 shrink-0"></i>
+                <span>${h.address || 'View on Map'}${h.pincode ? ' - ' + h.pincode : ''} <i class="fas fa-external-link-alt text-[9px] ml-1 opacity-70"></i></span>
+            </button>
             <div class="flex gap-3 overflow-x-auto hide-scroll pb-2">`;
         h.rooms.forEach(vr => {
             html += `<div onclick="openRoomDetails('${hId}','${vr.rId}')" class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 min-w-[160px] text-center cursor-pointer shadow-sm hover:border-blue-400 transition">
@@ -693,11 +781,11 @@ window.resetSearch = () => {
     showToast('Search reset');
 };
 
-/* ================= ROOM DETAILS ================= */
+/* ================= ROOM DETAILS (LOGIN REQUIRED) ================= */
 window.openRoomDetails = async (houseId, roomId) => {
     if (!currentUser) {
         document.getElementById('loginModal').classList.remove('hidden');
-        showToast('Please login to view details', true);
+        showToast('Room details dekhne ke liye login karein', true);
         return;
     }
     showLoader();
@@ -712,10 +800,12 @@ window.openRoomDetails = async (houseId, roomId) => {
             const oSnap = await getDoc(doc(db, "users", house.ownerId));
             if (oSnap.exists()) owner = oSnap.data();
         }
+        const fullMapQuery = [house.address, house.city, house.state, house.pincode].filter(Boolean).join(', ');
         document.getElementById('rdPropertyTypeBadge').innerText = house.propertyType || house.type || 'Residential';
         document.getElementById('rdTypeBadge').innerText = prop.configSize;
         document.getElementById('rdHouseName').innerText = house.houseName || prop.houseName;
         document.getElementById('rdAddress').innerText = house.address || 'Address not available';
+        document.getElementById('rdAddressBtn').dataset.map = fullMapQuery;
         document.getElementById('rdCityState').innerText = [house.city, house.state].filter(Boolean).join(', ') || '--';
         document.getElementById('rdPincode').innerText = house.pincode || 'N/A';
         document.getElementById('rdRent').innerText = '₹' + (prop.rent || 0);
@@ -758,27 +848,48 @@ window.processMeterImage = async (event) => {
     event.target.value = '';
 };
 
+/* ================= HEADER & PROFILE SYNC ================= */
+function syncHeaderAndProfileUI() {
+    if (!currentUser) return;
+    const t = tenantProfile || {};
+    const displayName = t.fullName || (currentUser.email ? currentUser.email.split('@')[0] : 'Tenant');
+
+    const nameEl = document.getElementById('headerUserName');
+    nameEl.innerText = "Hi, " + displayName.split(' ')[0];
+    nameEl.classList.remove('hidden');
+    document.getElementById('headerLogoutBtn').classList.remove('hidden');
+    document.getElementById('welcomeName').innerText = displayName.split(' ')[0];
+    document.getElementById('sidebarUserName').innerText = displayName;
+
+    document.getElementById('profName').innerText = displayName;
+    document.getElementById('profEmail').innerText = t.email || currentUser.email || '--';
+    document.getElementById('profFullNameRow').innerText = t.fullName || '--';
+    document.getElementById('profEmailRow').innerText = t.email || currentUser.email || '--';
+    document.getElementById('profMobile').innerText = t.mobile || t.mobileNumber || '--';
+    document.getElementById('profCityOnly').innerText = t.city || '--';
+    document.getElementById('profStateOnly').innerText = t.state || '--';
+    document.getElementById('profRooms').innerText = (t.linkedRooms || []).length;
+}
+
 /* ================= AUTH ================= */
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         currentUser = user;
         try {
             const tSnap = await getDoc(doc(db, "tenants", user.uid));
-            tenantProfile = tSnap.exists() ? tSnap.data() : null;
-        } catch (e) { tenantProfile = null; }
-        const displayName = tenantProfile?.fullName || (user.email ? user.email.split('@')[0] : 'Tenant');
-        const nameEl = document.getElementById('headerUserName');
-        nameEl.innerText = "Hi, " + displayName.split(' ')[0];
-        nameEl.classList.remove('hidden');
-        document.getElementById('headerLogoutBtn').classList.remove('hidden');
-        document.getElementById('welcomeName').innerText = displayName.split(' ')[0];
-        document.getElementById('sidebarUserName').innerText = displayName;
+            if (tSnap.exists()) {
+                tenantProfile = tSnap.data();
+            }
+        } catch (e) { console.warn('Profile read error', e); }
+        syncHeaderAndProfileUI();
         loadNotificationsFromStorage();
         if (currentTab === 'myroom') { closeAuthModal(); await openMyAccount(); }
     } else {
         currentUser = null;
         tenantProfile = null;
         notifications = [];
+        linkedRoomPaths = [];
+        linkedRoomsCache = [];
         document.getElementById('headerUserName').classList.add('hidden');
         document.getElementById('headerLogoutBtn').classList.add('hidden');
         document.getElementById('welcomeName').innerText = 'Tenant';
@@ -796,13 +907,23 @@ document.getElementById('registerBtn').onclick = async () => {
     const city = document.getElementById('regCity').value.trim();
     const state = document.getElementById('regState').value.trim();
     const p = document.getElementById('regPassword').value;
-    if (!n || !e || !m || !city || !state || p.length < 6) return alert("Fill all fields. Password min 6 chars.");
+    if (!n || !e || !m || !city || !state || p.length < 6) return alert("Sabhi fields bharein (Name, Email, Mobile, City, State). Password min 6 chars.");
     showLoader();
     try {
         const cred = await createUserWithEmailAndPassword(auth, e, p);
-        const profileData = { fullName: n, email: e, mobile: m, city: city, state: state, linkedRooms: [] };
+        const profileData = {
+            fullName: n,
+            email: e,
+            mobile: m,
+            city: city,
+            state: state,
+            linkedRooms: [],
+            createdAt: new Date().toISOString()
+        };
         await setDoc(doc(db, "tenants", cred.user.uid), profileData);
+        currentUser = cred.user;
         tenantProfile = profileData;
+        syncHeaderAndProfileUI();
         showToast('Account Created!');
         closeAuthModal();
     } catch (er) { alert(er.message); }
@@ -825,7 +946,7 @@ document.getElementById('loginBtn').onclick = async () => {
 window.logoutUser = async () => {
     if (!confirm("Are you sure you want to logout?")) return;
     if (activeRoomUnsubscribe) { activeRoomUnsubscribe(); activeRoomUnsubscribe = null; }
-    currentActiveRoomData = null; currentOwnerData = null; currentRoomPath = null;
+    currentActiveRoomData = null; currentOwnerData = null; currentHouseData = null; currentRoomPath = null;
     await signOut(auth);
     showToast('Logged out');
     switchTab('explore');
@@ -838,21 +959,25 @@ async function loadTenantProfile() {
         const snap = await getDoc(doc(db, "tenants", currentUser.uid));
         if (snap.exists()) tenantProfile = snap.data();
     } catch (e) { console.warn('profile fetch failed', e); }
-    const t = tenantProfile || {};
-    document.getElementById('profName').innerText = t.fullName || (currentUser.email ? currentUser.email.split('@')[0] : 'Tenant');
-    document.getElementById('profEmail').innerText = t.email || currentUser.email || '--';
-    document.getElementById('profMobile').innerText = t.mobile || t.mobileNumber || '--';
-    document.getElementById('profCity').innerText = [t.city, t.state].filter(Boolean).join(', ') || '--';
-    document.getElementById('profRooms').innerText = (t.linkedRooms || []).length;
+    syncHeaderAndProfileUI();
 }
 
-/* ================= LINK/UNLINK ROOM ================= */
+/* ================= LINK / AUTO-UNLINK / MANUAL UNLINK ================= */
+function shouldAutoUnlinkRoom(roomData) {
+    if (!roomData) return true;
+    if (roomData.isDeleted) return true;
+    if ((roomData.occupancyStatus || '').toLowerCase() === 'vacant') return true;
+    if (roomData.accessEmail && currentUser?.email && roomData.accessEmail.toLowerCase() !== currentUser.email.toLowerCase()) return true;
+    return false;
+}
+
 window.linkNewRoom = async () => {
     if (!currentUser) { document.getElementById('loginModal').classList.remove('hidden'); return; }
     const unitId = document.getElementById('roomUnitIdInput').value.trim();
     if (!unitId) return showToast('Enter Unit ID.', true);
     showLoader();
     let foundPath = null;
+    let foundVacant = false;
     try {
         const hSnaps = await getDocs(collection(db, "houses"));
         for (const hDoc of hSnaps.docs) {
@@ -860,15 +985,22 @@ window.linkNewRoom = async () => {
             for (const rDoc of rSnaps.docs) {
                 const r = rDoc.data();
                 if (r.tenantUniqueId === unitId && (r.accessEmail || '').toLowerCase() === currentUser.email.toLowerCase()) {
-                    foundPath = `houses/${hDoc.id}/rooms/${rDoc.id}`;
+                    if (shouldAutoUnlinkRoom(r)) {
+                        foundVacant = true;
+                    } else {
+                        foundPath = `houses/${hDoc.id}/rooms/${rDoc.id}`;
+                    }
                     break;
                 }
             }
-            if (foundPath) break;
+            if (foundPath || foundVacant) break;
         }
-        if (foundPath) {
-            await updateDoc(doc(db, "tenants", currentUser.uid), { linkedRooms: arrayUnion(foundPath) });
+        if (foundVacant) {
+            showToast('Ye room abhi Vacant hai. Owner se contact karein.', true);
+        } else if (foundPath) {
+            await setDoc(doc(db, "tenants", currentUser.uid), { linkedRooms: arrayUnion(foundPath) }, { merge: true });
             document.getElementById('roomUnitIdInput').value = '';
+            currentRoomPath = foundPath;
             showToast('Room Linked Successfully!');
             await loadTenantLinkedRooms();
         } else {
@@ -878,24 +1010,79 @@ window.linkNewRoom = async () => {
     hideLoader();
 };
 
+window.unlinkCurrentRoom = async () => {
+    if (!currentRoomPath) return;
+    await window.unlinkRoom(currentRoomPath);
+};
+
 window.unlinkRoom = async (roomPath) => {
-    if (!confirm('Unlink this room? You will no longer see its bills.')) return;
+    if (!currentUser || !roomPath) return;
     showLoader();
     try {
+        const rSnap = await getDoc(doc(db, roomPath));
+        if (rSnap.exists()) {
+            const r = rSnap.data();
+            const dues = totalDue(r);
+            const isCleared = r.paymentStatus === "Paid" || dues <= 0;
+            if (!isCleared) {
+                hideLoader();
+                showToast(`Unlink blocked! Pehle ₹${dues} pending rent/bills clear karein.`, true);
+                alert(`Room unlink nahi ho sakta!\n\nAapka ₹${dues} rent/bill abhi pending hai. Pehle pura payment clear karein aur owner se approve karwayein, uske baad hi aap Room ID unlink kar sakte hain.`);
+                return;
+            }
+        }
+        hideLoader();
+        if (!confirm('Kya aap sure hain ki is Room ID ko unlink karna chahte hain?')) return;
+        showLoader();
         await updateDoc(doc(db, "tenants", currentUser.uid), { linkedRooms: arrayRemove(roomPath) });
-        showToast('Room Unlinked');
+        addNotification('🔓 Room Unlinked', `Aapne Room ${currentActiveRoomData?.roomNumber || ''} ki ID unlink kar di hai.`);
+        showToast('Room Unlinked Successfully');
         if (currentRoomPath === roomPath) {
             if (activeRoomUnsubscribe) { activeRoomUnsubscribe(); activeRoomUnsubscribe = null; }
-            currentActiveRoomData = null; currentOwnerData = null; currentRoomPath = null;
+            currentActiveRoomData = null; currentOwnerData = null; currentHouseData = null; currentRoomPath = null;
         }
         await loadTenantLinkedRooms();
-    } catch (e) { showToast('Error unlinking.', true); }
+    } catch (e) {
+        console.error(e);
+        showToast('Error unlinking room.', true);
+    }
     hideLoader();
 };
 
+/* ================= MULTI-ROOM SWITCHER ================= */
+function renderRoomSwitcher() {
+    const switcherBar = document.getElementById('roomSwitcherBar');
+    const switcherList = document.getElementById('roomSwitcherList');
+    const switcherCount = document.getElementById('roomSwitcherCount');
+
+    if (linkedRoomsCache.length <= 1) {
+        switcherBar.classList.add('hidden');
+        return;
+    }
+    switcherBar.classList.remove('hidden');
+    switcherCount.innerText = `${linkedRoomsCache.length} Rooms`;
+
+    switcherList.innerHTML = linkedRoomsCache.map(item => {
+        const isActive = currentRoomPath === item.path;
+        const isPaid = item.paymentStatus === 'Paid';
+        return `
+            <div onclick="switchToRoom('${item.path}')" class="min-w-[155px] border-2 ${isActive ? 'border-blue-500 bg-blue-50 dark:bg-blue-500/20' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900'} rounded-xl p-2.5 cursor-pointer shadow-sm hover:shadow-md transition shrink-0">
+                <div class="flex justify-between items-center gap-1">
+                    <p class="text-[9px] font-black ${isActive ? 'text-blue-700 dark:text-blue-300' : 'text-gray-400'} uppercase truncate">${item.houseName}</p>
+                    <span class="w-2 h-2 rounded-full ${isPaid ? 'bg-green-500' : 'bg-red-500'} shrink-0" title="${isPaid ? 'Paid' : 'Pending'}"></span>
+                </div>
+                <p class="font-black text-sm ${isActive ? 'text-blue-900 dark:text-blue-100' : 'text-gray-800 dark:text-white'}">Room ${item.roomNumber}</p>
+                <p class="text-[9px] font-bold ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500'} truncate">${item.configSize}</p>
+            </div>`;
+    }).join('');
+}
+
 window.switchToRoom = async (roomPath) => {
+    if (currentRoomPath === roomPath) return;
     showLoader();
-    await subscribeToActiveRoom(roomPath);
+    currentRoomPath = roomPath;
+    renderRoomSwitcher();
+    subscribeToActiveRoom(roomPath);
     hideLoader();
     showToast('Switched room');
 };
@@ -906,51 +1093,101 @@ async function loadTenantLinkedRooms() {
         const tSnap = await getDoc(doc(db, "tenants", currentUser.uid));
         if (tSnap.exists()) tenantProfile = tSnap.data();
     } catch (e) {}
-    linkedRoomPaths = (tenantProfile && tenantProfile.linkedRooms) || [];
+    const rawPaths = (tenantProfile && tenantProfile.linkedRooms) || [];
+
+    const validRooms = [];
+    const autoUnlinkedNames = [];
+
+    for (const path of rawPaths) {
+        const parts = path.split('/rooms/');
+        if (parts.length !== 2) continue;
+        const houseId = parts[0].replace('houses/', '');
+        const rId = parts[1];
+        try {
+            const rSnap = await getDoc(doc(db, "houses", houseId, "rooms", rId));
+            const r = rSnap.exists() ? rSnap.data() : null;
+            if (!rSnap.exists() || shouldAutoUnlinkRoom(r)) {
+                await updateDoc(doc(db, "tenants", currentUser.uid), { linkedRooms: arrayRemove(path) });
+                autoUnlinkedNames.push(r?.roomNumber ? `Room ${r.roomNumber}` : 'a room');
+                continue;
+            }
+            const hSnap = await getDoc(doc(db, "houses", houseId));
+            const h = hSnap.exists() ? hSnap.data() : {};
+            validRooms.push({
+                path,
+                houseId,
+                roomId: rId,
+                houseName: h.houseName || 'Property',
+                roomNumber: r.roomNumber ?? '--',
+                configSize: r.configSize || r.roomSize || 'Room',
+                paymentStatus: r.paymentStatus || 'Pending',
+                tenantUniqueId: r.tenantUniqueId || ''
+            });
+        } catch (e) {
+            console.warn('Room check error:', e);
+        }
+    }
+
+    if (autoUnlinkedNames.length > 0) {
+        const msg = `${autoUnlinkedNames.join(', ')} owner ne Vacant mark kar diya, isliye Room ID auto-unlink ho gayi.`;
+        addNotification('🔄 Room Auto-Unlinked', msg);
+        showToast(msg, true);
+        if (tenantProfile) {
+            tenantProfile.linkedRooms = validRooms.map(v => v.path);
+        }
+    }
+
+    linkedRoomsCache = validRooms;
+    linkedRoomPaths = validRooms.map(v => v.path);
+    syncHeaderAndProfileUI();
+
     if (linkedRoomPaths.length === 0) {
+        if (activeRoomUnsubscribe) { activeRoomUnsubscribe(); activeRoomUnsubscribe = null; }
+        currentActiveRoomData = null; currentOwnerData = null; currentHouseData = null; currentRoomPath = null;
         document.getElementById('noRoomsState').classList.remove('hidden');
         document.getElementById('activeDashboardCard').classList.add('hidden');
         document.getElementById('roomSwitcherBar').classList.add('hidden');
         return;
     }
+
     document.getElementById('noRoomsState').classList.add('hidden');
     document.getElementById('activeDashboardCard').classList.remove('hidden');
 
-    // Render room switcher if multiple
-    const switcherBar = document.getElementById('roomSwitcherBar');
-    const switcherList = document.getElementById('roomSwitcherList');
-    if (linkedRoomPaths.length > 1) {
-        switcherBar.classList.remove('hidden');
-        // Fetch room data for each linked room
-        let switcherHtml = '';
-        for (const path of linkedRoomPaths) {
-            const parts = path.split('/rooms/');
-            const houseId = parts[0].replace('houses/', '');
-            const rId = parts[1];
-            try {
-                const rSnap = await getDoc(doc(db, "houses", houseId, "rooms", rId));
-                const hSnap = await getDoc(doc(db, "houses", houseId));
-                if (rSnap.exists()) {
-                    const r = rSnap.data();
-                    const h = hSnap.exists() ? hSnap.data() : {};
-                    const isActive = currentRoomPath === path;
-                    switcherHtml += `
-                        <div onclick="switchToRoom('${path}')" class="min-w-[140px] border-2 ${isActive ? 'border-blue-500 bg-blue-50 dark:bg-blue-500/20' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900'} rounded-xl p-2.5 cursor-pointer shadow-sm hover:shadow-md transition">
-                            <p class="text-[9px] font-black ${isActive ? 'text-blue-700 dark:text-blue-300' : 'text-gray-400'} uppercase truncate">${h.houseName || 'Property'}</p>
-                            <p class="font-black text-sm ${isActive ? 'text-blue-900 dark:text-blue-100' : 'text-gray-800 dark:text-white'}">Room ${r.roomNumber}</p>
-                            <p class="text-[9px] font-bold ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500'}">${r.configSize || r.roomSize || 'Room'}</p>
-                        </div>`;
-                }
-            } catch (e) {}
-        }
-        switcherList.innerHTML = switcherHtml;
-    } else {
-        switcherBar.classList.add('hidden');
-    }
-
-    // Load active room (or first)
     const activePath = currentRoomPath && linkedRoomPaths.includes(currentRoomPath) ? currentRoomPath : linkedRoomPaths[0];
+    currentRoomPath = activePath;
+    renderRoomSwitcher();
     subscribeToActiveRoom(activePath);
+}
+
+/* ================= AUTO-LOG APPROVED TRANSACTION ================= */
+async function ensureApprovedTransactionEntry(r) {
+    if (!currentUser || !currentHouseId || !currentRoomId || !r) return;
+    const { label: monthLabel, key: monthKey } = getCurrentMonthLabel();
+    const deterministicId = `auto_${currentHouseId}_${currentRoomId}_${monthKey}`;
+    try {
+        const txnRef = doc(db, "transactions", deterministicId);
+        const existing = await getDoc(txnRef);
+        if (!existing.exists()) {
+            await setDoc(txnRef, {
+                ownerId: currentOwnerId || '',
+                houseId: currentHouseId,
+                roomId: currentRoomId,
+                houseName: currentHouseData?.houseName || document.getElementById('dashHouseName').innerText || '',
+                roomName: String(r.roomNumber ?? '--'),
+                tenantUid: currentUser.uid,
+                tenantName: tenantProfile?.fullName || currentUser.email,
+                tenantEmail: currentUser.email,
+                tenantUniqueId: r.tenantUniqueId || '',
+                amount: totalDue(r),
+                month: monthLabel,
+                type: 'Rent Paid',
+                status: 'Approved',
+                date: new Date().toISOString()
+            }, { merge: true });
+        }
+    } catch (e) {
+        console.warn('Auto transaction sync failed:', e);
+    }
 }
 
 /* ================= ACTIVE ROOM SUBSCRIPTION ================= */
@@ -961,41 +1198,69 @@ function subscribeToActiveRoom(roomPath) {
     currentHouseId = parts[0].replace('houses/', '');
     currentRoomId = parts[1];
 
-    // Subscribe to house + owner
     getDoc(doc(db, "houses", currentHouseId)).then(async hSnap => {
         if (!hSnap.exists()) return;
         const house = hSnap.data();
+        currentHouseData = house;
         document.getElementById('dashHouseName').innerText = house.houseName || 'Property';
+        const addrDisplay = [house.address, house.city, house.state, house.pincode].filter(Boolean).join(', ');
+        document.getElementById('dashHouseAddress').innerText = addrDisplay || 'Tap to open in Google Maps';
+        document.getElementById('dashAddressBtn').dataset.map = addrDisplay || house.houseName || '';
+
         currentOwnerId = house.ownerId || null;
         if (!currentOwnerId) return;
         const oSnap = await getDoc(doc(db, "users", currentOwnerId));
         if (oSnap.exists()) {
             currentOwnerData = { ...oSnap.data(), ownerId: currentOwnerId };
-            document.getElementById('dashOwnerContact').innerText = currentOwnerData.mobileNumber || currentOwnerData.mobile || '--';
-            document.getElementById('dashOwnerCall').href = (currentOwnerData.mobileNumber || currentOwnerData.mobile) ? `tel:${currentOwnerData.mobileNumber || currentOwnerData.mobile}` : '#';
+            const mob = currentOwnerData.mobileNumber || currentOwnerData.mobile || '';
+            document.getElementById('dashOwnerContact').innerText = mob || '--';
+            document.getElementById('dashOwnerCall').href = mob ? `tel:${mob}` : '#';
             document.getElementById('ownerNameDisplay').innerText = currentOwnerData.ownerName || currentOwnerData.fullName || '--';
-            document.getElementById('ownerMobileDisplay').innerText = currentOwnerData.mobileNumber || currentOwnerData.mobile || '--';
+            document.getElementById('ownerMobileDisplay').innerText = mob || '--';
             document.getElementById('ownerCityStateDisplay').innerText = [currentOwnerData.city, currentOwnerData.state].filter(Boolean).join(', ') || '--';
             document.getElementById('ownerUpiDisplay').innerText = currentOwnerData.upiId || '--';
         }
     });
 
     if (activeRoomUnsubscribe) activeRoomUnsubscribe();
-    activeRoomUnsubscribe = onSnapshot(roomRef, (rSnap) => {
-        if (!rSnap.exists()) return;
-        const r = rSnap.data();
+    activeRoomUnsubscribe = onSnapshot(roomRef, async (rSnap) => {
+        const r = rSnap.exists() ? rSnap.data() : null;
+
+        // Real-time auto-unlink if owner marks room Vacant / Deleted / Reassigned
+        if (!rSnap.exists() || shouldAutoUnlinkRoom(r)) {
+            if (activeRoomUnsubscribe) { activeRoomUnsubscribe(); activeRoomUnsubscribe = null; }
+            try {
+                await updateDoc(doc(db, "tenants", currentUser.uid), { linkedRooms: arrayRemove(roomPath) });
+            } catch (e) {}
+            const roomLabel = r?.roomNumber ? `Room ${r.roomNumber}` : 'Active Room';
+            const msg = `${roomLabel} owner ne Vacant mark kar diya hai. Aapki Room ID automatically unlink ho gayi hai.`;
+            addNotification('🔄 Room Auto-Unlinked', msg);
+            showToast(msg, true);
+            currentActiveRoomData = null; currentOwnerData = null; currentHouseData = null; currentRoomPath = null;
+            await loadTenantLinkedRooms();
+            return;
+        }
+
         currentActiveRoomData = r;
 
-        // Detect payment status change for notifications
+        // Update cache status for switcher dot
+        const cached = linkedRoomsCache.find(item => item.path === roomPath);
+        if (cached && cached.paymentStatus !== r.paymentStatus) {
+            cached.paymentStatus = r.paymentStatus;
+            renderRoomSwitcher();
+        }
+
         const prevStatus = previousRoomStatus[roomPath];
-        if (prevStatus && prevStatus !== 'Paid' && r.paymentStatus === 'Paid') {
-            const amount = totalDue(r);
-            addNotification('✅ Rent Approved', `₹${amount} for Room ${r.roomNumber} approved by owner`);
-            showToast(`Rent Approved! ₹${amount} received for Room ${r.roomNumber}`);
+        if (r.paymentStatus === 'Paid') {
+            await ensureApprovedTransactionEntry(r);
+            if (prevStatus && prevStatus !== 'Paid') {
+                const amount = totalDue(r);
+                addNotification('✅ Rent Approved', `₹${amount} for Room ${r.roomNumber} approved by owner & added to History`);
+                showToast(`Rent Approved! ₹${amount} history mein add ho gaya`);
+            }
         }
         previousRoomStatus[roomPath] = r.paymentStatus;
 
-        // Update card
         document.getElementById('dashRoomNo').innerText = (r.roomType || 'Room') + " " + (r.roomNumber ?? '--');
         document.getElementById('dashPropTypeBadge').innerText = r.propertyType || 'Residential';
         document.getElementById('dashConfigSize').innerText = r.configSize || r.roomSize || 'Standard';
@@ -1008,7 +1273,6 @@ function subscribeToActiveRoom(roomPath) {
         document.getElementById('dashTotalDue').innerText = "₹" + totalDue(r);
         document.getElementById('dashDeposit').innerText = "₹" + (r.deposit || 0);
 
-        // Meter details
         const meterBox = document.getElementById('meterDetailBox');
         if (r.unitRate > 0 || r.meterCurr > 0) {
             meterBox.classList.remove('hidden');
@@ -1020,7 +1284,6 @@ function subscribeToActiveRoom(roomPath) {
             meterBox.classList.add('hidden');
         }
 
-        // Status + payment actions
         const statusEl = document.getElementById('dashPaymentStatus');
         const payDiv = document.getElementById('payActionDiv');
         if (r.paymentStatus === "Paid") {
@@ -1075,9 +1338,7 @@ window.notifyOwnerPayment = async () => {
     document.getElementById('paymentModal').classList.add('hidden');
     showLoader();
     try {
-        const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-        const now = new Date();
-        const currentMonth = monthNames[now.getMonth()] + ' ' + now.getFullYear();
+        const { label: currentMonth } = getCurrentMonthLabel();
         const amt = totalDue(currentActiveRoomData);
 
         await addDoc(collection(db, "payment_requests"), {
@@ -1086,6 +1347,8 @@ window.notifyOwnerPayment = async () => {
             roomId: currentRoomId,
             houseName: document.getElementById('dashHouseName').innerText,
             roomNumber: currentActiveRoomData.roomNumber ?? '--',
+            tenantUid: currentUser.uid,
+            tenantEmail: currentUser.email,
             tenantName: tenantProfile?.fullName || currentUser.email,
             tenantMobile: tenantProfile?.mobile || '',
             tenantUniqueId: currentActiveRoomData.tenantUniqueId || '',
@@ -1108,32 +1371,87 @@ window.notifyOwnerPayment = async () => {
     hideLoader();
 };
 
-/* ================= HISTORY ================= */
+/* ================= HISTORY (TRANSACTIONS + APPROVED REQUESTS) ================= */
+function matchesCurrentTenant(rec) {
+    if (!currentUser) return false;
+    const email = (currentUser.email || '').toLowerCase();
+    const fullName = (tenantProfile?.fullName || '').toLowerCase();
+    const linkedUnitIds = linkedRoomsCache.map(x => x.tenantUniqueId).filter(Boolean);
+
+    if (rec.tenantUid && rec.tenantUid === currentUser.uid) return true;
+    if (rec.tenantEmail && rec.tenantEmail.toLowerCase() === email) return true;
+    if (rec.tenantUniqueId && linkedUnitIds.includes(rec.tenantUniqueId)) return true;
+    if (fullName && rec.tenantName && rec.tenantName.toLowerCase() === fullName) return true;
+    return false;
+}
+
 async function loadTransactionHistory() {
     const hList = document.getElementById('historyList');
-    if (!tenantProfile) return;
+    if (!currentUser) return;
     hList.innerHTML = `<p class="text-center text-gray-400 py-5">Syncing...</p>`;
     try {
-        const snaps = await getDocs(collection(db, "transactions"));
-        let html = '', found = 0;
-        snaps.forEach(d => {
+        const entries = [];
+        const seenKeys = new Set();
+
+        // 1. Fetch from transactions collection
+        const txnSnaps = await getDocs(collection(db, "transactions"));
+        txnSnaps.forEach(d => {
             const t = d.data();
-            if (t.tenantName && t.tenantName.toLowerCase() === (tenantProfile.fullName || '').toLowerCase()) {
-                found++;
-                const dStr = new Date(t.date || 0).toLocaleDateString('en-GB');
-                html += `<div class="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex justify-between items-center">
-                    <div><p class="font-bold text-sm text-gray-800 dark:text-white">${t.type || 'Rent Paid'}</p>
-                    <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">${t.houseName || ''} • Room ${t.roomName || ''}</p>
-                    <p class="text-[10px] text-gray-500 dark:text-gray-400">${dStr}${t.month ? ' • ' + t.month : ''}</p></div>
-                    <div class="text-right"><p class="font-black text-lg text-green-500">₹${t.amount || 0}</p>
-                    <p class="text-[9px] text-green-600 dark:text-green-400 font-bold uppercase mt-1">Approved</p></div>
-                </div>`;
-            }
+            if (!matchesCurrentTenant(t)) return;
+            const dedupeKey = `${t.roomName || t.roomNumber || ''}_${t.month || ''}_${t.amount || 0}`;
+            seenKeys.add(dedupeKey);
+            entries.push({
+                type: t.type || 'Rent Paid',
+                houseName: t.houseName || '',
+                roomName: t.roomName || t.roomNumber || '',
+                month: t.month || '',
+                amount: t.amount || 0,
+                date: t.date || t.approvedAt || new Date().toISOString()
+            });
         });
-        hList.innerHTML = found === 0
-            ? `<p class="text-center py-5 text-gray-400 font-bold">No transactions yet.</p>`
-            : html;
+
+        // 2. Fetch Approved entries from payment_requests collection
+        const reqSnaps = await getDocs(collection(db, "payment_requests"));
+        reqSnaps.forEach(d => {
+            const req = d.data();
+            if ((req.status || '').toLowerCase() !== 'approved') return;
+            if (!matchesCurrentTenant(req)) return;
+            const dedupeKey = `${req.roomNumber || ''}_${req.month || ''}_${req.amount || 0}`;
+            if (seenKeys.has(dedupeKey)) return;
+            seenKeys.add(dedupeKey);
+            entries.push({
+                type: 'Rent Paid (' + (req.mode || 'UPI') + ')',
+                houseName: req.houseName || '',
+                roomName: req.roomNumber || '',
+                month: req.month || '',
+                amount: req.amount || 0,
+                date: req.approvedAt || req.requestedAt || new Date().toISOString()
+            });
+        });
+
+        entries.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        if (entries.length === 0) {
+            hList.innerHTML = `<p class="text-center py-5 text-gray-400 font-bold">No approved transactions yet.</p>`;
+            return;
+        }
+
+        hList.innerHTML = entries.map(item => {
+            const dStr = new Date(item.date).toLocaleDateString('en-GB');
+            return `<div class="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                <div>
+                    <p class="font-bold text-sm text-gray-800 dark:text-white">${item.type}</p>
+                    <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">${item.houseName}${item.roomName ? ' • Room ' + item.roomName : ''}</p>
+                    <p class="text-[10px] text-gray-500 dark:text-gray-400">${dStr}${item.month ? ' • ' + item.month : ''}</p>
+                </div>
+                <div class="text-right">
+                    <p class="font-black text-lg text-green-500">₹${item.amount}</p>
+                    <p class="text-[9px] text-green-600 dark:text-green-400 font-bold uppercase mt-1">Approved</p>
+                </div>
+            </div>`;
+        }).join('');
     } catch (e) {
+        console.error(e);
         hList.innerHTML = `<p class="text-center py-5 text-gray-400 font-bold">Unable to load history.</p>`;
     }
 }
@@ -1170,7 +1488,7 @@ window.generatePDFReceipt = () => {
     docPdf.text("Water / Maintenance", 20, y); docPdf.text(`${r.waterBillFixed || 0}`, 150, y); y += 8;
     docPdf.text("Light Bill", 20, y); docPdf.text(`${r.currentLightBill || 0}`, 150, y); y += 8;
     if (r.unitRate > 0) {
-        docPdf.setFontSize(9); docPdf.text(`  (${(r.meterCurr||0) - (r.meterPrev||0)} units × ₹${r.unitRate})`, 20, y); y += 6;
+        docPdf.setFontSize(9); docPdf.text(`  (${(r.meterCurr||0) - (r.meterPrev||0)} units x Rs.${r.unitRate})`, 20, y); y += 6;
         docPdf.setFontSize(11);
     }
     docPdf.text("Penalty", 20, y); docPdf.text(`${r.penalty || 0}`, 150, y); y += 8;
